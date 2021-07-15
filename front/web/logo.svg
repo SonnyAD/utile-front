@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="130"
+   height="84"
+   viewBox="0 0 34.395833 22.225"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2">
+    <rect
+       x="-5.7937322"
+       y="-1.931244"
+       width="394.93939"
+       height="123.59962"
+       id="rect4455" />
+    <rect
+       x="-5.7937322"
+       y="-1.931244"
+       width="394.93939"
+       height="123.59962"
+       id="rect4891" />
+    <rect
+       x="-5.7937322"
+       y="-1.931244"
+       width="394.93939"
+       height="123.59962"
+       id="rect5997" />
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-30.445436,-43.204262)">
+    <g
+       id="g16619"
+       transform="matrix(0.26446599,0,0,0.26446599,22.401282,31.783132)"
+       style="stroke-width:3.7812">
+      <path
+         id="path1398"
+         style="fill:#a02c2c;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 130.14,56.81766 c -0.87506,-0.02689 -1.75215,-0.0122 -2.62361,0.04392 h -11.04067 v 3.374988 l -69.4092,43.259382 h -9.842294 v 10.78694 h 0.03721 c 0.03456,1.01999 0.303609,2.02232 0.788035,2.97912 0.822698,1.62494 2.266582,3.11857 4.238014,4.34446 6.727914,4.16404 17.617034,4.15224 24.321513,-0.0264 L 141.314,75.020165 c 3.49906,-2.182958 5.1509,-5.19783 4.96935,-8.270812 l -1.5e-4,-9.88777 h -15.55099 c -0.19698,-0.01678 -0.39441,-0.03141 -0.59221,-0.04392 z" />
+      <path
+         id="path6098"
+         style="fill:#f2f2f2;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 139.1183,65.218577 -74.636117,46.484273 0.07402,11.25496 74.681957,-46.628273 z" />
+      <path
+         id="path8320"
+         style="fill:#e6e6e6;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 139.1183,68.393577 -74.636117,46.484273 0.07402,8.07996 74.681957,-46.628273 z" />
+      <path
+         id="path8509"
+         style="fill:#b3b3b3;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 139.1183,72.62691 -74.636117,46.48427 0.07402,3.84663 74.681957,-46.628273 z" />
+      <path
+         id="path7755"
+         style="fill:#999999;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 64.202192,99.211006 75.202418,20.418874 1.60238,4.67534 -76.524807,-10.48569 z" />
+      <path
+         id="rect7422"
+         style="fill:#cccccc;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 59.459947,97.049174 79.944663,20.464026 1.60238,4.67534 -76.524807,-10.48569 z" />
+      <path
+         id="rect846"
+         style="fill:#c83737;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 42.218735,95.388419 a 10.681315,17.197917 89.999993 0 0 0.04245,15.105641 10.681315,17.197917 89.999993 0 0 24.32149,-0.0264 L 141.28742,63.907691 a 10.681315,17.197917 89.999993 0 0 -0.0425,-15.10564 10.681315,17.197917 89.999993 0 0 -24.3215,0.02637 z" />
+      <text
+         xml:space="preserve"
+         transform="matrix(0.54400971,-0.33890534,0.54400971,0.33890534,58.076291,85.019798)"
+         id="text4453"
+         style="font-size:40px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat, Normal';white-space:pre;shape-inside:url(#rect4455);fill:#ffffff;stroke-width:1.64753"><tspan
+           x="-5.7929688"
+           y="34.8321"
+           id="tspan16645">utile</tspan></text>
+      <text
+         xml:space="preserve"
+         transform="matrix(0.31832154,-0.19830688,0.31832154,0.19830688,44.742223,102.5764)"
+         id="text4889"
+         style="font-size:40px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat, Normal';white-space:pre;shape-inside:url(#rect4891);fill:#ffffff;stroke-width:2.81563"><tspan
+           x="-5.7929688"
+           y="34.8321"
+           id="tspan16647">°</tspan></text>
+      <text
+         xml:space="preserve"
+         transform="matrix(0.31832154,-0.19830688,0.31832154,0.19830688,128.92496,50.128692)"
+         id="text5995"
+         style="font-size:40px;line-height:1.25;font-family:Montserrat;-inkscape-font-specification:'Montserrat, Normal';white-space:pre;shape-inside:url(#rect5997);fill:#ffffff;stroke-width:2.81563"><tspan
+           x="-5.7929688"
+           y="34.8321"
+           id="tspan16649">°</tspan></text>
+      <path
+         id="rect7797"
+         style="fill:#999999;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 139.02082,121.91754 1.98617,0.27099 v 2.12953 l -2.14424,-0.33873 z" />
+      <path
+         id="path11856"
+         style="fill:#999999;fill-opacity:1;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 136.60483,71.679729 13.05273,32.032201 -0.54039,0.48279 v 1.05834 l 3.58585,4.26739 0.98506,-2.80806 v -1.58751 l -2.10113,-0.60269 -12.99783,-32.424447 -2.02329,-2.112662 -0.5403,0.313869 z" />
+      <path
+         id="rect8870"
+         style="fill:#cccccc;fill-opacity:1;stroke-width:1.00044;stroke-linecap:round;stop-color:#000000"
+         d="m 136.60483,70.092228 13.05273,32.561362 -0.54039,1.54113 3.58585,3.73822 0.98506,-2.80806 -2.10113,-2.1902 -12.99783,-32.424438 -0.62721,-1.403264 -1.39608,0.878103 z" />
+    </g>
+  </g>
+</svg>

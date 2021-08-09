@@ -6,9 +6,19 @@
     import CopyToClipboard from "svelte-copy-to-clipboard"
     import { notifier } from '@beyonk/svelte-notifications'
 
-
     import Fa from 'svelte-fa'
     import { faSync } from '@fortawesome/free-solid-svg-icons'
+
+	import Button from './Button.svelte';    
+
+    function receiveDispatch(e) {
+		openIPDetails(e.detail.text) 
+	}
+
+	function openIPDetails(ip) {
+		let win = window.open('https://utile.space/ip/?ip='+ip, '_blank');
+		win.focus();
+	}
 
     let domain;
     let currentDomain;
@@ -58,7 +68,7 @@
     placeholder="Domain"
     use:registerFocus
 />
-<button on:click="{resolve}">Resolve</button>
+<button on:click="{resolve}" class="utile-button">Resolve</button>
 {#if resolution}
     <table class="styled-table">
         <thead>
@@ -77,6 +87,7 @@
                             {address} 
                         </td>
                         <td style="text-align: right;">                            
+                            <Button toggle='false' text='Details' sendDispatch={address} on:message={receiveDispatch} />
                             <CopyToClipboard text={address} on:copy={copied} on:fail={() => {}} let:copy>
                                 <button on:click={copy}>Copy</button>
                             </CopyToClipboard>
@@ -92,6 +103,10 @@
 
 
 <style>
+
+    .utile-button, .utile-button:active {background-color: #c83737; color: white;}
+	.utile-button:hover {background-color: #a02c2c; color: white; cursor:pointer;}
+
     .styled-table {
         border-collapse: collapse;
         border-radius: 6px 6px 0px 0px;
@@ -128,7 +143,7 @@
         background-color: #f3f3f3;
     }
 
-    .styled-table tbody button {
+    .styled-table tbody tr button {
         background-color: #dcdcdc;
     }
 

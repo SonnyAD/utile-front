@@ -21,13 +21,14 @@
 	}
 
     let domain;
+    let type;
     let currentDomain;
     let resolution;
     let inputField = null;
 
 
     const roll = async (domain) => {
-        const res = await fetch('https://utile.space/api/dns/'+domain, {
+        const res = await fetch('https://utile.space/api/dns/'+ type + '/' + domain, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -68,6 +69,13 @@
     placeholder="Domain"
     use:registerFocus
 />
+<select name="type" bind:value="{type}">
+    <option value="">DNS</option>
+    <option value="cname">CNAME</option>
+    <option value="mx">MX</option>
+    <option value="ns">NS</option>
+    <option value="txt">TXT</option>
+</select>
 <button on:click="{resolve}" class="utile-button">Resolve</button>
 {#if resolution}
     <table class="styled-table">
@@ -79,21 +87,73 @@
         </thead>
         <tbody>
             {#await resolution}
-                <tr><td>...</td></tr>
+                <tr><td colspan="2">...</td></tr>
             {:then data}
-                {#each data.addresses as address}
+                {#if type == ""}
+                    {#each data.addresses as address}
+                        <tr>
+                            <td>
+                                {address}
+                            </td>
+                            <td style="text-align: right;">                            
+                                <Button toggle='false' text='Details' sendDispatch={address} on:message={receiveDispatch} />
+                                <CopyToClipboard text={address} on:copy={copied} on:fail={() => {}} let:copy>
+                                    <button on:click={copy}>Copy</button>
+                                </CopyToClipboard>
+                            </td>
+                        </tr>
+                    {/each}
+                {:else if type == "ns"}
+                    {#each data.hosts as host}
+                        <tr>
+                            <td>
+                                {host}
+                            </td>
+                            <td style="text-align: right;">                            
+                                <CopyToClipboard text={host} on:copy={copied} on:fail={() => {}} let:copy>
+                                    <button on:click={copy}>Copy</button>
+                                </CopyToClipboard>
+                            </td>
+                        </tr>
+                    {/each}                
+                {:else if type == "mx"}
+                    {#each data.records as record}
+                        <tr>
+                            <td>
+                                {record.host} {record.pref}
+                            </td>
+                            <td style="text-align: right;">
+                                <CopyToClipboard text={record.host} on:copy={copied} on:fail={() => {}} let:copy>
+                                    <button on:click={copy}>Copy</button>
+                                </CopyToClipboard>
+                            </td>
+                        </tr>
+                    {/each}
+                {:else if type == "txt"}
+                    {#each data.values as value}
+                        <tr>
+                            <td>
+                                {value}
+                            </td>
+                            <td style="text-align: right;">
+                                <CopyToClipboard text={value} on:copy={copied} on:fail={() => {}} let:copy>
+                                    <button on:click={copy}>Copy</button>
+                                </CopyToClipboard>
+                            </td>
+                        </tr>
+                    {/each}
+                {:else if type == "cname"}
                     <tr>
                         <td>
-                            {address} 
+                            {data.value}
                         </td>
-                        <td style="text-align: right;">                            
-                            <Button toggle='false' text='Details' sendDispatch={address} on:message={receiveDispatch} />
-                            <CopyToClipboard text={address} on:copy={copied} on:fail={() => {}} let:copy>
+                        <td style="text-align: right;">
+                            <CopyToClipboard text={data.value} on:copy={copied} on:fail={() => {}} let:copy>
                                 <button on:click={copy}>Copy</button>
                             </CopyToClipboard>
                         </td>
                     </tr>
-                {/each}                
+                {/if}
             {:catch error}
                 <tr><td><em>No record found</em></td></tr>
             {/await}

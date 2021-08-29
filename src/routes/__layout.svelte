@@ -1,5 +1,5 @@
 <script>
-	export let version;
+	const version = import.meta.env.VITE_VERSION;
 
 	import { NotificationDisplay } from '../lib/notiications';
 	import tippy from 'sveltejs-tippy';

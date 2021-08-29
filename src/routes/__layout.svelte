@@ -1,5 +1,5 @@
 <script>
-	const version = import.meta.env.VITE_VERSION;
+	import { VERSION } from '$lib/Env.js'
 
 	import { NotificationDisplay } from '../lib/notiications';
 	import tippy from 'sveltejs-tippy';
@@ -90,7 +90,7 @@
 	</article>
 
 	<footer>
-		utile.space v{version} &copy; 2021 All rights reserved. Website by
+		utile.space v{VERSION} &copy; 2021 All rights reserved. Website by
 		<a href="https://sonny.alvesdi.as" title="Sonny Alves Dias">sonny.alvesdi.as</a>
 	</footer>
 </section>

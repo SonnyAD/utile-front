@@ -1,19 +1,23 @@
-FROM google/dart AS builder
+FROM node:14-buster-slim AS builder
 
 WORKDIR /app
 
-RUN pub global activate webdev
+ADD package.json package-lock.json ./
 
-ADD pubspec.* /app/
+RUN npm ci
 
-RUN pub get
+COPY . .
 
-ADD . /app
+RUN node node_modules/esbuild/install.js
+RUN npm run build
 
-RUN pub get
+FROM node:14-buster-slim AS runtime
 
-RUN webdev build --output web:build
+WORKDIR /app
 
-FROM nginx:stable-alpine AS runtime
+COPY --from=builder /app/build /app/build
 
-COPY --from=builder /app/build /usr/share/nginx/html
+ENV PORT=3000
+ENV HOST=0.0.0.0
+
+CMD ["node", "./build"]

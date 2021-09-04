@@ -22,7 +22,7 @@
 	let resolution;
 	let inputField = null;
 
-	const roll = async (domain) => {
+	const roll = async (type, domain) => {
 		const res = await fetch('https://utile.space/api/dns/' + type + '/' + domain, {
 			method: 'GET',
 			headers: {
@@ -37,11 +37,14 @@
 
 	function resolve() {
 		currentDomain = domain;
-		resolution = roll(domain);
+		domain = '';
+		resolution = roll(type, currentDomain);
 	}
 
 	const onKeyPress = (e) => {
-		if (e.charCode === 13) resolution = roll(domain);
+		currentDomain = domain;
+		domain = '';
+		if (e.charCode === 13) resolution = roll(type, currentDomain);
 	};
 
 	const copied = () => {
@@ -51,22 +54,24 @@
 
 <h2 style="margin-top: 0">DNS Resolver</h2>
 
-<input
-	bind:value={domain}
-	bind:this={inputField}
-	on:keypress={onKeyPress}
-	type="text"
-	name="domain"
-	placeholder="Domain"
-/>
-<select name="type" bind:value={type}>
-	<option value="">DNS</option>
-	<option value="cname">CNAME</option>
-	<option value="mx">MX</option>
-	<option value="ns">NS</option>
-	<option value="txt">TXT</option>
-</select>
-<button on:click={resolve} class="utile-button">Resolve</button>
+<form on:submit|preventDefault={resolve}>
+	<input
+		bind:value={domain}
+		bind:this={inputField}
+		on:keypress={onKeyPress}
+		type="text"
+		name="domain"
+		placeholder="Domain"
+	/>
+	<select name="type" bind:value={type}>
+		<option value="">DNS</option>
+		<option value="cname">CNAME</option>
+		<option value="mx">MX</option>
+		<option value="ns">NS</option>
+		<option value="txt">TXT</option>
+	</select>
+	<button disabled={!domain} type="submit" class="utile-button">Resolve</button>
+</form>
 {#if resolution}
 	<table class="styled-table">
 		<thead>
@@ -83,7 +88,7 @@
 			{#await resolution}
 				<tr><td colspan="2">...</td></tr>
 			{:then data}
-				{#if type == ''}
+				{#if 'addresses' in data}
 					{#each data.addresses as address}
 						<tr>
 							<td>
@@ -102,7 +107,7 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if type == 'ns'}
+				{:else if 'hosts' in data}
 					{#each data.hosts as host}
 						<tr>
 							<td>
@@ -115,7 +120,7 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if type == 'mx'}
+				{:else if 'records' in data}
 					{#each data.records as record}
 						<tr>
 							<td>
@@ -129,7 +134,7 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if type == 'txt'}
+				{:else if 'values' in data}
 					{#each data.values as value}
 						<tr>
 							<td>
@@ -142,7 +147,7 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if type == 'cname'}
+				{:else if 'value' in data}
 					<tr>
 						<td>
 							{data.value}
@@ -153,6 +158,8 @@
 							</CopyToClipboard>
 						</td>
 					</tr>
+				{:else}
+					<tr><td><em>No record found</em></td></tr>
 				{/if}
 			{:catch error}
 				<tr><td><em>No record found</em></td></tr>

@@ -65,7 +65,10 @@
 	/>
 	<select name="type" bind:value={type}>
 		<option value="">DNS</option>
+		<option value="aaaa">AAAA</option>
+		<option value="caa">CAA</option>
 		<option value="cname">CNAME</option>
+		<option value="dmarc">DMARC</option>
 		<option value="mx">MX</option>
 		<option value="ns">NS</option>
 		<option value="txt">TXT</option>

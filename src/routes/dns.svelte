@@ -41,6 +41,11 @@
 		resolution = roll(type, currentDomain);
 	}
 
+	function onchange() {
+		console.log(type)
+		inputField.placeholder = type != 'ptr' ? 'Domain' : 'IP';
+	}
+
 	const onKeyPress = (e) => {
 		if (e.charCode === 13) {
 			currentDomain = domain;
@@ -65,7 +70,7 @@
 		name="domain"
 		placeholder="Domain"
 	/>
-	<select name="type" bind:value={type}>
+	<select name="type" bind:value={type} on:change="{onchange}">
 		<option value="">DNS</option>
 		<option value="aaaa">AAAA</option>
 		<option value="caa">CAA</option>
@@ -74,6 +79,7 @@
 		<option value="mx">MX</option>
 		<option value="ns">NS</option>
 		<option value="txt">TXT</option>
+		<option value="ptr">PTR</option>
 	</select>
 	<button disabled={!domain} type="submit" class="utile-button">Resolve</button>
 </form>
@@ -129,8 +135,11 @@
 					{#each data.records as record}
 						<tr>
 							<td>
-								{record.host}
-								{record.pref}
+								{#if 'flag' in record}
+									{record.flag} {record.tag} {record.value}
+								{:else}
+									{record.host} {record.pref}
+								{/if}
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={record.host} on:copy={copied} on:fail={() => {}} let:copy>
@@ -169,7 +178,7 @@
 			{:catch error}
 				<tr><td><em>No record found</em></td></tr>
 			{/await}
-		</tbody><tbody />
+		</tbody>
 	</table>
 {/if}
 
@@ -188,7 +197,7 @@
 	.styled-table {
 		border-collapse: collapse;
 		border-radius: 6px 6px 0px 0px;
-		margin: 25px 50px;
+		margin: 25px 0px;
 		font-size: 0.9em;
 		font-family: sans-serif;
 		min-width: 400px;

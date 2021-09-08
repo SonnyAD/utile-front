@@ -1,7 +1,7 @@
 <script>
-	import { VERSION } from '$lib/Env.js'
+	import { VERSION } from '$lib/Env.js';
 
-	import { NotificationDisplay } from '../lib/notiications';
+	import { NotificationDisplay } from '$lib/notifications';
 	import tippy from 'sveltejs-tippy';
 
 	var links = [

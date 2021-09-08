@@ -1,11 +1,11 @@
 <script>
-	import CopyToClipboard from 'svelte-copy-to-clipboard';
-	import { notifier } from '../lib/notiications';
+	import { notifier } from '$lib/notifications';
+	import { API_URL } from '$lib/Env.js';
+	import Button from '$lib/Button.svelte';
 
+	import CopyToClipboard from 'svelte-copy-to-clipboard';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import { faSync } from '@fortawesome/free-solid-svg-icons';
-
-	import Button from '../lib/Button.svelte';
 
 	function receiveDispatch(e) {
 		openIPDetails(e.detail.text);
@@ -23,7 +23,7 @@
 	let inputField = null;
 
 	const roll = async (type, domain) => {
-		const res = await fetch('https://utile.space/api/dns/' + type + '/' + domain, {
+		const res = await fetch(API_URL + '/dns/' + type + '/' + domain, {
 			method: 'GET',
 			headers: {
 				Accept: 'application/json'

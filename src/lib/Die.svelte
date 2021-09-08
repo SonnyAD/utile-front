@@ -1,8 +1,9 @@
 <script>
-	import { notifier } from '../lib/notiications';
+	import { notifier } from '$lib/notifications';
+	import { API_URL } from '$lib/Env.js';
 
 	const roll = async (faces) => {
-		const res = await fetch('https://utile.space/api/d' + faces, {
+		const res = await fetch(API_URL + '/d' + faces, {
 			method: 'GET'
 		});
 

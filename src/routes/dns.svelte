@@ -42,9 +42,11 @@
 	}
 
 	const onKeyPress = (e) => {
-		currentDomain = domain;
-		domain = '';
-		if (e.charCode === 13) resolution = roll(type, currentDomain);
+		if (e.charCode === 13) {
+			currentDomain = domain;
+			domain = '';
+			resolution = roll(type, currentDomain);
+		}
 	};
 
 	const copied = () => {

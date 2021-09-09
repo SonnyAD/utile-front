@@ -6,6 +6,7 @@
 	import CopyToClipboard from 'svelte-copy-to-clipboard';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import { faSync } from '@fortawesome/free-solid-svg-icons';
+	import { onMount } from 'svelte';
 
 	function receiveDispatch(e) {
 		openIPDetails(e.detail.text);
@@ -21,6 +22,10 @@
 	let currentDomain;
 	let resolution;
 	let inputField = null;
+
+	onMount(() => {
+		inputField.focus();
+	});
 
 	const roll = async (type, domain) => {
 		const res = await fetch(API_URL + '/dns/' + type + '/' + domain, {

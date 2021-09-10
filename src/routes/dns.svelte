@@ -20,6 +20,7 @@
 	let domain;
 	let type;
 	let currentDomain;
+	let currentType;
 	let resolution;
 	let inputField = null;
 
@@ -37,6 +38,7 @@
 
 		inputField.value = '';
 		currentDomain = domain;
+		currentType = type;
 		return await res.json();
 	};
 
@@ -47,7 +49,6 @@
 	}
 
 	function onchange() {
-		console.log(type)
 		inputField.placeholder = type != 'ptr' ? 'Domain' : 'IP';
 	}
 
@@ -94,7 +95,7 @@
 			<tr>
 				<th><strong>{currentDomain}</strong></th>
 				<th style="text-align: right"
-					><button on:click={() => (resolution = roll(currentDomain))}
+					><button on:click={() => (resolution = roll(currentType, currentDomain))}
 						><Fa icon={faSync} primaryColor="#a02c2c" /></button
 					></th
 				>

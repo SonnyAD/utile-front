@@ -104,8 +104,8 @@
 			{#await resolution}
 				<tr><td colspan="2">...</td></tr>
 			{:then data}
-				{#if 'addresses' in data}
-					{#each data.addresses as address}
+				{#if data.type == 'dns'}
+					{#each data.resolution.addresses as address}
 						<tr>
 							<td>
 								{address}
@@ -123,8 +123,8 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if 'hosts' in data}
-					{#each data.hosts as host}
+				{:else if data.type == 'aaaa'}
+					{#each data.resolution.hosts as host}
 						<tr>
 							<td>
 								{host}
@@ -136,15 +136,24 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if 'records' in data}
-					{#each data.records as record}
+				{:else if data.type == 'ns'}
+					{#each data.resolution.hosts as host}
 						<tr>
 							<td>
-								{#if 'flag' in record}
-									{record.flag} {record.tag} {record.value}
-								{:else}
-									{record.host} {record.pref}
-								{/if}
+								{host}
+							</td>
+							<td style="text-align: right;">
+								<CopyToClipboard text={host} on:copy={copied} on:fail={() => {}} let:copy>
+									<button on:click={copy}>Copy</button>
+								</CopyToClipboard>
+							</td>
+						</tr>
+					{/each}
+				{:else if data.type == 'mx'}
+					{#each data.resolution.records as record}
+						<tr>
+							<td>
+								{record.host} {record.pref}
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={record.host} on:copy={copied} on:fail={() => {}} let:copy>
@@ -153,8 +162,21 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if 'values' in data}
-					{#each data.values as value}
+				{:else if data.type == 'caa'}
+					{#each data.resolution.records as record}
+						<tr>
+							<td>
+								{record.flag} {record.tag} {record.value}
+							</td>
+							<td style="text-align: right;">
+								<CopyToClipboard text={record.value} on:copy={copied} on:fail={() => {}} let:copy>
+									<button on:click={copy}>Copy</button>
+								</CopyToClipboard>
+							</td>
+						</tr>
+					{/each}
+				{:else if data.type == 'txt'}
+					{#each data.resolution.values as value}
 						<tr>
 							<td>
 								{value}
@@ -166,13 +188,37 @@
 							</td>
 						</tr>
 					{/each}
-				{:else if 'value' in data}
+				{:else if data.type == 'ptr'}
+					{#each data.resolution.domains as domain}
+						<tr>
+							<td>
+								{domain}
+							</td>
+							<td style="text-align: right;">
+								<CopyToClipboard text={domain} on:copy={copied} on:fail={() => {}} let:copy>
+									<button on:click={copy}>Copy</button>
+								</CopyToClipboard>
+							</td>
+						</tr>
+					{/each}
+				{:else if data.type == 'cname'}
 					<tr>
 						<td>
-							{data.value}
+							{data.resolution.value}
 						</td>
 						<td style="text-align: right;">
-							<CopyToClipboard text={data.value} on:copy={copied} on:fail={() => {}} let:copy>
+							<CopyToClipboard text={data.resolution.value} on:copy={copied} on:fail={() => {}} let:copy>
+								<button on:click={copy}>Copy</button>
+							</CopyToClipboard>
+						</td>
+					</tr>
+				{:else if data.type == 'dmarc'}
+					<tr>
+						<td>
+							{data.resolution.value}
+						</td>
+						<td style="text-align: right;">
+							<CopyToClipboard text={data.resolution.value} on:copy={copied} on:fail={() => {}} let:copy>
 								<button on:click={copy}>Copy</button>
 							</CopyToClipboard>
 						</td>

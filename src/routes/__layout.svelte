@@ -31,6 +31,12 @@
 			title: 'Get your IP',
 			newTarget: true
 		},
+		{
+			link: '/links/',
+			label: '/links',
+			description: 'Retrieve my useful links',
+			title: 'Retrieve my useful links'
+		},
 		/*{
       'link': '/password',
       'label': '/password',

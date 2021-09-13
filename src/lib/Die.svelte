@@ -21,17 +21,26 @@
 	let die;
 </script>
 
-<button on:click={() => (die = roll(faces))}
-	>Roll
+<td>
 	{#if die}
-		<span>
-			{#await die}
-				: ...
-			{:then data}
-				: {data}
-			{:catch error}
-				: Failed
-			{/await}
-		</span>
+		{#await die}
+			...
+		{:then data}
+			{data}
+		{:catch error}
+			Failed
+		{/await}
+	{:else}
+		&nbsp;
 	{/if}
-</button>
+</td>
+
+<td>
+	<button on:click={() => (die = roll(faces))}>Roll</button>
+</td>
+
+<style>
+	td {
+		text-align: center;
+	}
+</style>

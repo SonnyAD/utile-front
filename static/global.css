@@ -1,6 +1,20 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto);
 @import url(https://unpkg.com/tippy.js@6/themes/light-border.css);
 
+:root {
+	--madder-lake: #c83737ff;
+	--saffron: #eac435ff;
+	--corn: #e7e247ff;
+	--melon: #fab3a9ff;
+	--sea-green-crayola: #10ffcbff;
+	--caribbean-green: #40c9a2ff;
+	--viridian-green: #2f9c95ff;
+	--usafa-blue: #1b5299ff;
+	--jet: #2f2f2fff;
+	--nice-grey: #fafafa;
+	--black: #000000ff;
+}
+
 html,
 body {
 	width: 100%;

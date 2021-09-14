@@ -107,8 +107,8 @@
 	}
 
 	section {
-		grid-template-columns: 1fr 20% 60% 20% 1fr;
-		grid-template-rows: 200px auto 50px;
+		grid-template-columns: 1fr 10% calc(80%-2fr) 10% 1fr;
+		grid-template-rows: 170px auto 50px;
 		display: grid;
 		grid-column-gap: 0px;
 	}
@@ -129,6 +129,7 @@
 		border: none;
 		grid-column: 3 / 5;
 		grid-row: 2 / 3;
+		padding: 0px;
 	}
 
 	footer {

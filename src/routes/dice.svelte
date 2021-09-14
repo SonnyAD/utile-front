@@ -4,6 +4,8 @@
 	let customDie = 50;
 </script>
 
+<h2>Dice</h2>
+
 <table style="table-layout: fixed; width: 100%">
 	<thead>
 		<tr>
@@ -47,6 +49,10 @@
 </table>
 
 <style>
+	h2 {
+		margin-top: 0;
+	}
+
 	small {
 		font-size: small;
 		font-style: italic;

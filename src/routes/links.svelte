@@ -20,6 +20,8 @@
 	});
 </script>
 
+<h2>Links</h2>
+
 <table style="table-layout: fixed; width: 100%">
 	<thead>
 		<tr>
@@ -37,7 +39,11 @@
 					<tr>
 						<td><a href={link.url} title={link.description} target="_blank" rel="noopener">{link.url}</a></td>
 						<td><em>{link.description}</em></td>
-						<td><small>{link.tags.join(', ')}</small></td>
+						<td>
+							{#each link.tags as tag}
+								<small>{tag}</small><br>
+							{/each}
+						</td>
 					</tr>
 				{/each}
 			{/await}
@@ -51,6 +57,22 @@
 </table>
 
 <style>
+	h2 {
+		margin-top: 0;
+	}
+
+	small {
+		background: #c83737;
+		border-radius: 5px;
+		padding: 2px 5px;
+		color: white;
+		font-size: smaller;
+	}
+
+	td {
+		font-size: small;
+	}
+
 	tr>td:first-child, tr>th:first-child  {
 		width: 40%;
 	}

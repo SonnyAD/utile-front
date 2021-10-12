@@ -8,12 +8,12 @@ const config = {
 		adapter: adapter({
 			// default options are shown
 			out: 'build',
-			precompress: false,
+			precompress: true,
 			env: {
 				host: 'HOST',
 				port: 'PORT'
 			}
-		})
+		}),
 	}
 };
 

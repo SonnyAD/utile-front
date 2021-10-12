@@ -62,19 +62,14 @@
 	};
 </script>
 
-<NotificationDisplay {themes} />
-
-<section>
-	<header>
-		<div style="float:left; margin-right: 10px;">
+<section class="w3-main w3-row-padding">
+	<aside class="w3-collapse w3-padding w3-quarter">
+		<header class="w3-center">
 			<img alt="Logo" src="logo.svg" />
-		</div>
-		<h1 style="margin: 0">utile.space</h1>
-		<p>Welcome to utile.space the Swiss Army Knife services.</p>
-	</header>
+			<div class="w3-large w3-monospace"><strong>utile.space</strong></div>
+		</header>
 
-	<aside>
-		<nav>
+		<nav class="w3-padding-large">
 			<div><a href="/" title="Home">/</a></div>
 
 			{#each links as link}
@@ -89,51 +84,40 @@
 				</div>
 			{/each}
 		</nav>
+
 	</aside>
 
-	<article>
+	<article class="w3-threequarter">
 		<slot />
 	</article>
 
-	<footer>
-		utile.space v{VERSION} &copy; 2021 All rights reserved. Website by
-		<a href="https://sonny.alvesdi.as" title="Sonny Alves Dias">sonny.alvesdi.as</a>
-	</footer>
+	<NotificationDisplay {themes} />
+
 </section>
 
 <style>
+
 	nav {
 		text-align: left;
+		font-family: var(--mono) !important;
 	}
 
-	section {
-		grid-template-columns: 1fr 10% calc(80%-2fr) 10% 1fr;
-		grid-template-rows: 170px auto 50px;
-		display: grid;
-		grid-column-gap: 0px;
+	nav > div {
+		display: list-item;
+		list-style-type: none;
+		font-size: medium;
+		margin-bottom: 0px;
 	}
 
-	header {
-		grid-column: 2 / 5;
-		grid-row: 1 / 2;
+	nav > div > a {
+		text-decoration: none;
 	}
 
-	aside {
-		grid-column: 2 / 3;
-		grid-row: 2 / 3;
-		max-height: 300px;
-		overflow: auto;
+	nav > div > a:hover {
+		text-decoration: underline;
 	}
 
-	article {
-		border: none;
-		grid-column: 3 / 5;
-		grid-row: 2 / 3;
-		padding: 0px;
-	}
-
-	footer {
-		grid-column: 2 / 5;
-		grid-row: 3 / 4;
+	a:active {
+		color: var(--madder-lake);
 	}
 </style>

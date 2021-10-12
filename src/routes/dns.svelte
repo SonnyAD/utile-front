@@ -6,7 +6,7 @@
 	import CopyToClipboard from 'svelte-copy-to-clipboard';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import { faSync } from '@fortawesome/free-solid-svg-icons';
-	import { onMount } from 'svelte';
+	import { onMount } from 'svelte';
 
 	function receiveDispatch(e) {
 		openIPDetails(e.detail.text);
@@ -76,7 +76,7 @@
 		name="domain"
 		placeholder="Domain"
 	/>
-	<select name="type" bind:value={type} on:change="{onchange}">
+	<select name="type" bind:value={type} on:change={onchange}>
 		<option value="">DNS</option>
 		<option value="aaaa">AAAA</option>
 		<option value="caa">CAA</option>
@@ -154,7 +154,8 @@
 					{#each data.resolution.records as record}
 						<tr>
 							<td>
-								{record.host} {record.pref}
+								{record.host}
+								{record.pref}
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={record.host} on:copy={copied} on:fail={() => {}} let:copy>
@@ -167,7 +168,9 @@
 					{#each data.resolution.records as record}
 						<tr>
 							<td>
-								{record.flag} {record.tag} {record.value}
+								{record.flag}
+								{record.tag}
+								{record.value}
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={record.value} on:copy={copied} on:fail={() => {}} let:copy>
@@ -208,7 +211,12 @@
 							{data.resolution.value}
 						</td>
 						<td style="text-align: right;">
-							<CopyToClipboard text={data.resolution.value} on:copy={copied} on:fail={() => {}} let:copy>
+							<CopyToClipboard
+								text={data.resolution.value}
+								on:copy={copied}
+								on:fail={() => {}}
+								let:copy
+							>
 								<button on:click={copy}>Copy</button>
 							</CopyToClipboard>
 						</td>
@@ -219,7 +227,12 @@
 							{data.resolution.value}
 						</td>
 						<td style="text-align: right;">
-							<CopyToClipboard text={data.resolution.value} on:copy={copied} on:fail={() => {}} let:copy>
+							<CopyToClipboard
+								text={data.resolution.value}
+								on:copy={copied}
+								on:fail={() => {}}
+								let:copy
+							>
 								<button on:click={copy}>Copy</button>
 							</CopyToClipboard>
 						</td>

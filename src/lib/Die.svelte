@@ -21,7 +21,7 @@
 	let die;
 </script>
 
-<td>
+<div class="w3-col w3-third w3-center">
 	{#if die}
 		{#await die}
 			...
@@ -33,14 +33,12 @@
 	{:else}
 		&nbsp;
 	{/if}
-</td>
+</div>
 
-<td>
-	<button on:click={() => (die = roll(faces))}>Roll</button>
-</td>
+<div class="w3-col w3-third w3-center">
+	<button class="w3-btn w3-ripple w3-theme" on:click={() => (die = roll(faces))}>Roll</button>
+</div>
 
 <style>
-	td {
-		text-align: center;
-	}
+
 </style>

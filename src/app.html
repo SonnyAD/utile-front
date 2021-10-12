@@ -6,11 +6,15 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<link rel="stylesheet" type="text/css" href="/tacit.min.css" />
 		<link rel="stylesheet" href="/global.css" />
+		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
 		%svelte.head%
 	</head>
-	<body>
-		<div id="svelte">%svelte.body%</div>
+	<body class="w3-light-grey">
+		<div id="svelte" class="w3-content w3-margin-top w3-margin-bottom w3-auto">%svelte.body%</div>
+		<footer class="w3-container w3-margin-top w3-stretch" style="background: var(--madder-lake); color:white">
+			<p>utile.space v{VERSION} &copy; 2021 All rights reserved. Website by
+			<a href="https://sonny.alvesdi.as" title="Sonny Alves Dias">sonny.alvesdi.as</a></p>
+		</footer>
 	</body>
 </html>

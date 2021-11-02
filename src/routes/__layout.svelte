@@ -37,12 +37,12 @@
 			description: 'Retrieve my useful links',
 			title: 'Retrieve my useful links'
 		},
-		/*{
-      'link': '/password',
-      'label': '/password',
-      'description': 'Generate random password',
-      'title': 'Generate password'
-    },*/
+		{
+			link: '/password',
+			label: '/password',
+			description: 'Generate random password',
+			title: 'Generate password'
+		},
 		{
 			link: '/pdf/',
 			label: '/pdf',

@@ -62,7 +62,7 @@
 	};
 </script>
 
-<section class="w3-main w3-row-padding">
+<section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom w3-auto">
 	<aside class="w3-collapse w3-padding w3-quarter">
 		<header class="w3-center">
 			<img alt="Logo" src="logo.svg" />
@@ -77,7 +77,7 @@
 					{#if !link.newTarget}
 						└─<a class="listitem" href={link.link} title={link.title}>{link.label}</a>
 					{:else}
-						└─<a class="listitem" href={link.link} title={link.title} target="_blank" rel="noopener"
+						└─<a class="listitem" href={link.link} title={link.title} target="_blank" rel="external noopener"
 							>{link.label}</a
 						>
 					{/if}
@@ -94,6 +94,11 @@
 	<NotificationDisplay {themes} />
 
 </section>
+
+<footer class="w3-container w3-margin-top w3-stretch" style="background: var(--madder-lake); color:white">
+	<p>utile.space v{VERSION} &copy; 2021 All rights reserved. Website by
+	<a href="https://sonny.alvesdi.as" title="Sonny Alves Dias">sonny.alvesdi.as</a></p>
+</footer>
 
 <style>
 

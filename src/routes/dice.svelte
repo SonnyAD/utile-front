@@ -1,10 +1,11 @@
 <script>
-	import Die from '../lib/Die.svelte';
+	import Header from '$lib/components/Header.svelte';
+	import Die from '$lib/Die.svelte';
 
 	let customDie = 50;
 </script>
 
-<h2>Dice</h2>
+<Header title="Dice" subtitle="Throw any of the most common dice, or create any die between two andone hundred faces." />
 
 <div class="w3-container w3-responsive">
 	<div class="w3-row w3-border-bottom w3-border-black w3-padding-small w3-large">

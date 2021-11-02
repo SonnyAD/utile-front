@@ -36,7 +36,7 @@
 </div>
 
 <div class="w3-col w3-third w3-center">
-	<button class="w3-btn w3-ripple w3-theme" on:click={() => (die = roll(faces))}>Roll</button>
+	<button class="w3-btn w3-ripple w3-theme w3-round" on:click={() => (die = roll(faces))}>Roll</button>
 </div>
 
 <style>

@@ -2,6 +2,7 @@
 	import { notifier } from '$lib/notifications';
 	import { API_URL } from '$lib/Env.js';
 	import Button from '$lib/Button.svelte';
+	import Header from '$lib/components/Header.svelte';
 
 	import CopyToClipboard from 'svelte-copy-to-clipboard';
 	import Fa from 'svelte-fa/src/fa.svelte';
@@ -65,37 +66,44 @@
 	};
 </script>
 
-<h2 style="margin-top: 0">DNS Resolver</h2>
+<Header title="DNS Resolver" subtitle="Use this page to resolve various type DNS of records: A, CNAME, MX, TXT, etc." />
 
-<form on:submit|preventDefault={resolve}>
-	<input
-		bind:value={domain}
-		bind:this={inputField}
-		on:keypress={onKeyPress}
-		type="text"
-		name="domain"
-		placeholder="Domain"
-	/>
-	<select name="type" bind:value={type} on:change={onchange}>
-		<option value="">DNS</option>
-		<option value="aaaa">AAAA</option>
-		<option value="caa">CAA</option>
-		<option value="cname">CNAME</option>
-		<option value="dmarc">DMARC</option>
-		<option value="mx">MX</option>
-		<option value="ns">NS</option>
-		<option value="txt">TXT</option>
-		<option value="ptr">PTR</option>
-	</select>
-	<button disabled={!domain} type="submit" class="utile-button">Resolve</button>
+<form on:submit|preventDefault={resolve} class="w3-container w3-row-padding">
+	<div class="w3-col m5 l5">
+		<input
+			bind:value={domain}
+			bind:this={inputField}
+			on:keypress={onKeyPress}
+			type="text"
+			name="domain"
+			placeholder="Domain"
+			class="w3-input w3-round"
+		/>
+	</div>
+	<div class="w3-col m5 l4">
+		<select name="type" bind:value={type} on:change={onchange} class="w3-select w3-round">
+			<option value="">DNS</option>
+			<option value="aaaa">AAAA</option>
+			<option value="caa">CAA</option>
+			<option value="cname">CNAME</option>
+			<option value="dmarc">DMARC</option>
+			<option value="mx">MX</option>
+			<option value="ns">NS</option>
+			<option value="txt">TXT</option>
+			<option value="ptr">PTR</option>
+		</select>
+	</div>
+	<div class="w3-col m2 l3">
+		<button disabled={!domain} type="submit" class="w3-button utile-button w3-round">Resolve</button>
+	</div>
 </form>
 {#if resolution}
-	<table class="styled-table">
+	<table class="styled-table w3-margin">
 		<thead>
 			<tr>
 				<th><strong>{currentDomain}</strong></th>
-				<th style="text-align: right"
-					><button on:click={() => (resolution = roll(currentType, currentDomain))}
+				<th class="w3-right"
+					><button class="w3-button w3-round w3-light-grey" on:click={() => (resolution = roll(currentType, currentDomain))}
 						><Fa icon={faSync} primaryColor="#a02c2c" /></button
 					></th
 				>
@@ -119,7 +127,7 @@
 									on:message={receiveDispatch}
 								/>
 								<CopyToClipboard text={address} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -132,7 +140,7 @@
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={host} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -145,7 +153,7 @@
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={host} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -159,7 +167,7 @@
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={record.host} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -174,7 +182,7 @@
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={record.value} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -187,7 +195,7 @@
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={value} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -200,7 +208,7 @@
 							</td>
 							<td style="text-align: right;">
 								<CopyToClipboard text={domain} on:copy={copied} on:fail={() => {}} let:copy>
-									<button on:click={copy}>Copy</button>
+									<button class="w3-button w3-round" on:click={copy}>Copy</button>
 								</CopyToClipboard>
 							</td>
 						</tr>
@@ -217,7 +225,7 @@
 								on:fail={() => {}}
 								let:copy
 							>
-								<button on:click={copy}>Copy</button>
+								<button class="w3-button w3-round" on:click={copy}>Copy</button>
 							</CopyToClipboard>
 						</td>
 					</tr>
@@ -233,7 +241,7 @@
 								on:fail={() => {}}
 								let:copy
 							>
-								<button on:click={copy}>Copy</button>
+								<button class="w3-button w3-round" on:click={copy}>Copy</button>
 							</CopyToClipboard>
 						</td>
 					</tr>
@@ -262,7 +270,7 @@
 	.styled-table {
 		border-collapse: collapse;
 		border-radius: 6px 6px 0px 0px;
-		margin: 25px 0px;
+
 		font-size: 0.9em;
 		font-family: sans-serif;
 		min-width: 400px;

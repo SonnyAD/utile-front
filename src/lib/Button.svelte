@@ -19,12 +19,14 @@
 {#if toggle == 'true'}
 	<button
 		class:active
+		class="w3-button w3-round"
 		on:click={() => {
 			handleToggle();
 		}}>{text}</button
 	>
 {:else}
 	<button
+		class="w3-button w3-round"
 		on:click={() => {
 			handleDispatch({ sendDispatch });
 		}}>{text}</button

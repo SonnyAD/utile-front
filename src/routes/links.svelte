@@ -1,8 +1,37 @@
-<script>
+<script context="module">
 	import { API_URL } from '$lib/Env.js';
+
+	export async function load({page}) {
+		const res = await fetch(API_URL + '/links', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json'
+			}
+		});
+
+		const data = await res.json();
+
+		return {props: {links: data.links, next: data.next}};
+	}
+</script>
+<script>
+	import Header from '$lib/components/Header.svelte';
 	import { onMount } from 'svelte';
 
-	const loadLinks = async () => {
+	export let links = [];
+	export let next = '';
+
+	let searchTerm = "";
+	let loadingMore = false;
+	let searching = false;
+	let inputField = null;
+
+	onMount(() => {
+		inputField.focus();
+	});
+
+	const loadMore = async () => {
+		loadingMore = true;
 		const res = await fetch(API_URL + '/links?start=' + next, {
 			method: 'GET',
 			headers: {
@@ -10,27 +39,66 @@
 			}
 		});
 
-		return await res.json();
+		const data = await res.json();
+
+		links = links.concat(data.links);
+		next = data.next;
 	};
 
-	let links = [];
-	let next = '';
-	let newLinks;
-
-	onMount(() => {
-		loadMore();
-	});
-
-	const loadMore = async () => {
-		newLinks = loadLinks();
-		newLinks.then((data) => {
-			links = links.concat(data.links);
-			next = data.next;
+	const search = async (term) => {
+		searching = true;
+		links = [];
+		const res = await fetch(API_URL + '/links?search=' + term, {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json'
+			}
 		});
+
+		const data = await res.json();
+
+		links = data.links;
+		next = data.next;
+		searching = false;
 	};
+
+	const onKeyPress = (e) => {
+		// RETURN / ENTER
+		if (e.charCode === 13)
+		{
+			search(searchTerm);
+		}
+	}
+
+	const onKeyDown = (e) => {
+		// ESCAPE
+		if (e.keyCode === 27)
+		{
+			searchTerm = "";
+		}
+	};
+
+	const onSubmit = () => {
+		search(searchTerm);
+	}
 </script>
 
-<h2>Links</h2>
+<svelte:window on:keydown="{onKeyDown}"/>
+
+<Header title="Links" subtitle="Find below a list of curated links for software engineers on various subject like DevOps, GameDev or others." />
+
+<hr>
+
+<div class="w3-container w3-section" on:keydown="{onKeyPress}">
+	<form class="w3-row" on:submit|preventDefault="{onSubmit}">
+		<div class="w3-col l10 m10 s10" style="padding-right: 4px">
+			<input type="text" bind:value="{searchTerm}" bind:this={inputField} on:keypress={onKeyPress} class="w3-input w3-round">
+		</div>
+		<div class="w3-rest" style="padding-left: 4px">
+			<input type="submit" value="Search" class="w3-button w3-ripple w3-theme w3-block w3-round">
+		</div>
+	</form>
+</div>
 
 <div class="w3-container w3-responsive">
 	<div class="w3-row w3-border-bottom w3-border-black w3-padding-small w3-large">
@@ -38,44 +106,50 @@
 		<div class="w3-col l7 m12 s12"><strong>Description</strong></div>
 		<div class="w3-col l2 m12 s12"><strong>Tags</strong></div>
 	</div>
-	{#if links && links.length > 0}
-		{#each links as link}
-			<div class="links-row w3-row w3-padding-small">
-				<div class="w3-col l3 m6 s12">
-					<a href={link.url} title={link.description} target="_blank" rel="noopener"
-						><strong>{link.url.replace(/https?:\/\//,'')}</strong></a
-					>
-				</div>
-				<div class="w3-col l7 m6 s12"><em>{link.description}</em>&nbsp;</div>
-				<div class="w3-col l2 m12 s12">
-					{#each link.tags as tag}
-						<small class="w3-tag w3-padding-small w3-{tag.color}" style="margin: 0 5px 5px 0;"
-							>{tag.name}</small
-						>
-					{/each}
-				</div>
+	<div class="w3-row w3-margin-bottom" style="overflow-y: scroll; height: 75vh;">
+		{#if searching}
+			<div class="links-row w3-row w3-padding-small w3-border-bottom w3-hover-border-blue">
+				<div class="w3-col l12 m12 s12"><em>Searching...</em></div>
 			</div>
-		{/each}
-	{/if}
-	<div class="w3-row w3-light-grey">
-		{#if next != '' && newLinks}
-			{#await newLinks}
-				<div class="w3-center">...</div>
-			{:then data}
-				<div class="w3-center">
-					<button on:click={loadMore} class="w3-btn w3-red w3-ripple">Load More</button>
+		{:else if links.length > 0}
+			{#each links as link}
+				<div class="links-row w3-row w3-padding-small w3-border-bottom w3-hover-border-blue">
+					<div class="w3-col l3 m6 s12">
+						<a href={link.url} title={link.description} target="_blank" rel="noopener"
+							><strong>{link.url.replace(/https?:\/\//,'')}</strong></a
+						>
+					</div>
+					<div class="w3-col l7 m6 s12"><em>{link.description}</em>&nbsp;</div>
+					<div class="w3-col l2 m12 s12">
+						{#each link.tags as tag}
+							<small class="w3-tag w3-padding-small w3-{tag.color}" style="margin: 0 5px 5px 0;"
+								>{tag.name}</small
+							>
+						{/each}
+					</div>
 				</div>
-			{/await}
+			{/each}
+		{:else}
+			<div class="links-row w3-row w3-padding-small w3-border-bottom w3-hover-border-blue">
+				<div class="w3-col l12 m12 s12"><em>No results.</em></div>
+			</div>
+		{/if}
+	</div>
+	<div class="w3-row w3-light-grey">
+		{#if next != ''}
+			{#if loadingMore}
+				<div class="w3-center">...</div>
+			{:else}
+				<div class="w3-center">
+					<button on:click={loadMore} class="w3-btn w3-ripple w3-theme">Load More</button>
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>
 
 <style>
-	h2 {
-		margin-top: 0;
-	}
-
-	.w3-row:nth-child(even), .w3-row:last-child {
+	.links-row {
 		background-color: var(--nice-grey);
 	}
 

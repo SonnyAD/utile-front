@@ -1,4 +1,5 @@
 <script>
+    import {onMount} from 'svelte';
 	import Header from '$lib/components/Header.svelte';
     import { notifier } from '$lib/notifications';
     import CopyToClipboard from 'svelte-copy-to-clipboard';
@@ -17,6 +18,10 @@
     const copied = () => {
 		notifier.success('Password copied to clipboard!');
 	};
+
+    onMount(() => {
+        generatePassword();
+    });
 </script>
 
 <Header title="Password Generator" subtitle="Use this page to generate password on client side (only)." />

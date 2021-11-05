@@ -1,6 +1,6 @@
 {
 	"name": "utile-front",
-	"version": "3.2.1",
+	"version": "3.3.0",
 	"apiUrl": "https://utile.space/api",
 	"private": true,
 	"type": "module",
@@ -27,6 +27,7 @@
 		"@fortawesome/free-solid-svg-icons": "^5.15.4",
 		"svelte-copy-to-clipboard": "^0.2.5",
 		"svelte-fa": "^2.3.3",
+		"svelte-json-tree": "^0.1.0",
 		"sveltejs-tippy": "^3.0.0"
 	}
 }

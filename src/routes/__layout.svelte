@@ -6,6 +6,12 @@
 
 	var links = [
 		{
+			link: '/base64',
+			label: '/base64',
+			description: 'Encode/decode data in base64',
+			title: 'Encrypt or decrypt base64'
+		},
+		{
 			link: '/dice',
 			label: '/d[2-100]',
 			description: 'Roll dice between 2 and 100',
@@ -30,6 +36,12 @@
 			description: 'Get your IP',
 			title: 'Get your IP',
 			newTarget: true
+		},
+		{
+			link: '/json',
+			label: '/json',
+			description: 'Get a Tree View of your JSON',
+			title: 'Get a Tree View of your JSON'
 		},
 		{
 			link: '/links/',

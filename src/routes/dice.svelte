@@ -46,9 +46,6 @@
 </div>
 
 <style>
-	h2 {
-		margin-top: 0;
-	}
 
 	.dice-row:nth-child(even) {
 		line-height: 2em;

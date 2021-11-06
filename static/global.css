@@ -90,6 +90,16 @@ html {
 	overflow-x: hidden;
 }
 
+html, body, #svelte {
+	height: 100%;
+}
+
+#svelte {
+	min-height: 100%;
+	display: grid;
+	grid-template-rows: 1fr auto;
+}
+
 footer {
 	text-align: center;
 	font-size: small;

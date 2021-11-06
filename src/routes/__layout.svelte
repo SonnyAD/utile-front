@@ -74,7 +74,7 @@
 	};
 </script>
 
-<section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom w3-auto">
+<section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom">
 	<aside class="w3-collapse w3-padding w3-quarter">
 		<header class="w3-center">
 			<img alt="Logo" src="logo.svg" />
@@ -113,6 +113,15 @@
 </footer>
 
 <style>
+
+	section.w3-main {
+		width: 100%;
+	}
+
+	footer {
+		grid-row-start: 2;
+		grid-row-end: 3;
+	}
 
 	nav {
 		text-align: left;

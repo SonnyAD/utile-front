@@ -25,4 +25,4 @@ jobs:
           curl -X POST https://api.github.com/repos/SonnyAD/utile-compose/dispatches \
           -H 'Accept: application/vnd.github.v3+json' \
           -u 'Sonny:${{ secrets.ACCESS_TOKEN }}' \
-          --data '{"event_type": "deploy", "client_payload": { "service": "front" }}'
+          --data '{"event_type": "deploy-front", "client_payload": { "service": "front" }}'

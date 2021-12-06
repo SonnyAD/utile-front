@@ -44,6 +44,12 @@
 			title: 'Get a Tree View of your JSON'
 		},
 		{
+			link: '/json2csv',
+			label: '/json2csv',
+			description: 'Convert JSON to CSV',
+			title: 'Convert JSON to CSV'
+		},		
+		{
 			link: '/links/',
 			label: '/links',
 			description: 'Retrieve my useful links',

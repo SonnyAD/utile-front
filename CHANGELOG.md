@@ -1,3 +1,7 @@
+## 4.1.0
+
+- Adds lorem ipsum and timestamp conversion features
+
 ## 4.0.0
 
 - Rewritten the website with SvelteKit 1.0.0

@@ -49,13 +49,19 @@
 			label: '/json2csv',
 			description: 'Convert JSON to CSV',
 			title: 'Convert JSON to CSV'
-		},		
+		},
 		{
 			link: '/links/',
 			label: '/links',
 			description: 'Retrieve my useful links',
 			title: 'Retrieve my useful links'
 		},
+		{
+			link: '/lorem/',
+			label: '/lorem',
+			description: 'Generate a lorem ipsum paragraph',
+			title: 'Generate lorem ipsum'
+		},		
 		{
 			link: '/password',
 			label: '/password',
@@ -68,6 +74,12 @@
 			description: 'Free PDF files I am resharing',
 			title: 'Free PDF',
 			newTarget: true
+		},
+		{
+			link: '/timestamp/',
+			label: '/timestamp',
+			description: 'Convert timestamp to date and vice-vers',
+			title: 'Convert timestamp'
 		}
 	];
 

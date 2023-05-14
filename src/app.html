@@ -2,15 +2,29 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-
-		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<link rel="stylesheet" href="/global.css" />
 		<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-		%svelte.head%
+		<style>
+			footer {
+				position: fixed;
+				left: 0;
+				bottom: 0;
+				width: 100%;
+				background-color: red;
+				color: white;
+				text-align: center;
+			}
+		</style>
+		%sveltekit.head%
 	</head>
-	<body class="w3-light-grey">
-		<div id="svelte">%svelte.body%</div>
+	<body data-sveltekit-preload-data="hover" class="w3-light-grey">
+		<div style="margin-bottom: 70px;">%sveltekit.body%</div>
+
+		<footer class="" style="background: var(--madder-lake); color:white">
+			<p>utile.space v%sveltekit.env.PUBLIC_VERSION% &copy; <script>new Date().getFullYear()>2017&&document.write(new Date().getFullYear());</script> All rights reserved. Website by
+			<a href="https://sonny.alvesdi.as" title="Sonny Alves Dias">sonny.alvesdi.as</a></p>
+		</footer>
 	</body>
 </html>

@@ -1,5 +1,6 @@
 <script>
-	import { VERSION } from '$lib/Env.js';
+	import '../app.css';
+	import { PUBLIC_VERSION } from '$lib/Env.js';
 
 	import { NotificationDisplay } from '$lib/notifications';
 	import tippy from 'sveltejs-tippy';
@@ -78,6 +79,8 @@
 		info: '#5b87b0',
 		default: '#dddddd' // relates to simply '.show()'
 	};
+
+    let year = new Date().getFullYear();
 </script>
 
 <section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom">
@@ -113,20 +116,11 @@
 
 </section>
 
-<footer class="w3-container w3-margin-top w3-stretch" style="background: var(--madder-lake); color:white">
-	<p>utile.space v{VERSION} &copy; 2021 All rights reserved. Website by
-	<a href="https://sonny.alvesdi.as" title="Sonny Alves Dias">sonny.alvesdi.as</a></p>
-</footer>
 
 <style>
 
 	section.w3-main {
 		width: 100%;
-	}
-
-	footer {
-		grid-row-start: 2;
-		grid-row-end: 3;
 	}
 
 	nav {

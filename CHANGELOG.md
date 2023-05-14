@@ -1,3 +1,11 @@
+## 4.0.0
+
+- Rewritten the website with SvelteKit 1.0.0
+
+## 3.0.0 
+
+- Rewritten the website with SvelteKit beta
+
 ## 2.0.0
 
 - Complete redo of the front and its current features using Svelte, no more dart

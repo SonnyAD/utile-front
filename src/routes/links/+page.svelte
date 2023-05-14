@@ -1,7 +1,20 @@
-<script context="module">
-	import { API_URL } from '$lib/Env.js';
+<script>
+	import { API_URL } from '$lib/Env';
+	import Header from '$lib/components/Header.svelte';
+	import { onMount } from 'svelte';
 
-	export async function load({page}) {
+	let links = [];
+	let next = '';
+	let initialLoadDone = false;
+
+	let searchTerm = "";
+	let loadingMore = false;
+	let searching = false;
+	let inputField = null;
+
+	onMount(async () => {
+		inputField.focus();
+		
 		const res = await fetch(API_URL + '/links', {
 			method: 'GET',
 			headers: {
@@ -11,26 +24,15 @@
 
 		const data = await res.json();
 
-		return {props: {links: data.links, next: data.next}};
-	}
-</script>
-<script>
-	import Header from '$lib/components/Header.svelte';
-	import { onMount } from 'svelte';
-
-	export let links = [];
-	export let next = '';
-
-	let searchTerm = "";
-	let loadingMore = false;
-	let searching = false;
-	let inputField = null;
-
-	onMount(() => {
-		inputField.focus();
+		links = data.links;
+		next = data.next;
+		initialLoadDone = true;
 	});
 
 	const loadMore = async () => {
+		if (initialLoadDone == false)
+			return;
+
 		loadingMore = true;
 		const res = await fetch(API_URL + '/links?start=' + next, {
 			method: 'GET',
@@ -46,6 +48,9 @@
 	};
 
 	const search = async (term) => {
+		if (initialLoadDone == false)
+			return;
+
 		searching = true;
 		links = [];
 		const res = await fetch(API_URL + '/links?search=' + term, {
@@ -131,7 +136,7 @@
 			{/each}
 		{:else}
 			<div class="links-row w3-row w3-padding-small w3-border-bottom w3-hover-border-blue">
-				<div class="w3-col l12 m12 s12"><em>No results.</em></div>
+				<div class="w3-col l12 m12 s12"><em>{!initialLoadDone ? 'Loading...' : 'No results.'}</em></div>
 			</div>
 		{/if}
 	</div>

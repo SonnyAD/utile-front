@@ -1,4 +1,4 @@
-FROM node:14-buster-slim AS builder
+FROM node:16-alpine
 
 WORKDIR /app
 
@@ -8,10 +8,11 @@ RUN npm ci
 
 COPY . .
 
-RUN node node_modules/esbuild/install.js
+#RUN node node_modules/esbuild/install.js
 RUN npm run build
 
 ENV PORT=2000
 ENV HOST=0.0.0.0
+ENV PUBLIC_VERSION=4.0.0
 
 CMD ["node", "./build"]

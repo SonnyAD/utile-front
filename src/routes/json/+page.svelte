@@ -32,7 +32,7 @@
 
     <div class="w3-col w3-half w3-padding">
         {#if json}
-            <JSONTree value={json} />
+            <JSONTree value={json} defaultExpandedLevel={1} />
         {:else}
             &nbsp;
         {/if}

@@ -4,6 +4,8 @@
 
 	import { NotificationDisplay } from '$lib/notifications';
 	import tippy from 'sveltejs-tippy';
+	import Fa from 'svelte-fa/src/fa.svelte';
+	import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
 	var links = [
 		{
@@ -111,7 +113,7 @@
 						└─<a class="listitem" href={link.link} title={link.title}>{link.label}</a>
 					{:else}
 						└─<a class="listitem" href={link.link} title={link.title} target="_blank" rel="external noopener"
-							>{link.label}</a
+							>{link.label}<sup>&nbsp;<Fa icon={faArrowUpRightFromSquare} /></sup></a
 						>
 					{/if}
 				</div>

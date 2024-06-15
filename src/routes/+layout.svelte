@@ -34,6 +34,12 @@
 			newTarget: true
 		},
 		{
+			link: '/int2english',
+			label: '/int2english',
+			description: 'Convert integers to English string',
+			title: 'Convert integers to English string',
+		},		
+		{
 			link: '/ip/',
 			label: '/ip',
 			description: 'Get your IP',

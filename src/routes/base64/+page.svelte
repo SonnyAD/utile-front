@@ -21,7 +21,7 @@
     }
 
     const copied = () => {
-		notifier.success('Password copied to clipboard!');
+		notifier.success('Value copied to clipboard!');
 	};
 </script>
 

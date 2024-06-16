@@ -27,7 +27,7 @@
 			title: 'Roll a dice'
 		},
 		{
-			link: '/docs/',
+			link: '/api/docs/',
 			label: '/docs',
 			description: 'API Documentation',
 			title: 'API Documentation',

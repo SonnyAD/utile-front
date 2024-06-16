@@ -13,7 +13,7 @@
 
     const belowTwenty = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
     const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-    const thousands = ["", "Thousand", "Million", "Billion"];
+    const thousands = ["", "Thousand", "Million", "Billion", "Trillion", "Quadrillion", "Quintillion"];
 
     function numberToWords(num) {
         if (num === 0) return "Zero";
@@ -51,11 +51,13 @@
 
 <Header title="Int2English" subtitle="Convert integers to English string" />
 
-<textarea bind:value={input} class="w3-block" rows="5"></textarea>
+<form on:submit|preventDefault={int2english}>
+    <input type="number" max={Number.MAX_SAFE_INTEGER} bind:value={input} class="w3-block w3-padding-large" />
 
-<p>
-    <button class="w3-button w3-ripple w3-theme w3-round" on:click="{int2english}">To English</button>
-</p>
+    <p>
+        <button type="submit" class="w3-button w3-ripple w3-theme w3-round">To English</button>
+    </p>
+</form>
 
 {#if output}
     <h3>Result</h3>

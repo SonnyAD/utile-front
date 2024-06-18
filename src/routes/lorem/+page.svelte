@@ -45,11 +45,10 @@
 <Header title="Lorem Ipsum" subtitle="Use this page to generate lorem ipsum strings and paragraphs." />
 
 <p>
+    <button class="w3-button w3-ripple w3-theme w3-round" on:click="{generateLoremIpsum}">Generate</button>    
     <CopyToClipboard text={output} on:copy={copied} on:fail={() => {}} let:copy>
         <button class="w3-button w3-round grey" on:click={copy}>Copy</button>
     </CopyToClipboard>
-
-    <button class="w3-button w3-ripple w3-theme w3-round" on:click="{generateLoremIpsum}">Generate</button>
 </p>
 
 
@@ -68,5 +67,4 @@
 	button.grey:hover {
 		background-color: #e2e2e2;
 	}
-
 </style>

@@ -88,6 +88,12 @@
 			label: '/timestamp',
 			description: 'Convert timestamp to date and vice-vers',
 			title: 'Convert timestamp'
+		},
+		{
+			link: '/uuid',
+			label: '/uuid',
+			description: 'Generate UUIDs',
+			title: 'Generate UUIDs'
 		}
 	];
 

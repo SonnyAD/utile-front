@@ -9,6 +9,18 @@
 
 	var links = [
 		{
+			link: '/about',
+			label: '/about',
+			description: 'About this website',
+			title: 'About this website'
+		},
+		{
+			link: '/api',
+			label: '/api',
+			description: 'utile.space API',
+			title: 'utile.space API'
+		},				
+		{
 			link: '/base64',
 			label: '/base64',
 			description: 'Encode/decode data in base64',

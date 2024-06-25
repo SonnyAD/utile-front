@@ -1,6 +1,10 @@
 import { notification } from './store.js';
 import { tick } from 'svelte';
 
+/**
+ * @param {HTMLUListElement} node
+ * @param {string} sessionKey
+ */
 async function toaster(node, sessionKey) {
 	const unsubscribe = notification.subscribe((value) => {
 		if (!value) {

@@ -3,8 +3,14 @@
     import JSONTree from 'svelte-json-tree';
 
     let input = "";
+    /**
+	 * @type {any}
+	 */
     let json = undefined;
 
+    /**
+	 * @param {string} jsonString
+	 */
     function getTreeView(jsonString) {
         if (jsonString)
         {

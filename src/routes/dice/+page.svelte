@@ -15,19 +15,19 @@
 	</div>
 
 	<div class="dice-row w3-row w3-padding-small">
-		<div class="w3-col w3-third w3-center"><img src="d2.svg" alt="D2" /></div>
+		<div class="w3-col w3-third w3-center"><img src="./d2.svg" alt="D2" /></div>
 		<Die faces="2" />
 	</div>
 	<div class="dice-row w3-row w3-padding-small">
-		<div class="w3-col w3-third w3-center"><img src="d6.svg" alt="D6" /></div>
+		<div class="w3-col w3-third w3-center"><img src="./d6.svg" alt="D6" /></div>
 		<Die faces="6" />
 	</div>
 	<div class="dice-row w3-row w3-padding-small">
-		<div class="w3-col w3-third w3-center"><img src="d20.svg" alt="D20" /></div>
+		<div class="w3-col w3-third w3-center"><img src="./d20.svg" alt="D20" /></div>
 		<Die faces="20" />
 	</div>
 	<div class="dice-row w3-row w3-padding-small">
-		<div class="w3-col w3-third w3-center"><img src="d100.svg" alt="D100" /></div>
+		<div class="w3-col w3-third w3-center"><img src="./d100.svg" alt="D100" /></div>
 		<Die faces="100" />
 	</div>
 	<div class="dice-row w3-row w3-padding-small">

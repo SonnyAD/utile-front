@@ -16,16 +16,16 @@
 	"devDependencies": {
 		"@fortawesome/free-solid-svg-icons": "^6.4.0",
 		"@playwright/test": "^1.28.1",
-		"@sveltejs/adapter-auto": "^2.0.0",
-		"@sveltejs/adapter-node": "^1.2.4",
-		"@sveltejs/kit": "^1.5.0",
+		"@sveltejs/adapter-auto": "^2.1.1",
+		"@sveltejs/adapter-node": "^1.3.1",
+		"@sveltejs/kit": "^1.30.4",
 		"eslint": "^8.28.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-svelte": "^2.26.0",
-		"prettier": "^2.8.0",
-		"prettier-plugin-svelte": "^2.8.1",
-		"svelte": "^3.54.0",
-		"svelte-check": "^3.0.1",
+		"prettier": "^2.8.8",
+		"prettier-plugin-svelte": "^2.10.1",
+		"svelte": "^3.59.2",
+		"svelte-check": "^3.8.2",
 		"svelte-copy-to-clipboard": "^0.2.5",
 		"svelte-fa": "^3.0.3",
 		"svelte-json-tree": "^1.0.0",
@@ -35,5 +35,99 @@
 		"vite": "^4.3.0",
 		"vitest": "^0.25.3"
 	},
-	"type": "module"
+	"type": "module",
+	"exports": {
+		"./package.json": "./package.json",
+		"./Button.svelte": {
+			"types": "./package/Button.svelte.d.ts",
+			"svelte": "./package/Button.svelte",
+			"default": "./package/Button.svelte"
+		},
+		"./Die.svelte": {
+			"types": "./package/Die.svelte.d.ts",
+			"svelte": "./package/Die.svelte",
+			"default": "./package/Die.svelte"
+		},
+		"./Env": {
+			"types": "./package/Env.d.ts",
+			"default": "./package/Env.js"
+		},
+		"./components/Button.svelte": {
+			"types": "./package/components/Button.svelte.d.ts",
+			"svelte": "./package/components/Button.svelte",
+			"default": "./package/components/Button.svelte"
+		},
+		"./components/Header.svelte": {
+			"types": "./package/components/Header.svelte.d.ts",
+			"svelte": "./package/components/Header.svelte",
+			"default": "./package/components/Header.svelte"
+		},
+		"./components/Input.svelte": {
+			"types": "./package/components/Input.svelte.d.ts",
+			"svelte": "./package/components/Input.svelte",
+			"default": "./package/components/Input.svelte"
+		},
+		"./notifications/Notifications.svelte": {
+			"types": "./package/notifications/Notifications.svelte.d.ts",
+			"svelte": "./package/notifications/Notifications.svelte",
+			"default": "./package/notifications/Notifications.svelte"
+		},
+		"./notifications": {
+			"types": "./package/notifications/index.d.ts",
+			"svelte": "./package/notifications/index.js",
+			"default": "./package/notifications/index.js"
+		},
+		"./notifications/notifier": {
+			"types": "./package/notifications/notifier.d.ts",
+			"default": "./package/notifications/notifier.js"
+		},
+		"./notifications/store": {
+			"types": "./package/notifications/store.d.ts",
+			"default": "./package/notifications/store.js"
+		},
+		"./notifications/toaster": {
+			"types": "./package/notifications/toaster.d.ts",
+			"default": "./package/notifications/toaster.js"
+		}
+	},
+	"files": [
+		"package"
+	],
+	"typesVersions": {
+		">4.0": {
+			"Button.svelte": [
+				"./package/Button.svelte.d.ts"
+			],
+			"Die.svelte": [
+				"./package/Die.svelte.d.ts"
+			],
+			"Env": [
+				"./package/Env.d.ts"
+			],
+			"components/Button.svelte": [
+				"./package/components/Button.svelte.d.ts"
+			],
+			"components/Header.svelte": [
+				"./package/components/Header.svelte.d.ts"
+			],
+			"components/Input.svelte": [
+				"./package/components/Input.svelte.d.ts"
+			],
+			"notifications/Notifications.svelte": [
+				"./package/notifications/Notifications.svelte.d.ts"
+			],
+			"notifications": [
+				"./package/notifications/index.d.ts"
+			],
+			"notifications/notifier": [
+				"./package/notifications/notifier.d.ts"
+			],
+			"notifications/store": [
+				"./package/notifications/store.d.ts"
+			],
+			"notifications/toaster": [
+				"./package/notifications/toaster.d.ts"
+			]
+		}
+	}
 }

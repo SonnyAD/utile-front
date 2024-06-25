@@ -119,7 +119,19 @@
 	};
 
     let year = new Date().getFullYear();
+	let title = "Home";
+
+	/**
+	 * @param {string} newTitle
+	 */
+	function updateTitle(newTitle) {
+		title = newTitle;
+	}
 </script>
+
+<svelte:head>
+    <title>utile.space — {title}</title>
+</svelte:head>
 
 <section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom">
 	<aside class="w3-collapse w3-padding w3-quarter">
@@ -134,7 +146,7 @@
 			{#each links as link}
 				<div use:tippy={{ content: link.description, placement: 'left', theme: 'light-border' }}>
 					{#if !link.newTarget}
-						└─<a class="listitem" href={link.link} title={link.title}>{link.label}</a>
+						└─<a class="listitem" href={link.link} title={link.title} on:click={() => (updateTitle(link.title))}>{link.label}</a>
 					{:else}
 						└─<a class="listitem" href={link.link} title={link.title} target="_blank" rel="external noopener"
 							>{link.label}<sup>&nbsp;<Fa icon={faArrowUpRightFromSquare} /></sup></a

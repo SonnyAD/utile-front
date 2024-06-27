@@ -6,7 +6,7 @@
 
 - Rewritten the website with SvelteKit 1.0.0
 
-## 3.0.0 
+## 3.0.0
 
 - Rewritten the website with SvelteKit beta
 

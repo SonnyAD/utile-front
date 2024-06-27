@@ -1,6 +1,5 @@
 <script>
 	import '../app.css';
-	import { PUBLIC_VERSION } from '$lib/Env.js';
 
 	import { NotificationDisplay } from '$lib/notifications';
 	import tippy from 'sveltejs-tippy';
@@ -19,7 +18,7 @@
 			label: '/api',
 			description: 'utile.space API',
 			title: 'utile.space API'
-		},				
+		},
 		{
 			link: '/base64',
 			label: '/base64',
@@ -49,8 +48,8 @@
 			link: '/int2english',
 			label: '/int2english',
 			description: 'Convert integers to English string',
-			title: 'Convert integers to English string',
-		},		
+			title: 'Convert integers to English string'
+		},
 		{
 			link: '/ip/',
 			label: '/ip',
@@ -81,7 +80,7 @@
 			label: '/lorem',
 			description: 'Generate a lorem ipsum paragraph',
 			title: 'Generate lorem ipsum'
-		},		
+		},
 		{
 			link: '/password',
 			label: '/password',
@@ -118,8 +117,7 @@
 		default: '#dddddd' // relates to simply '.show()'
 	};
 
-    let year = new Date().getFullYear();
-	let title = "Home";
+	let title = 'Home';
 
 	/**
 	 * @param {string} newTitle
@@ -130,7 +128,7 @@
 </script>
 
 <svelte:head>
-    <title>utile.space — {title}</title>
+	<title>utile.space — {title}</title>
 </svelte:head>
 
 <section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom">
@@ -146,16 +144,25 @@
 			{#each links as link}
 				<div use:tippy={{ content: link.description, placement: 'left', theme: 'light-border' }}>
 					{#if !link.newTarget}
-						└─<a class="listitem" href={link.link} title={link.title} on:click={() => (updateTitle(link.title))}>{link.label}</a>
+						└─<a
+							class="listitem"
+							href={link.link}
+							title={link.title}
+							on:click={() => updateTitle(link.title)}>{link.label}</a
+						>
 					{:else}
-						└─<a class="listitem" href={link.link} title={link.title} target="_blank" rel="external noopener"
+						└─<a
+							class="listitem"
+							href={link.link}
+							title={link.title}
+							target="_blank"
+							rel="external noopener"
 							>{link.label}<sup>&nbsp;<Fa icon={faArrowUpRightFromSquare} /></sup></a
 						>
 					{/if}
 				</div>
 			{/each}
 		</nav>
-
 	</aside>
 
 	<article class="w3-threequarter">
@@ -163,12 +170,9 @@
 	</article>
 
 	<NotificationDisplay {themes} />
-
 </section>
 
-
 <style>
-
 	section.w3-main {
 		width: 100%;
 	}

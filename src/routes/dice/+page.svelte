@@ -5,7 +5,10 @@
 	let customDie = 50;
 </script>
 
-<Header title="Dice" subtitle="Throw any of the most common dice, or create any die between two andone hundred faces." />
+<Header
+	title="Dice"
+	subtitle="Throw any of the most common dice, or create any die between two andone hundred faces."
+/>
 
 <div class="w3-container w3-responsive">
 	<div class="w3-row w3-border-bottom w3-border-black w3-padding-small w3-large">
@@ -46,7 +49,6 @@
 </div>
 
 <style>
-
 	.dice-row:nth-child(even) {
 		line-height: 2em;
 		vertical-align: middle;

@@ -66,7 +66,10 @@
 	};
 </script>
 
-<Header title="DNS Resolver" subtitle="Use this page to resolve various type DNS of records: A, CNAME, MX, TXT, etc." />
+<Header
+	title="DNS Resolver"
+	subtitle="Use this page to resolve various type DNS of records: A, CNAME, MX, TXT, etc."
+/>
 
 <form on:submit|preventDefault={resolve} class="w3-container w3-row-padding">
 	<div class="w3-col m5 l5">
@@ -94,7 +97,8 @@
 		</select>
 	</div>
 	<div class="w3-col m2 l3">
-		<button disabled={!domain} type="submit" class="w3-button utile-button w3-round">Resolve</button>
+		<button disabled={!domain} type="submit" class="w3-button utile-button w3-round">Resolve</button
+		>
 	</div>
 </form>
 {#if resolution}
@@ -103,7 +107,9 @@
 			<tr>
 				<th><strong>{currentDomain}</strong></th>
 				<th class="w3-right"
-					><button class="w3-button w3-round w3-light-grey" on:click={() => (resolution = roll(currentType, currentDomain))}
+					><button
+						class="w3-button w3-round w3-light-grey"
+						on:click={() => (resolution = roll(currentType, currentDomain))}
 						><Fa icon={faSync} primaryColor="#a02c2c" /></button
 					></th
 				>
@@ -249,7 +255,7 @@
 					<tr><td><em>No record found</em></td></tr>
 				{/if}
 			{:catch error}
-				<tr><td><em>No record found</em></td></tr>
+				<tr><td><em>No record found ({error.message})</em></td></tr>
 			{/await}
 		</tbody>
 	</table>

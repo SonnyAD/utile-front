@@ -7,14 +7,14 @@
 	let next = '';
 	let initialLoadDone = false;
 
-	let searchTerm = "";
+	let searchTerm = '';
 	let loadingMore = false;
 	let searching = false;
 	let inputField = null;
 
 	onMount(async () => {
 		inputField.focus();
-		
+
 		const res = await fetch(API_URL + '/links', {
 			method: 'GET',
 			headers: {
@@ -30,8 +30,7 @@
 	});
 
 	const loadMore = async () => {
-		if (initialLoadDone == false)
-			return;
+		if (initialLoadDone == false) return;
 
 		loadingMore = true;
 		const res = await fetch(API_URL + '/links?start=' + next, {
@@ -48,8 +47,7 @@
 	};
 
 	const search = async (term) => {
-		if (initialLoadDone == false)
-			return;
+		if (initialLoadDone == false) return;
 
 		searching = true;
 		links = [];
@@ -69,38 +67,45 @@
 
 	const onKeyPress = (e) => {
 		// RETURN / ENTER
-		if (e.charCode === 13)
-		{
+		if (e.charCode === 13) {
 			search(searchTerm);
 		}
-	}
+	};
 
 	const onKeyDown = (e) => {
 		// ESCAPE
-		if (e.keyCode === 27)
-		{
-			searchTerm = "";
+		if (e.keyCode === 27) {
+			searchTerm = '';
 		}
 	};
 
 	const onSubmit = () => {
 		search(searchTerm);
-	}
+	};
 </script>
 
-<svelte:window on:keydown="{onKeyDown}"/>
+<svelte:window on:keydown={onKeyDown} />
 
-<Header title="Links" subtitle="Find below a list of curated links for software engineers on various subject like DevOps, GameDev or others." />
+<Header
+	title="Links"
+	subtitle="Find below a list of curated links for software engineers on various subject like DevOps, GameDev or others."
+/>
 
-<hr>
+<hr />
 
-<div class="w3-container w3-section" on:keydown="{onKeyPress}">
-	<form class="w3-row" on:submit|preventDefault="{onSubmit}">
+<div class="w3-container w3-section" on:keydown={onKeyPress}>
+	<form class="w3-row" on:submit|preventDefault={onSubmit}>
 		<div class="w3-col l10 m10 s10" style="padding-right: 4px">
-			<input type="text" bind:value="{searchTerm}" bind:this={inputField} on:keypress={onKeyPress} class="w3-input w3-round">
+			<input
+				type="text"
+				bind:value={searchTerm}
+				bind:this={inputField}
+				on:keypress={onKeyPress}
+				class="w3-input w3-round"
+			/>
 		</div>
 		<div class="w3-rest" style="padding-left: 4px">
-			<input type="submit" value="Search" class="w3-button w3-ripple w3-theme w3-block w3-round">
+			<input type="submit" value="Search" class="w3-button w3-ripple w3-theme w3-block w3-round" />
 		</div>
 	</form>
 </div>
@@ -121,7 +126,7 @@
 				<div class="links-row w3-row w3-padding-small w3-border-bottom w3-hover-border-blue">
 					<div class="w3-col l3 m6 s12">
 						<a href={link.url} title={link.description} target="_blank" rel="noopener"
-							><strong>{link.url.replace(/https?:\/\//,'')}</strong></a
+							><strong>{link.url.replace(/https?:\/\//, '')}</strong></a
 						>
 					</div>
 					<div class="w3-col l7 m6 s12"><em>{link.description}</em>&nbsp;</div>
@@ -136,7 +141,9 @@
 			{/each}
 		{:else}
 			<div class="links-row w3-row w3-padding-small w3-border-bottom w3-hover-border-blue">
-				<div class="w3-col l12 m12 s12"><em>{!initialLoadDone ? 'Loading...' : 'No results.'}</em></div>
+				<div class="w3-col l12 m12 s12">
+					<em>{!initialLoadDone ? 'Loading...' : 'No results.'}</em>
+				</div>
 			</div>
 		{/if}
 	</div>

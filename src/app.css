@@ -90,7 +90,9 @@ html {
 	overflow-x: hidden;
 }
 
-html, body, #svelte {
+html,
+body,
+#svelte {
 	height: 100%;
 }
 

@@ -79,7 +79,7 @@
 		margin-top: -6px;
 		-webkit-appearance: none;
 		-moz-appearance: none;
-		appearance: none;		
+		appearance: none;
 	}
 
 	input[type='range']::-moz-range-thumb {

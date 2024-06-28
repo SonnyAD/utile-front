@@ -61,8 +61,7 @@
 			}
 		});
 
-		if (inputField != null)
-			inputField.value = '';
+		if (inputField != null) inputField.value = '';
 		currentDomain = domain;
 		currentType = type;
 		return await res.json();
@@ -75,8 +74,7 @@
 	}
 
 	function onchange() {
-		if (inputField != null)
-			inputField.placeholder = type != 'ptr' ? 'Domain' : 'IP';
+		if (inputField != null) inputField.placeholder = type != 'ptr' ? 'Domain' : 'IP';
 	}
 
 	const onKeyPress = (/** @type {{ charCode: number; }} */ e) => {

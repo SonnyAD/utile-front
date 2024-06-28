@@ -17,7 +17,7 @@ async function toaster(node, sessionKey) {
 	await tick();
 	try {
 		var session = sessionStorage.getItem(sessionKey);
-		const existing = JSON.parse(session?session: "");
+		const existing = JSON.parse(session ? session : '');
 		for (const n of existing) {
 			notification.set(n);
 		}

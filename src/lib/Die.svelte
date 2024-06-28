@@ -15,7 +15,7 @@
 		);
 
 		return result;
-	};
+	}
 
 	export let faces;
 	/**

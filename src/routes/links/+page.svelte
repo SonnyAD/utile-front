@@ -72,7 +72,7 @@
 		links = data.links;
 		next = data.next;
 		searching = false;
-	};
+	}
 
 	const onKeyPress = (/** @type {{ charCode: number; }} */ e) => {
 		// RETURN / ENTER

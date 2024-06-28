@@ -28,6 +28,9 @@ jobs:
       - name: Lint
         run: |
           npm run lint
+      - name: Svelte Check
+        run: |
+          npm run check
       - name: Trigger Github Actions of parent repo
         run: |
           curl -X POST https://api.github.com/repos/SonnyAD/utile-compose/dispatches \

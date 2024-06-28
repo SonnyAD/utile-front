@@ -1,7 +1,7 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
-	import CopyToClipboard from 'svelte-copy-to-clipboard';
+	import { copy } from 'svelte-copy';
 	import { onMount } from 'svelte';
 
 	let output = '';
@@ -91,9 +91,9 @@
 	<button class="w3-button w3-ripple w3-theme w3-round" on:click={generateLoremIpsum}
 		>Generate</button
 	>
-	<CopyToClipboard text={output} on:copy={copied} on:fail={() => {}} let:copy>
-		<button class="w3-button w3-round grey" on:click={copy}>Copy</button>
-	</CopyToClipboard>
+	<button class="w3-button w3-round grey" use:copy={output} on:svelte-copy={() => copied()}
+		>Copy</button
+	>
 </p>
 
 {#if output}

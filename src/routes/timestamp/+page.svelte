@@ -1,7 +1,7 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
-	import CopyToClipboard from 'svelte-copy-to-clipboard';
+	import { copy } from 'svelte-copy';
 
 	let input = '';
 	let output = '';
@@ -9,7 +9,7 @@
 	// function to convert timestamp to date
 	function convertTimestamp() {
 		let timestamp = input;
-		let d = new Date(timestamp * 1000), // Convert the passed timestamp to milliseconds
+		let d = new Date(parseInt(timestamp) * 1000), // Convert the passed timestamp to milliseconds
 			yyyy = d.getFullYear(),
 			mm = ('0' + (d.getMonth() + 1)).slice(-2), // Months are zero based. Add leading 0.
 			dd = ('0' + d.getDate()).slice(-2), // Add leading 0.
@@ -41,7 +41,7 @@
 		let d = new Date(date),
 			timestamp = d.getTime() / 1000;
 
-		output = timestamp;
+		output = timestamp.toString();
 	}
 
 	const copied = () => {
@@ -65,9 +65,9 @@
 	<blockquote>
 		<p>{output}</p>
 		<p>
-			<CopyToClipboard text={output} on:copy={copied} on:fail={() => {}} let:copy>
-				<button class="w3-button w3-round grey" on:click={copy}>Copy</button>
-			</CopyToClipboard>
+			<button class="w3-button w3-round grey" use:copy={output} on:svelte-copy={() => copied()}
+				>Copy</button
+			>
 		</p>
 	</blockquote>
 {:else}

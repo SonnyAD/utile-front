@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
-	import CopyToClipboard from 'svelte-copy-to-clipboard';
+	import { copy } from 'svelte-copy';
 
 	let password = '';
 
@@ -16,7 +16,7 @@
 	};
 
 	const copied = () => {
-		notifier.success('Password copied to clipboard!');
+		notifier.success('Password copied to clipboard!', 1000);
 	};
 
 	onMount(() => {
@@ -36,9 +36,9 @@
 {/if}
 
 <p>
-	<CopyToClipboard text={password} on:copy={copied} on:fail={() => {}} let:copy>
-		<button class="w3-button w3-round grey" on:click={copy}>Copy</button>
-	</CopyToClipboard>
+	<button class="w3-button w3-round grey" use:copy={password} on:svelte-copy={() => copied()}
+		>Copy</button
+	>
 
 	<button class="w3-button w3-ripple w3-theme w3-round" on:click={generatePassword}>Generate</button
 	>

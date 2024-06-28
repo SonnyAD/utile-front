@@ -4,7 +4,7 @@
 	import Button from '$lib/Button.svelte';
 	import Header from '$lib/components/Header.svelte';
 
-	import CopyToClipboard from 'svelte-copy-to-clipboard';
+	import { copy } from 'svelte-copy';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import { faSync } from '@fortawesome/free-solid-svg-icons';
 	import { onMount } from 'svelte';
@@ -18,11 +18,29 @@
 		win.focus();
 	}
 
+	/**
+	 * @type {string}
+	 */
 	let domain;
+	/**
+	 * @type {string}
+	 */
 	let type;
+	/**
+	 * @type {any}
+	 */
 	let currentDomain;
+	/**
+	 * @type {any}
+	 */
 	let currentType;
+	/**
+	 * @type {Promise<any>}
+	 */
 	let resolution;
+	/**
+	 * @type {HTMLInputElement | null}
+	 */
 	let inputField = null;
 
 	onMount(() => {
@@ -132,9 +150,11 @@
 									sendDispatch={address}
 									on:message={receiveDispatch}
 								/>
-								<CopyToClipboard text={address} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button
+									class="w3-button w3-round"
+									use:copy={address}
+									on:svelte-copy={() => copied()}>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -145,9 +165,9 @@
 								{host}
 							</td>
 							<td style="text-align: right;">
-								<CopyToClipboard text={host} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button class="w3-button w3-round" use:copy={host} on:svelte-copy={() => copied()}
+									>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -158,9 +178,9 @@
 								{host}
 							</td>
 							<td style="text-align: right;">
-								<CopyToClipboard text={host} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button class="w3-button w3-round" use:copy={host} on:svelte-copy={() => copied()}
+									>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -172,9 +192,11 @@
 								{record.pref}
 							</td>
 							<td style="text-align: right;">
-								<CopyToClipboard text={record.host} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button
+									class="w3-button w3-round"
+									use:copy={record.host}
+									on:svelte-copy={() => copied()}>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -187,9 +209,11 @@
 								{record.value}
 							</td>
 							<td style="text-align: right;">
-								<CopyToClipboard text={record.value} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button
+									class="w3-button w3-round"
+									use:copy={record.value}
+									on:svelte-copy={() => copied()}>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -200,9 +224,9 @@
 								{value}
 							</td>
 							<td style="text-align: right;">
-								<CopyToClipboard text={value} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button class="w3-button w3-round" use:copy={value} on:svelte-copy={() => copied()}
+									>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -213,9 +237,9 @@
 								{domain}
 							</td>
 							<td style="text-align: right;">
-								<CopyToClipboard text={domain} on:copy={copied} on:fail={() => {}} let:copy>
-									<button class="w3-button w3-round" on:click={copy}>Copy</button>
-								</CopyToClipboard>
+								<button class="w3-button w3-round" use:copy={domain} on:svelte-copy={() => copied()}
+									>Copy</button
+								>
 							</td>
 						</tr>
 					{/each}
@@ -225,14 +249,11 @@
 							{data.resolution.value}
 						</td>
 						<td style="text-align: right;">
-							<CopyToClipboard
-								text={data.resolution.value}
-								on:copy={copied}
-								on:fail={() => {}}
-								let:copy
+							<button
+								class="w3-button w3-round"
+								use:copy={data.resolution.value}
+								on:svelte-copy={() => copied()}>Copy</button
 							>
-								<button class="w3-button w3-round" on:click={copy}>Copy</button>
-							</CopyToClipboard>
 						</td>
 					</tr>
 				{:else if data.type == 'dmarc'}
@@ -241,14 +262,11 @@
 							{data.resolution.value}
 						</td>
 						<td style="text-align: right;">
-							<CopyToClipboard
-								text={data.resolution.value}
-								on:copy={copied}
-								on:fail={() => {}}
-								let:copy
+							<button
+								class="w3-button w3-round"
+								use:copy={data.resolution.value}
+								on:svelte-copy={() => copied()}>Copy</button
 							>
-								<button class="w3-button w3-round" on:click={copy}>Copy</button>
-							</CopyToClipboard>
 						</td>
 					</tr>
 				{:else}

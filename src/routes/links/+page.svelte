@@ -3,6 +3,9 @@
 	import Header from '$lib/components/Header.svelte';
 	import { onMount } from 'svelte';
 
+	/**
+	 * @type {any[]}
+	 */
 	let links = [];
 	let next = '';
 	let initialLoadDone = false;
@@ -10,7 +13,10 @@
 	let searchTerm = '';
 	let loadingMore = false;
 	let searching = false;
-	let inputField = null;
+	/**
+	 * @type {HTMLInputElement}
+	 */
+	let inputField;
 
 	onMount(async () => {
 		inputField.focus();

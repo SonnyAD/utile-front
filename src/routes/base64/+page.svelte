@@ -1,7 +1,7 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
-	import CopyToClipboard from 'svelte-copy-to-clipboard';
+	import { copy } from 'svelte-copy';
 
 	let input = '';
 	let output = '';
@@ -46,9 +46,9 @@
 	<blockquote>
 		<p>{output}</p>
 		<p>
-			<CopyToClipboard text={output} on:copy={copied} on:fail={() => {}} let:copy>
-				<button class="w3-button w3-round grey" on:click={copy}>Copy</button>
-			</CopyToClipboard>
+			<button class="w3-button w3-round grey" use:copy={output} on:svelte-copy={() => copied()}>
+				Copy
+			</button>
 		</p>
 	</blockquote>
 {:else}

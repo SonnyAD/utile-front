@@ -31,6 +31,9 @@ jobs:
       - name: Svelte Check
         run: |
           npm run check
+      - name: Test
+        run: |
+          npm run test:ci
       - name: Trigger Github Actions of parent repo
         run: |
           curl -X POST https://api.github.com/repos/SonnyAD/utile-compose/dispatches \

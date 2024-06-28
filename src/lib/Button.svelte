@@ -7,6 +7,9 @@
 
 	const dispatch = createEventDispatcher();
 
+	/**
+	 * @param {{ sendDispatch: any; }} e
+	 */
 	function handleDispatch(e) {
 		dispatch('message', { text: e.sendDispatch });
 	}

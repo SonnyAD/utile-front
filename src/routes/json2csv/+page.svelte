@@ -2,9 +2,15 @@
 	import Header from '$lib/components/Header.svelte';
 
 	let input = '';
+	/**
+	 * @type {string}
+	 */
 	let output;
 
 	// function to convert JSON to CSV and keeping the labels
+	/**
+	 * @param {string} objArray
+	 */
 	function jsonToCSVWithLabels(objArray) {
 		var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
 		var str = '';

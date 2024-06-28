@@ -1,4 +1,6 @@
 <script>
+// @ts-nocheck
+
 	import { toaster } from './toaster.js';
 
 	export let themes = {
@@ -12,16 +14,24 @@
 	export let timeout = 3000;
 	export let sessionKey = 'byk-toasts';
 
+	/**
+	 * @type {any[]}
+	 */
 	let toasts = [];
 
-	function animateOut(node, { delay = 0, duration = 1000 }) {
+	/**
+	 * @param {HTMLLIElement} _node
+	 */
+	function animateOut(_node, { delay = 0, duration = 1000 }) {
 		return {
 			delay,
 			duration,
-			css: (t) => `opacity: ${(t - 0.7) * 1}; transform-origin: top right;`
+			css: (/** @type {number} */ t) => `opacity: ${(t - 0.7) * 1}; transform-origin: top right;`
 		};
 	}
 
+	// TODO: fix that?
+	// @ts-ignore
 	function createToast({ detail }) {
 		const { message, type, options = {} } = detail;
 		const background = themes[type] || themes.default;
@@ -56,12 +66,18 @@
 		];
 	}
 
+	/**
+	 * @param {{ persist: any; id: any; }} toast
+	 */
 	function maybePurge(toast) {
 		!toast.persist && purge(toast.id);
 	}
 
+	/**
+	 * @param {any} id
+	 */
 	function purge(id) {
-		const filter = (t) => t.id !== id;
+		const filter = (/** @type {{ id: any; }} */ t) => t.id !== id;
 		toasts = toasts.filter(filter);
 		try {
 			sessionStorage.setItem(

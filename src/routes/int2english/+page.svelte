@@ -55,6 +55,9 @@
 		'Quintillion'
 	];
 
+	/**
+	 * @param {number} num
+	 */
 	function numberToWords(num) {
 		if (num === 0) return 'Zero';
 
@@ -72,6 +75,10 @@
 		return word.trim();
 	}
 
+	/**
+	 * @param {number} num
+	 * @returns {string}
+	 */
 	function helper(num) {
 		if (num === 0) {
 			return '';

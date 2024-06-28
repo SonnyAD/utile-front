@@ -1,4 +1,6 @@
 <script>
+// @ts-nocheck
+
 	import '../app.css';
 
 	import { NotificationDisplay } from '$lib/notifications';

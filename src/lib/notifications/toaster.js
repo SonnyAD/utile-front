@@ -11,12 +11,13 @@ async function toaster(node, sessionKey) {
 			return;
 		}
 		node.dispatchEvent(new CustomEvent('notify', { detail: value }));
-		notification.set();
+		notification.set(undefined);
 	});
 
 	await tick();
 	try {
-		const existing = JSON.parse(sessionStorage.getItem(sessionKey));
+		var session = sessionStorage.getItem(sessionKey);
+		const existing = JSON.parse(session?session: "");
 		for (const n of existing) {
 			notification.set(n);
 		}

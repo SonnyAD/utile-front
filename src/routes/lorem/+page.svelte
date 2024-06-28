@@ -6,6 +6,9 @@
 
 	let output = '';
 
+	/**
+	 * @type {string[]}
+	 */
 	let lorem = [];
 	lorem.push(
 		'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vestibulum sed arcu non odio euismod lacinia at quis risus. Etiam sit amet nisl purus in mollis nunc sed. Consequat id porta nibh venenatis. A diam maecenas sed enim ut sem viverra aliquet. Sapien et ligula ullamcorper malesuada proin. Tristique magna sit amet purus gravida. Erat nam at lectus urna duis convallis convallis tellus id. Quis varius quam quisque id diam vel. Vel pharetra vel turpis nunc eget lorem dolor sed viverra. A scelerisque purus semper eget. Sagittis aliquam malesuada bibendum arcu vitae elementum curabitur.'

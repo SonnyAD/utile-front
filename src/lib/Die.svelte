@@ -2,7 +2,7 @@
 	import { notifier } from '$lib/notifications';
 	import { API_URL } from '$lib/Env.js';
 
-	const roll = async (faces) => {
+	async function roll(/** @type {string} */ faces) {
 		const res = await fetch(API_URL + '/d' + faces, {
 			method: 'GET'
 		});
@@ -18,6 +18,9 @@
 	};
 
 	export let faces;
+	/**
+	 * @type {Promise<string>}
+	 */
 	let die;
 </script>
 

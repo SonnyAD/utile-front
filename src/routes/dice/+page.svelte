@@ -61,6 +61,8 @@
 
 	input[type='range'] {
 		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
 		border: none;
 	}
 
@@ -76,6 +78,8 @@
 		cursor: pointer;
 		margin-top: -6px;
 		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;		
 	}
 
 	input[type='range']::-moz-range-thumb {
@@ -85,6 +89,8 @@
 		background: #c83737;
 		cursor: pointer;
 		-webkit-appearance: none;
+		-moz-appearance: none;
+		appearance: none;
 	}
 
 	input[type='range']::-webkit-progress-value {

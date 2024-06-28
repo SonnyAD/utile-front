@@ -52,7 +52,10 @@
 		next = data.next;
 	};
 
-	const search = async (term) => {
+	/**
+	 * @param {string} term
+	 */
+	async function search(term) {
 		if (initialLoadDone == false) return;
 
 		searching = true;
@@ -71,14 +74,14 @@
 		searching = false;
 	};
 
-	const onKeyPress = (e) => {
+	const onKeyPress = (/** @type {{ charCode: number; }} */ e) => {
 		// RETURN / ENTER
 		if (e.charCode === 13) {
 			search(searchTerm);
 		}
 	};
 
-	const onKeyDown = (e) => {
+	const onKeyDown = (/** @type {{ keyCode: number; }} */ e) => {
 		// ESCAPE
 		if (e.keyCode === 27) {
 			searchTerm = '';

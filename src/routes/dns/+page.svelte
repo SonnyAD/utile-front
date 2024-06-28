@@ -9,13 +9,19 @@
 	import { faSync } from '@fortawesome/free-solid-svg-icons';
 	import { onMount } from 'svelte';
 
+	/**
+	 * @param {{ detail: { text: string; }; }} e
+	 */
 	function receiveDispatch(e) {
 		openIPDetails(e.detail.text);
 	}
 
+	/**
+	 * @param {string} ip
+	 */
 	function openIPDetails(ip) {
 		let win = window.open('https://utile.space/ip/?ip=' + ip, '_blank');
-		win.focus();
+		win?.focus();
 	}
 
 	/**
@@ -44,10 +50,10 @@
 	let inputField = null;
 
 	onMount(() => {
-		inputField.focus();
+		inputField?.focus();
 	});
 
-	const roll = async (type, domain) => {
+	const roll = async (/** @type {string} */ type, /** @type {string} */ domain) => {
 		const res = await fetch(API_URL + '/dns/' + type + '/' + domain, {
 			method: 'GET',
 			headers: {
@@ -55,7 +61,8 @@
 			}
 		});
 
-		inputField.value = '';
+		if (inputField != null)
+			inputField.value = '';
 		currentDomain = domain;
 		currentType = type;
 		return await res.json();
@@ -68,10 +75,11 @@
 	}
 
 	function onchange() {
-		inputField.placeholder = type != 'ptr' ? 'Domain' : 'IP';
+		if (inputField != null)
+			inputField.placeholder = type != 'ptr' ? 'Domain' : 'IP';
 	}
 
-	const onKeyPress = (e) => {
+	const onKeyPress = (/** @type {{ charCode: number; }} */ e) => {
 		if (e.charCode === 13) {
 			currentDomain = domain;
 			domain = '';

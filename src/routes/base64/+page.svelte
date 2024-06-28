@@ -22,6 +22,8 @@
 	function b64EncodeUnicode() {
 		output = btoa(
 			encodeURIComponent(input).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+				// TODO: Fix that error
+				// @ts-ignore
 				return String.fromCharCode('0x' + p1);
 			})
 		);

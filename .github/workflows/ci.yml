@@ -34,6 +34,13 @@ jobs:
       - name: Test
         run: |
           npm run test:ci
+      - name: ⏫ Bump package version
+        id: bumping-version
+        uses: jpb06/bump-package@latest
+        with:
+          should-default-to-patch: true
+          commit-user: Sonny Alves Dias
+          commit-user-email: sonny@alvesdi.as
       - name: Trigger Github Actions of parent repo
         run: |
           curl -X POST https://api.github.com/repos/SonnyAD/utile-compose/dispatches \

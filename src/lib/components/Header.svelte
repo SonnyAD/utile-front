@@ -3,12 +3,12 @@
 	export let subtitle;
 </script>
 
-<h2 class="w3-xxlarge">{title}</h2>
+<h1 class="w3-xxlarge">{title}</h1>
 
 <p>{subtitle}</p>
 
 <style>
-	h2 {
+	h1 {
 		font-family: monospace;
 	}
 

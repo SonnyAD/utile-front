@@ -31,9 +31,13 @@ jobs:
       - name: Svelte Check
         run: |
           npm run check
-      - name: Test
+      - name: Unit and Integration Tests
         run: |
           npm run test:ci
+      - name: Acceptance Tests
+        run: |
+          npx playwright install
+          npm run test
       - name: ⏫ Bump package version
         id: bumping-version
         uses: jpb06/bump-package@latest

@@ -30,7 +30,7 @@
 />
 
 {#if password}
-	<p>{password}</p>
+	<p id="result">{password}</p>
 {:else}
 	<p>&nbsp;</p>
 {/if}

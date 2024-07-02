@@ -102,7 +102,7 @@
 
 <hr />
 
-<div class="w3-container w3-section" on:keydown={onKeyPress}>
+<div class="w3-container w3-section" role="document">
 	<form class="w3-row" on:submit|preventDefault={onSubmit}>
 		<div class="w3-col l10 m10 s10" style="padding-right: 4px">
 			<input

@@ -92,7 +92,7 @@
 
 <ul class="toasts" use:toaster={sessionKey} on:notify={createToast}>
 	{#each toasts as toast (toast.id)}
-		<li class="toast" style="background: {toast.background};" out:animateOut>
+		<li class="toast" style="background: {toast.background};" out:animateOut|global>
 			{#if toast.persist}
 				<button class="close" on:click={() => purge(toast.id)}> ✕ </button>
 			{/if}

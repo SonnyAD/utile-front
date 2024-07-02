@@ -5,7 +5,7 @@
 
 	import { NotificationDisplay } from '$lib/notifications';
 	import tippy from 'sveltejs-tippy';
-	import Fa from 'svelte-fa/src/fa.svelte';
+	import Fa from 'svelte-fa';
 	import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
 
 	var links = [

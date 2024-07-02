@@ -5,7 +5,7 @@
 	import Header from '$lib/components/Header.svelte';
 
 	import { copy } from 'svelte-copy';
-	import Fa from 'svelte-fa/src/fa.svelte';
+	import Fa from 'svelte-fa';
 	import { faSync } from '@fortawesome/free-solid-svg-icons';
 	import { onMount } from 'svelte';
 

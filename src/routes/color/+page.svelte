@@ -4,17 +4,15 @@
 	import { copy } from 'svelte-copy';
 
 	import ColorPicker, { A11yVariant } from 'svelte-awesome-color-picker';
-	// @ts-ignore
-	import { RgbaColor, HsvaColor } from 'svelte-awesome-color-picker';
 
 	// default theme color
 	let hex = '#c83737';
 	/**
-	 * @type {RgbaColor}
+	 * @type {any}
 	 */
 	let rgb;
 	/**
-	 * @type {HsvaColor}
+	 * @type {any}
 	 */
 	let hsv;
 

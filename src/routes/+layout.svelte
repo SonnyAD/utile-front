@@ -28,6 +28,12 @@
 			title: 'Encrypt or decrypt base64'
 		},
 		{
+			link: '/color',
+			label: '/color',
+			description: 'Color picker',
+			title: 'Color picker'
+		},
+		{
 			link: '/dice',
 			label: '/d[2-100]',
 			description: 'Roll dice between 2 and 100',

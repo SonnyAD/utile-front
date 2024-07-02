@@ -38,7 +38,7 @@
 		try {
 			let result = jsonToCSVWithLabels(input);
 			output = result;
-		} catch (e) {
+		} catch {
 			// Do nothing
 		}
 	}

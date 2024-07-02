@@ -2,7 +2,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
 	import { copy } from 'svelte-copy';
-	
+
 	import ColorPicker, { A11yVariant } from 'svelte-awesome-color-picker';
 
 	// default theme color

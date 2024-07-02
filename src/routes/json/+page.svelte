@@ -16,7 +16,7 @@
 			console.log('Received ', jsonString);
 			try {
 				json = JSON.parse(jsonString);
-			} catch (e) {
+			} catch {
 				json = undefined;
 			}
 		}

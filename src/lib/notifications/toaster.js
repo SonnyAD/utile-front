@@ -21,13 +21,13 @@ async function toaster(node, sessionKey) {
 		for (const n of existing) {
 			notification.set(n);
 		}
-	} catch (e) {
-		console.log('Cannot use session storage');
+	} catch {
+		console.log('Cannot use session storage ');
 	} finally {
 		try {
 			sessionStorage.removeItem(sessionKey);
-		} catch (e2) {
-			console.log('Cannot use session storage');
+		} catch {
+			console.log('Cannot use session storage ');
 		}
 	}
 

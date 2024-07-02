@@ -50,7 +50,7 @@
 				])
 			);
 		} catch (e) {
-			console.log('Cannot use session storage');
+			console.log('Cannot use session storage ' + e.message);
 		}
 
 		toasts = [
@@ -85,7 +85,7 @@
 				JSON.stringify(JSON.parse(sessionStorage.getItem(sessionKey) || '[]').filter(filter))
 			);
 		} catch (e) {
-			console.log('Cannot use session storage');
+			console.log('Cannot use session storage ' + e.message);
 		}
 	}
 </script>

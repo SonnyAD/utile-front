@@ -9,7 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}    
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push-image:
@@ -19,7 +19,7 @@ jobs:
       contents: read
       packages: write
       attestations: write
-      id-token: write    
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4

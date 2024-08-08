@@ -1,6 +1,6 @@
 {
 	"name": "utile-front",
-	"version": "4.4.18",
+	"version": "4.4.19",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",

@@ -126,17 +126,21 @@
 	};
 
 	let title = 'Home';
+	let description =
+		'Welcome to utile.space the Swiss Army Knife webtool. Click on the links in the menu to discover the tools offered.';
 
 	/**
-	 * @param {string} newTitle
+	 * @param {any} link
 	 */
-	function updateTitle(newTitle) {
-		title = newTitle;
+	function updateMeta(link) {
+		title = link.title;
+		description = link.description;
 	}
 </script>
 
 <svelte:head>
 	<title>utile.space — {title}</title>
+	<meta name="description" content={description} />
 </svelte:head>
 
 <section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom">
@@ -156,7 +160,7 @@
 							class="listitem"
 							href={link.link}
 							title={link.title}
-							on:click={() => updateTitle(link.title)}>{link.label}</a
+							on:click={() => updateMeta(link)}>{link.label}</a
 						>
 					{:else}
 						└─<a

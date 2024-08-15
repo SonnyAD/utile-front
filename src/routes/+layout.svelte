@@ -90,6 +90,12 @@
 			title: 'Generate lorem ipsum'
 		},
 		{
+			link: '/math',
+			label: '/math',
+			description: 'Some mathematics stuff, I liked to play with like Pi, Tau, ...',
+			title: 'Some mathematics stuff'
+		},
+		{
 			link: '/password',
 			label: '/password',
 			description: 'Generate random password',

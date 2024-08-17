@@ -21,7 +21,7 @@
 	let page = 0;
 
 	onMount(() => {
-		const WS_URL = API_URL.replace('https://', 'ws://');
+		const WS_URL = API_URL.replace('https://', 'wss://');
 		conn = new WebSocket(WS_URL + '/math/ws');
 
 		conn.onclose = function (evt) {

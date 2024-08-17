@@ -10,7 +10,7 @@
 	 */
 	let output;
 
-	let websocketOutput = "";
+	let websocketOutput = '';
 
 	/**
 	 * @type {WebSocket}
@@ -20,21 +20,20 @@
 	let previousConstant = '';
 	let page = 0;
 
+	onMount(() => {
+		conn = new WebSocket('ws://localhost:3000/api/math/ws');
 
-	onMount(()=> {
-		conn = new WebSocket("ws://localhost:3000/api/math/ws");
+		conn.onclose = function (evt) {
+			console.log('Websocket connection lost: ' + evt.reason);
+		};
 
-        conn.onclose = function (evt) {
-            console.log("Websocket connection lost: " + evt.reason)
-        };
-
-        conn.onmessage = function (evt) {
-			websocketOutput += evt.data
+		conn.onmessage = function (evt) {
+			websocketOutput += evt.data;
 			output = new Promise((resolve) => {
 				resolve(websocketOutput);
 			});
-        };
-	});	
+		};
+	});
 
 	/**
 	 * @param {string} constantName
@@ -50,14 +49,14 @@
 	}
 
 	function resetOutput() {
-		output = new Promise((resolve) => resolve(""));
-		websocketOutput = "";
+		output = new Promise((resolve) => resolve(''));
+		websocketOutput = '';
 		previousConstant = '';
 	}
 
 	/**
 	 * @param {string} constantName
-	 */	
+	 */
 	function requestPage(constantName) {
 		// Make sure websocket is on
 		if (!conn) {
@@ -74,7 +73,7 @@
 		}
 
 		// send page request, page size 1000
-		conn.send(constantName + " " + page.toString() + ", 1000")
+		conn.send(constantName + ' ' + page.toString() + ', 1000');
 	}
 
 	function nextPage() {
@@ -91,17 +90,16 @@
 			const scrolledTo = y + innerHeight;
 			const threshold = 30;
 			const hasReachedBottom = clientHeight - threshold <= scrolledTo;
-			if (hasReachedBottom) 
-				nextPage();
-		}		
-	};
+			if (hasReachedBottom) nextPage();
+		}
+	}
 
 	const copied = () => {
 		notifier.success('Value copied to clipboard!');
 	};
 </script>
 
-<svelte:window bind:scrollY={y} bind:innerHeight={innerHeight} />
+<svelte:window bind:scrollY={y} bind:innerHeight />
 
 <Header
 	title="Some mathematics stuff"
@@ -117,15 +115,15 @@
 	>
 </p>
 <p>
-	<button class="w3-button w3-ripple w3-theme w3-round" on:click={() => (requestPage('pi'))}
+	<button class="w3-button w3-ripple w3-theme w3-round" on:click={() => requestPage('pi')}
 		>Lazy load &pi; 1M first decimals</button
 	>
-	<button class="w3-button w3-ripple w3-theme w3-round" on:click={() => (requestPage('tau'))}
+	<button class="w3-button w3-ripple w3-theme w3-round" on:click={() => requestPage('tau')}
 		>Lazy load &tau; 1M first decimals</button
-	>	
+	>
 </p>
 
-<div bind:clientHeight={clientHeight}>
+<div bind:clientHeight>
 	<p title="result" style="word-break: break-all;">
 		{#if output}
 			{#await output}

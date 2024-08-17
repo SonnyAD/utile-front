@@ -21,7 +21,8 @@
 	let page = 0;
 
 	onMount(() => {
-		conn = new WebSocket('ws://localhost:3000/api/math/ws');
+		const WS_URL = API_URL.replace('https://', 'ws://');
+		conn = new WebSocket(WS_URL + '/math/ws');
 
 		conn.onclose = function (evt) {
 			console.log('Websocket connection lost: ' + evt.reason);

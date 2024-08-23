@@ -28,6 +28,12 @@
 			title: 'Encrypt or decrypt base64'
 		},
 		{
+			link: '/battleships',
+			label: '/battleships',
+			description: 'Battleships game using zero knowledge proof',
+			title: 'Battleships'
+		},
+		{
 			link: '/color',
 			label: '/color',
 			description: 'Color picker',

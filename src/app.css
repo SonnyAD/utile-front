@@ -22,6 +22,32 @@
 	color: #fff !important;
 	background-color: #c83737ff !important;
 }
+
+.w3-green {
+	color: #fff !important;
+	background-color: var(--caribbean-green) !important;
+}
+
+.w3-green-alt {
+	color: var(--nice-grey) !important;
+	background-color: var(--viridian-green) !important;
+}
+
+.w3-red-light {
+	color: #fff !important;
+	background-color: var(--saffron) !important;
+}
+
+.w3-blue {
+	color: #fff !important;
+	background-color: var(--usafa-blue) !important;
+}
+
+.w3-yellow {
+	color: var(--jet) !important;
+	background-color: var(--corn) !important;
+}
+
 .w3-theme-light {
 	color: #000 !important;
 	background-color: #e8eaf6 !important;

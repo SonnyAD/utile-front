@@ -44,6 +44,7 @@ jobs:
         id: bumping-version
         uses: jpb06/bump-package@latest
         with:
+          minor-keywords: feat,feature
           should-default-to-patch: true
           commit-user: Sonny Alves Dias
           commit-user-email: sonny@alvesdi.as

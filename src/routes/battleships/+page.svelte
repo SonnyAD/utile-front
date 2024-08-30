@@ -64,11 +64,58 @@
 
 	let opponentMuted = false;
 
+	function animate(obj) {
+		obj.animate(
+			{ angle: 360 },
+			{
+				duration: 3000,
+				onComplete: function () {
+					obj.angle = 0;
+					animate(obj);
+				},
+				onChange: opponentCanvas.renderAll.bind(opponentCanvas),
+				easing: function (t, b, c, d) {
+					return (2 * c * t) / d + b;
+				}
+			}
+		);
+	}
+
 	onMount(() => {
 		opponentCanvas = drawCanvas('opponent');
 		myCanvas = drawCanvas('mine');
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
+
+		fabric.loadSVGFromURL('/radar_bg.svg', function (objects, options) {
+			var obj = fabric.util.groupSVGElements(objects, options);
+			/*obj.set('width', 0.1);
+			obj.set('height', 0.1);*/
+
+			obj.left = (gridSize + 1) * cellSize + 10;
+			obj.top = cellSize;
+
+			obj.selectable = false;
+			obj.evented = false;
+
+			opponentCanvas.add(obj);
+		});
+
+		fabric.Image.fromURL('/radar_fg.png', function (obj) {
+			/*obj.set('width', 2*cellSize);
+			obj.set('height', 2*cellSize);*/
+
+			obj.left = (gridSize + 1) * cellSize + 10;
+			obj.top = cellSize;
+			obj.set('centeredRotation', true);
+			obj.selectable = false;
+			obj.evented = false;
+
+			obj._setOriginToCenter();
+
+			opponentCanvas.add(obj);
+			animate(obj);
+		});
 
 		opponentGridCursor = makeCursor(cellSize, '#32a797');
 		opponentCanvas.add(opponentGridCursor);

@@ -136,5 +136,8 @@
 				"./package/notifications/toaster.d.ts"
 			]
 		}
+	},
+	"dependencies": {
+		"fabric": "^5.4.0"
 	}
 }

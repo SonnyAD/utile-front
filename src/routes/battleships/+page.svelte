@@ -6,6 +6,7 @@
 	import { onMount } from 'svelte';
 	import { notifier } from '$lib/notifications';
 	import { v7 as uuidv7 } from 'uuid';
+	import { fabric } from 'fabric';
 
 	const GameState = {
 		Pending: 'Pending',
@@ -822,10 +823,6 @@
 		);
 	}
 </script>
-
-<svelte:head>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/500/fabric.min.js"></script>
-</svelte:head>
 
 <Header title="Battleships" subtitle="Battleships game with zero knowledge proof" />
 

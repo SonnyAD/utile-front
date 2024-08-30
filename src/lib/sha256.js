@@ -1,3 +1,6 @@
+/**
+ * @param {string | undefined} message
+ */
 async function sha256(message) {
 	const msgBuffer = new TextEncoder().encode(message);
 	const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -6,6 +9,10 @@ async function sha256(message) {
 	return hashHex;
 }
 
+/**
+ * @param {{ toString: () => any; }} value
+ * @param {{ toString: () => any; }} randomness
+ */
 export async function generateCommitment(value, randomness) {
 	const data = value.toString() + randomness.toString();
 	return sha256(data);

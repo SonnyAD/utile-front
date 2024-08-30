@@ -23,31 +23,43 @@
 	let shipId = 0;
 
 	/**
-	 * @type {fabric.Canvas}
+	 * @type {any}
 	 */
 	let myCanvas;
+	/**
+	 * @type {number[] | { toString: () => any; }[]}
+	 */
 	let myBoard = [];
+	/**
+	 * @type {{ toString: () => any; }[]}
+	 */
 	let mySalts = [];
 
 	/**
-	 * @type {fabric.Canvas}
+	 * @type {any}
 	 */
 	let opponentCanvas;
+	/**
+	 * @type {any[]}
+	 */
 	let opponentBoard = [];
+	/**
+	 * @type {string[]}
+	 */
 	let opponentCommitments = [];
 
 	/**
-	 * @type {fabric.Rect[]}
+	 * @type {any[]}
 	 */
 	let ships = [];
 
 	/**
-	 * @type {fabric.Rect}
+	 * @type {any}
 	 */
 	let gridCursor;
 
 	/**
-	 * @type {fabric.Rect}
+	 * @type {any}
 	 */
 	let opponentGridCursor;
 
@@ -64,6 +76,9 @@
 
 	let opponentMuted = false;
 
+	/**
+	 * @param {{ left?: number; top?: number; set?: (arg0: string, arg1: boolean) => void; selectable?: boolean; evented?: boolean; _setOriginToCenter?: () => void; animate?: any; angle?: any; }} obj
+	 */
 	function animate(obj) {
 		obj.animate(
 			{ angle: 360 },
@@ -74,7 +89,12 @@
 					animate(obj);
 				},
 				onChange: opponentCanvas.renderAll.bind(opponentCanvas),
-				easing: function (t, b, c, d) {
+				easing: function (
+					/** @type {number} */ t,
+					/** @type {number} */ b,
+					/** @type {number} */ c,
+					/** @type {number} */ d
+				) {
 					return (2 * c * t) / d + b;
 				}
 			}
@@ -87,35 +107,37 @@
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
 
-		fabric.loadSVGFromURL('/radar_bg.svg', function (objects, options) {
-			var obj = fabric.util.groupSVGElements(objects, options);
-			/*obj.set('width', 0.1);
-			obj.set('height', 0.1);*/
+		fabric.loadSVGFromURL(
+			'/radar_bg.svg',
+			function (/** @type {any} */ objects, /** @type {any} */ options) {
+				var obj = fabric.util.groupSVGElements(objects, options);
+				obj.left = (gridSize + 1) * cellSize + 10;
+				obj.top = cellSize;
 
-			obj.left = (gridSize + 1) * cellSize + 10;
-			obj.top = cellSize;
+				obj.selectable = false;
+				obj.evented = false;
 
-			obj.selectable = false;
-			obj.evented = false;
+				opponentCanvas.add(obj);
+			}
+		);
 
-			opponentCanvas.add(obj);
-		});
+		fabric.Image.fromURL(
+			'/radar_fg.png',
+			function (
+				/** @type {{ left: number; top: number; set: (arg0: string, arg1: boolean) => void; selectable: boolean; evented: boolean; _setOriginToCenter: () => void; }} */ obj
+			) {
+				obj.left = (gridSize + 1) * cellSize + 10;
+				obj.top = cellSize;
+				obj.set('centeredRotation', true);
+				obj.selectable = false;
+				obj.evented = false;
 
-		fabric.Image.fromURL('/radar_fg.png', function (obj) {
-			/*obj.set('width', 2*cellSize);
-			obj.set('height', 2*cellSize);*/
+				obj._setOriginToCenter();
 
-			obj.left = (gridSize + 1) * cellSize + 10;
-			obj.top = cellSize;
-			obj.set('centeredRotation', true);
-			obj.selectable = false;
-			obj.evented = false;
-
-			obj._setOriginToCenter();
-
-			opponentCanvas.add(obj);
-			animate(obj);
-		});
+				opponentCanvas.add(obj);
+				animate(obj);
+			}
+		);
 
 		opponentGridCursor = makeCursor(cellSize, '#32a797');
 		opponentCanvas.add(opponentGridCursor);
@@ -147,11 +169,15 @@
 					if (matches[1].toString() == 'shot') {
 						const s = matches[5].split(',');
 						const cell = { x: s[0], y: s[1] };
+						// @ts-ignore
 						receiveShot(cell);
+						// @ts-ignore
 						if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 0) {
 							conn.send('miss ' + matches[5]);
+							// @ts-ignore
 						} else if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 1) {
 							conn.send('hit ' + matches[5]);
+							// @ts-ignore
 							myBoard[cell.x - 1 + (cell.y - 1) * gridSize] = 1;
 							if (--hp == 0) {
 								conn.send('lose');
@@ -200,44 +226,50 @@
 						const cell = { x: s[0], y: s[1] };
 						await verifyProof(cell, matches[3]);
 					} else if (matches[1].toString() == 'miss') {
-						fabric.loadSVGFromURL('/miss.svg', function (objects, options) {
-							var obj = fabric.util.groupSVGElements(objects, options);
-							obj.set('width', cellSize);
-							obj.set('height', cellSize);
+						fabric.loadSVGFromURL(
+							'/miss.svg',
+							function (/** @type {any} */ objects, /** @type {any} */ options) {
+								var obj = fabric.util.groupSVGElements(objects, options);
+								obj.set('width', cellSize);
+								obj.set('height', cellSize);
 
-							let s = matches[5].toString().split(',');
-							const x = parseInt(s[0]);
-							const y = parseInt(s[1]);
-							obj.left = x * cellSize;
-							obj.top = y * cellSize;
+								let s = matches[5].toString().split(',');
+								const x = parseInt(s[0]);
+								const y = parseInt(s[1]);
+								obj.left = x * cellSize;
+								obj.top = y * cellSize;
 
-							obj.selectable = false;
-							obj.evented = false;
+								obj.selectable = false;
+								obj.evented = false;
 
-							opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
-							opponentCanvas.add(obj);
-							opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
-						});
+								opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
+								opponentCanvas.add(obj);
+								opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
+							}
+						);
 						conn.send('prove ' + matches[5]);
 					} else if (matches[1].toString() == 'hit') {
-						fabric.loadSVGFromURL('/hit.svg', function (objects, options) {
-							var obj = fabric.util.groupSVGElements(objects, options);
-							obj.set('width', cellSize);
-							obj.set('height', cellSize);
+						fabric.loadSVGFromURL(
+							'/hit.svg',
+							function (/** @type {any} */ objects, /** @type {any} */ options) {
+								var obj = fabric.util.groupSVGElements(objects, options);
+								obj.set('width', cellSize);
+								obj.set('height', cellSize);
 
-							let s = matches[5].toString().split(',');
-							const x = parseInt(s[0]);
-							const y = parseInt(s[1]);
-							obj.left = x * cellSize;
-							obj.top = y * cellSize;
+								let s = matches[5].toString().split(',');
+								const x = parseInt(s[0]);
+								const y = parseInt(s[1]);
+								obj.left = x * cellSize;
+								obj.top = y * cellSize;
 
-							obj.selectable = false;
-							obj.evented = false;
+								obj.selectable = false;
+								obj.evented = false;
 
-							opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
-							opponentCanvas.add(obj);
-							opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
-						});
+								opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
+								opponentCanvas.add(obj);
+								opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
+							}
+						);
 						conn.send('prove ' + matches[5]);
 					}
 				}
@@ -249,6 +281,9 @@
 		};
 	});
 
+	/**
+	 * @param {string} id
+	 */
 	function drawCanvas(id) {
 		const canvas = new fabric.Canvas(id);
 		canvas.hoverCursor = 'pointer';
@@ -259,6 +294,12 @@
 		return canvas;
 	}
 
+	/**
+	 * @param {{ x: any; y: any; }} coords
+	 * @param {number} gridSize
+	 * @param {number} cellSize
+	 * @param {{ add: (arg0: any) => void; }} canvas
+	 */
 	function makeGrid(coords, gridSize, cellSize, canvas) {
 		let lines = [];
 
@@ -286,6 +327,7 @@
 			);
 		}
 
+		// @ts-ignore
 		canvas.add(...lines);
 
 		// A - J
@@ -322,6 +364,11 @@
 		}
 	}
 
+	/**
+	 * @param {{ angle: number; left: number; top: number; height: any; width: any; }} rect
+	 * @param {number} gridSize
+	 * @param {number} cellSize
+	 */
 	function testRectInsideGrid(rect, gridSize, cellSize) {
 		if (rect.angle == 0)
 			return (
@@ -339,6 +386,9 @@
 			);
 	}
 
+	/**
+	 * @param {any[]} coords
+	 */
 	function makeLine(coords) {
 		return new fabric.Line(coords, {
 			fill: 'black',
@@ -349,6 +399,12 @@
 		});
 	}
 
+	/**
+	 * @param {number} size
+	 * @param {number} cellSize
+	 * @param {string} color
+	 * @param {number} canvasSize
+	 */
 	function makeShip(size, cellSize, color, canvasSize) {
 		let ship = new fabric.Rect({
 			left: canvasSize,
@@ -363,6 +419,10 @@
 		return ship;
 	}
 
+	/**
+	 * @param {number} cellSize
+	 * @param {string} color
+	 */
 	function makeCursor(cellSize, color) {
 		let cursor = new fabric.Rect({
 			left: cellSize,
@@ -379,6 +439,10 @@
 		return cursor;
 	}
 
+	/**
+	 * @param {{ angle: number; left: number; setCoords: () => void; }} ship
+	 * @param {number} cellSize
+	 */
 	function toggleShip(ship, cellSize) {
 		if (ship.angle == 0) {
 			ship.left = ship.left + cellSize;
@@ -404,7 +468,9 @@
 
 	function dropShips() {
 		myCanvas.on({
-			'object:moving': function (e) {
+			'object:moving': function (
+				/** @type {{ target: { width?: any; angle: any; left?: any; top?: any; }; }} */ e
+			) {
 				if (gridCursor.opacity == 0) {
 					gridCursor.opacity = 0.5;
 					gridCursor.set('width', e.target.width);
@@ -443,9 +509,12 @@
 					console.log('inside');
 				}
 			},
-			'object:modified': function (e) {
+			'object:modified': function (
+				/** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
+			) {
 				gridCursor.opacity = 0;
 
+				// @ts-ignore
 				if (isHorizontal(e.target)) {
 					e.target.left = clamp(
 						Math.round(e.target.left / cellSize) * cellSize,
@@ -474,7 +543,7 @@
 
 				if (snapshotShipsPosition() == 17) canLockShipPositions = true;
 			},
-			'mouse:dblclick': function (e) {
+			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
 				if (gameState != GameState.Positioning) return;
 
 				for (var i = 0; i < ships.length; i++) {
@@ -521,7 +590,7 @@
 			});
 			const width = shipIdToWidth(ship.customID);
 
-			if (testRectInsideGrid(ship, gridSize, cellSize)) {
+			if (width && cell && testRectInsideGrid(ship, gridSize, cellSize)) {
 				if (isHorizontal(ship)) {
 					for (let i = 0; i < width; i++) {
 						myBoard[cell.x - 1 + i + (cell.y - 1) * gridSize] = 1;
@@ -547,6 +616,9 @@
 		return map.get('ship' + shipId.toString());
 	}
 
+	/**
+	 * @param {{ angle: number; }} ship
+	 */
 	function isHorizontal(ship) {
 		return ship.angle == 0;
 	}
@@ -571,26 +643,29 @@
 		notifier.info('No opponent found. So we are matching you against our strongest AI!', 5000);
 
 		opponentCanvas.on({
-			'mouse:down': function (e) {
+			'mouse:down': function (/** @type {{ pointer: { x: number; y: number; }; }} */ e) {
 				if (gameState != GameState.InGame || !myTurn) return;
 
 				let cell = pointToGridCell(e.pointer);
 
 				if (cell && opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] == null) {
-					fabric.loadSVGFromURL('/pending.svg', function (objects, options) {
-						var obj = fabric.util.groupSVGElements(objects, options);
-						obj.set('width', cellSize);
-						obj.set('height', cellSize);
+					fabric.loadSVGFromURL(
+						'/pending.svg',
+						function (/** @type {any} */ objects, /** @type {any} */ options) {
+							var obj = fabric.util.groupSVGElements(objects, options);
+							obj.set('width', cellSize);
+							obj.set('height', cellSize);
 
-						obj.left = cell.x * cellSize;
-						obj.top = cell.y * cellSize;
+							obj.left = cell.x * cellSize;
+							obj.top = cell.y * cellSize;
 
-						obj.selectable = false;
-						obj.evented = false;
+							obj.selectable = false;
+							obj.evented = false;
 
-						opponentCanvas.add(obj);
-						opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] = obj;
-					});
+							opponentCanvas.add(obj);
+							opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] = obj;
+						}
+					);
 
 					myTurn = false;
 					opponentGridCursor.opacity = 0;
@@ -598,7 +673,7 @@
 					conn.send('shoot ' + cell.x + ',' + cell.y);
 				}
 			},
-			'mouse:move': function (e) {
+			'mouse:move': function (/** @type {{ pointer: { x: number; y: number; }; }} */ e) {
 				if (myTurn) {
 					opponentGridCursor.left = clamp(
 						Math.floor(e.pointer.x / cellSize) * cellSize,
@@ -627,13 +702,21 @@
 		}
 	}
 
+	/**
+	 * @param {{ x: any; y: any; }} cell
+	 */
 	function getProof(cell) {
 		const flatIndex = cell.x - 1 + (cell.y - 1) * gridSize;
 		return myBoard[flatIndex].toString() + mySalts[flatIndex].toString();
 	}
 
+	/**
+	 * @param {{ x: any; y: any; }} cell
+	 * @param {string} proof
+	 */
 	async function verifyProof(cell, proof) {
 		const flatIndex = parseInt(cell.x) - 1 + (parseInt(cell.y) - 1) * gridSize;
+		// @ts-ignore
 		const computedCommit = await generateCommitment(proof.at(0), proof.substring(1));
 
 		console.log(cell);
@@ -657,6 +740,9 @@
 		}
 	}
 
+	/**
+	 * @param {{ x: number; y: number; }} point
+	 */
 	function pointToGridCell(point) {
 		let xCell = Math.floor(point.x / cellSize);
 		let yCell = Math.floor(point.y / cellSize);
@@ -697,21 +783,27 @@
 		);
 	}
 
+	/**
+	 * @param {{ x: number; y: number; }} cell
+	 */
 	function receiveShot(cell) {
-		fabric.loadSVGFromURL('/shot.svg', function (objects, options) {
-			var obj = fabric.util.groupSVGElements(objects, options);
-			obj.set('width', cellSize);
-			obj.set('height', cellSize);
+		fabric.loadSVGFromURL(
+			'/shot.svg',
+			function (/** @type {any} */ objects, /** @type {any} */ options) {
+				var obj = fabric.util.groupSVGElements(objects, options);
+				obj.set('width', cellSize);
+				obj.set('height', cellSize);
 
-			obj.left = cell.x * cellSize;
-			obj.top = cell.y * cellSize;
+				obj.left = cell.x * cellSize;
+				obj.top = cell.y * cellSize;
 
-			obj.selectable = false;
-			obj.evented = false;
+				obj.selectable = false;
+				obj.evented = false;
 
-			myCanvas.add(obj);
-			myCanvas.renderAll();
-		});
+				myCanvas.add(obj);
+				myCanvas.renderAll();
+			}
+		);
 	}
 </script>
 

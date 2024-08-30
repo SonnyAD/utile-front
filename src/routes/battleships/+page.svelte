@@ -6,7 +6,6 @@
 	import { onMount } from 'svelte';
 	import { notifier } from '$lib/notifications';
 	import { v7 as uuidv7 } from 'uuid';
-	import { fabric } from 'fabric';
 
 	const GameState = {
 		Pending: 'Pending',
@@ -107,9 +106,11 @@
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
 
+		// @ts-ignore
 		fabric.loadSVGFromURL(
 			'/radar_bg.svg',
 			function (/** @type {any} */ objects, /** @type {any} */ options) {
+				// @ts-ignore
 				var obj = fabric.util.groupSVGElements(objects, options);
 				obj.left = (gridSize + 1) * cellSize + 10;
 				obj.top = cellSize;
@@ -121,6 +122,7 @@
 			}
 		);
 
+		// @ts-ignore
 		fabric.Image.fromURL(
 			'/radar_fg.png',
 			function (
@@ -226,9 +228,11 @@
 						const cell = { x: s[0], y: s[1] };
 						await verifyProof(cell, matches[3]);
 					} else if (matches[1].toString() == 'miss') {
+						// @ts-ignore
 						fabric.loadSVGFromURL(
 							'/miss.svg',
 							function (/** @type {any} */ objects, /** @type {any} */ options) {
+								// @ts-ignore
 								var obj = fabric.util.groupSVGElements(objects, options);
 								obj.set('width', cellSize);
 								obj.set('height', cellSize);
@@ -249,9 +253,11 @@
 						);
 						conn.send('prove ' + matches[5]);
 					} else if (matches[1].toString() == 'hit') {
+						// @ts-ignore
 						fabric.loadSVGFromURL(
 							'/hit.svg',
 							function (/** @type {any} */ objects, /** @type {any} */ options) {
+								// @ts-ignore
 								var obj = fabric.util.groupSVGElements(objects, options);
 								obj.set('width', cellSize);
 								obj.set('height', cellSize);
@@ -285,6 +291,7 @@
 	 * @param {string} id
 	 */
 	function drawCanvas(id) {
+		// @ts-ignore
 		const canvas = new fabric.Canvas(id);
 		canvas.hoverCursor = 'pointer';
 		canvas.selection = false;
@@ -334,6 +341,7 @@
 		const letters = 'ABCDEFGHIJ';
 		for (var z = 0; z < gridSize; z += 1) {
 			canvas.add(
+				// @ts-ignore
 				new fabric.Text(letters.charAt(z), {
 					fontFamily: 'monospace',
 					fontSize: 14,
@@ -350,6 +358,7 @@
 		// 1 - 10
 		for (var a = 1; a <= gridSize; a += 1) {
 			canvas.add(
+				// @ts-ignore
 				new fabric.Text(a.toString(), {
 					fontFamily: 'monospace',
 					fontSize: 14,
@@ -390,6 +399,7 @@
 	 * @param {any[]} coords
 	 */
 	function makeLine(coords) {
+		// @ts-ignore
 		return new fabric.Line(coords, {
 			fill: 'black',
 			stroke: 'black',
@@ -406,6 +416,7 @@
 	 * @param {number} canvasSize
 	 */
 	function makeShip(size, cellSize, color, canvasSize) {
+		// @ts-ignore
 		let ship = new fabric.Rect({
 			left: canvasSize,
 			top: (shipId + 1) * cellSize,
@@ -424,6 +435,7 @@
 	 * @param {string} color
 	 */
 	function makeCursor(cellSize, color) {
+		// @ts-ignore
 		let cursor = new fabric.Rect({
 			left: cellSize,
 			top: cellSize,
@@ -649,9 +661,11 @@
 				let cell = pointToGridCell(e.pointer);
 
 				if (cell && opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] == null) {
+					// @ts-ignore
 					fabric.loadSVGFromURL(
 						'/pending.svg',
 						function (/** @type {any} */ objects, /** @type {any} */ options) {
+							// @ts-ignore
 							var obj = fabric.util.groupSVGElements(objects, options);
 							obj.set('width', cellSize);
 							obj.set('height', cellSize);
@@ -787,9 +801,11 @@
 	 * @param {{ x: number; y: number; }} cell
 	 */
 	function receiveShot(cell) {
+		// @ts-ignore
 		fabric.loadSVGFromURL(
 			'/shot.svg',
 			function (/** @type {any} */ objects, /** @type {any} */ options) {
+				// @ts-ignore
 				var obj = fabric.util.groupSVGElements(objects, options);
 				obj.set('width', cellSize);
 				obj.set('height', cellSize);

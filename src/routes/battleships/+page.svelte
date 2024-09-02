@@ -109,7 +109,7 @@
 
 		// @ts-ignore
 		fabric.loadSVGFromURL(
-			'/radar_bg.svg',
+			'/red_radar_bg.svg',
 			function (/** @type {any} */ objects, /** @type {any} */ options) {
 				// @ts-ignore
 				var obj = fabric.util.groupSVGElements(objects, options);
@@ -125,7 +125,7 @@
 
 		// @ts-ignore
 		fabric.Image.fromURL(
-			'/radar_fg.png',
+			'/red_radar_fg.png',
 			function (
 				/** @type {{ left: number; top: number; set: (arg0: string, arg1: boolean) => void; selectable: boolean; evented: boolean; _setOriginToCenter: () => void; }} */ obj
 			) {

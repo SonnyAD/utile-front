@@ -454,27 +454,6 @@
 	}
 
 	/**
-	 * @param {number} size
-	 * @param {number} cellSize
-	 * @param {string} color
-	 * @param {number} canvasSize
-	 */
-	function makeShip(size, cellSize, color, canvasSize) {
-		// @ts-ignore
-		let ship = new fabric.Rect({
-			left: canvasSize,
-			top: (shipId + 1) * cellSize,
-			fill: color,
-			width: size * cellSize,
-			height: cellSize
-		});
-		ship.perPixelTargetFind = true;
-		ship.hasControls = ship.hasBorders = false;
-		ship.customID = shipId++;
-		return ship;
-	}
-
-	/**
 	 * @param {number} cellSize
 	 * @param {string} color
 	 */

@@ -103,20 +103,20 @@
 
 	let assets = [
 		{
-			url: "/carrier.svg",
+			url: '/carrier.svg'
 		},
 		{
-			url: "/battleship.svg",
+			url: '/battleship.svg'
 		},
 		{
-			url: "/destroyer.svg",
+			url: '/destroyer.svg'
 		},
 		{
-			url: "/submarine.svg",
+			url: '/submarine.svg'
 		},
 		{
-			url: "/patrol.svg",
-		},
+			url: '/patrol.svg'
+		}
 	];
 
 	onMount(() => {
@@ -128,7 +128,6 @@
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
 
-	
 		for (let i = 0; i < assets.length; i++) {
 			// @ts-ignore
 			fabric.loadSVGFromURL(
@@ -137,20 +136,19 @@
 					const svg = fabric.util.groupSVGElements(objects, options);
 
 					let g = new fabric.Group([], {
-						width: svg.width / svg.height * cellSize,
+						width: (svg.width / svg.height) * cellSize,
 						height: cellSize
 					});
-					
+
 					svg.scaleToWidth(g.width);
 
 					g.addWithUpdate(svg);
 
 					ships[i] = g;
-					console.log("Loaded " + assets[i].url);
+					console.log('Loaded ' + assets[i].url);
 				}
 			);
 		}
-
 
 		// @ts-ignore
 		fabric.loadSVGFromURL(

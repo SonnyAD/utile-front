@@ -101,11 +101,56 @@
 		);
 	}
 
+	let assets = [
+		{
+			url: "/carrier.svg",
+		},
+		{
+			url: "/battleship.svg",
+		},
+		{
+			url: "/destroyer.svg",
+		},
+		{
+			url: "/submarine.svg",
+		},
+		{
+			url: "/patrol.svg",
+		},
+	];
+
 	onMount(() => {
+		// Prepare Both Canvas
 		opponentCanvas = drawCanvas('opponent');
 		myCanvas = drawCanvas('mine');
+
+		// My Grid Cursor
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
+
+	
+		for (let i = 0; i < assets.length; i++) {
+			// @ts-ignore
+			fabric.loadSVGFromURL(
+				assets[i].url,
+				function (/** @type {any} */ objects, /** @type {any} */ options) {
+					const svg = fabric.util.groupSVGElements(objects, options);
+
+					let g = new fabric.Group([], {
+						width: svg.width / svg.height * cellSize,
+						height: cellSize
+					});
+					
+					svg.scaleToWidth(g.width);
+
+					g.addWithUpdate(svg);
+
+					ships[i] = g;
+					console.log("Loaded " + assets[i].url);
+				}
+			);
+		}
+
 
 		// @ts-ignore
 		fabric.loadSVGFromURL(
@@ -571,11 +616,13 @@
 			}
 		});
 
-		ships.push(makeShip(5, cellSize, '#1F363D', (gridSize + 1) * cellSize));
-		ships.push(makeShip(4, cellSize, '#40798C', (gridSize + 1) * cellSize));
-		ships.push(makeShip(3, cellSize, '#70A9A1', (gridSize + 1) * cellSize));
-		ships.push(makeShip(3, cellSize, '#9EC1A3', (gridSize + 1) * cellSize));
-		ships.push(makeShip(2, cellSize, '#CFE0C3', (gridSize + 1) * cellSize));
+		for (let i = 0; i < ships.length; i++) {
+			ships[i].left = (gridSize + 1) * cellSize;
+			ships[i].top = (i + 1) * cellSize;
+			ships[i].customID = shipId++;
+			ships[i].perPixelTargetFind = true;
+			ships[i].hasControls = ships[i].hasBorders = false;
+		}
 
 		myCanvas.add(...ships);
 	}

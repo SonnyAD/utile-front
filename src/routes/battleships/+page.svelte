@@ -79,6 +79,8 @@
 
 	let opponentMuted = false;
 
+	let stats;
+
 	/**
 	 * @param {{ left?: number; top?: number; set?: (arg0: string, arg1: boolean) => void; selectable?: boolean; evented?: boolean; _setOriginToCenter?: () => void; animate?: any; angle?: any; }} obj
 	 */
@@ -102,6 +104,17 @@
 				}
 			}
 		);
+	}
+
+	async function getStats() {
+		const res = await fetch(API_URL + '/battleships/stats', {
+			method: 'GET',
+			headers: {
+				Accept: 'application/json'
+			}
+		});
+
+		return res.json();
 	}
 
 	let assets = [
@@ -333,6 +346,8 @@
 			conn.send('signin ' + getPlayerId());
 			connected = true;
 		};
+
+		stats = getStats();
 	});
 
 	/**
@@ -926,10 +941,25 @@
 			<p>
 				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
 			</p>
-			<p>
+			<p style="maring: auto 0;">
 				Turn number: {turn}
 			</p>
 		{/if}
+		<p style="maring: auto 0;">
+			<small
+				><em>
+					{#await stats}
+						...
+					{:then data}
+						Online Players: {data.onlinePlayers} <br />
+						Matches: {data.pendingMatches} (Pending), {data.ongoingMatches} (Ongoing), {data.finishedMatches}
+						(Finished), {data.totalMatches} (Total)
+					{:catch error}
+						...
+					{/await}
+				</em></small
+			>
+		</p>
 	{/if}
 </div>
 

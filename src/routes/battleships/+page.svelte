@@ -857,7 +857,10 @@
 <div id="buttons" style="margin-left: 1rem; display: flex; flex-direction: row; gap: 1rem;">
 	{#if !connected}
 		<p>
-			<button class="w3-button w3-ripple w3-round w3-text-white" style="background-color: #c83737ff;"> 
+			<button
+				class="w3-button w3-ripple w3-round w3-text-white"
+				style="background-color: #c83737ff;"
+			>
 				<Moon size="15" color="#ffffff" unit="px" duration="1s" />
 				Connecting to server ...
 			</button>
@@ -927,7 +930,7 @@
 				Turn number: {turn}
 			</p>
 		{/if}
-	{/if}		
+	{/if}
 </div>
 
 <div style="display: flex; flex-direction: row; width: max-content;">

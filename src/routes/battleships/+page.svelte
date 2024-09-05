@@ -1,5 +1,6 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
+	import { Moon } from 'svelte-loading-spinners';
 	import { API_URL } from '$lib/Env.js';
 	import { generateCommitment } from '$lib/sha256.js';
 	import { clamp } from '$lib/mathutils';
@@ -18,6 +19,8 @@
 
 	const gridSize = 10;
 	const cellSize = 50;
+
+	let connected = false;
 
 	let gameState = GameState.Pending;
 	let shipId = 0;
@@ -328,6 +331,7 @@
 
 		conn.onopen = function () {
 			conn.send('signin ' + getPlayerId());
+			connected = true;
 		};
 	});
 
@@ -851,70 +855,79 @@
 <Header title="Battleships" subtitle="Battleships game with zero knowledge proof" />
 
 <div id="buttons" style="margin-left: 1rem; display: flex; flex-direction: row; gap: 1rem;">
-	{#if gameState == GameState.Pending || gameState == GameState.Over}
+	{#if !connected}
 		<p>
-			<button class="w3-button w3-ripple w3-green w3-round" on:click={startNewGame}
-				>🎮 Start New Game</button
-			>
+			<button class="w3-button w3-ripple w3-round w3-text-white" style="background-color: #c83737ff;"> 
+				<Moon size="15" color="#ffffff" unit="px" duration="1s" />
+				Connecting to server ...
+			</button>
 		</p>
-		<p>
-			<button class="w3-button w3-ripple w3-green-alt w3-round" on:click={joinGame}
-				>🚪 Join Game</button
-			>
-		</p>
-	{/if}
+	{:else}
+		{#if gameState == GameState.Pending || gameState == GameState.Over}
+			<p>
+				<button class="w3-button w3-ripple w3-green w3-round" on:click={startNewGame}
+					>🎮 Start New Game</button
+				>
+			</p>
+			<p>
+				<button class="w3-button w3-ripple w3-green-alt w3-round" on:click={joinGame}
+					>🚪 Join Game</button
+				>
+			</p>
+		{/if}
 
-	{#if gameState == GameState.Positioning || gameState == GameState.Lobby}
-		<p>
-			<button
-				class="w3-button w3-ripple w3-red-light w3-round"
-				class:w3-disabled={!canLockShipPositions}
-				on:click={lockPositions}>🔒 Lock Positions</button
-			>
-		</p>
-		<p>
-			<button class="w3-button w3-ripple w3-blue w3-round" on:click={resetPositions}
-				>↩️ Reset Positions</button
-			>
-		</p>
-	{/if}
+		{#if gameState == GameState.Positioning || gameState == GameState.Lobby}
+			<p>
+				<button
+					class="w3-button w3-ripple w3-red-light w3-round"
+					class:w3-disabled={!canLockShipPositions}
+					on:click={lockPositions}>🔒 Lock Positions</button
+				>
+			</p>
+			<p>
+				<button class="w3-button w3-ripple w3-blue w3-round" on:click={resetPositions}
+					>↩️ Reset Positions</button
+				>
+			</p>
+		{/if}
 
-	{#if gameState == GameState.InGame}
-		<p>
-			<button class="w3-button w3-ripple w3-green w3-round" on:click={muteOpponent}
-				>{#if opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
-			>
-		</p>
-		<div class="w3-dropdown-hover w3-mobile" style="margin-top: auto; margin-bottom: auto;">
-			<button class="w3-button w3-ripple w3-yellow w3-round">😀 Send Emoji</button>
-			<div class="w3-dropdown-content w3-dark-yellow">
-				<button on:click={() => sendEmoji(0)} class="w3-bar-item w3-button w3-mobile w3-center"
-					>😜</button
+		{#if gameState == GameState.InGame}
+			<p>
+				<button class="w3-button w3-ripple w3-green w3-round" on:click={muteOpponent}
+					>{#if opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
 				>
-				<button on:click={() => sendEmoji(1)} class="w3-bar-item w3-button w3-mobile w3-center"
-					>🫡</button
-				>
-				<button on:click={() => sendEmoji(2)} class="w3-bar-item w3-button w3-mobile w3-center"
-					>😵</button
-				>
-				<button on:click={() => sendEmoji(3)} class="w3-bar-item w3-button w3-mobile w3-center"
-					>🤯</button
-				>
-				<button on:click={() => sendEmoji(4)} class="w3-bar-item w3-button w3-mobile w3-center"
-					>🫣</button
-				>
-				<button on:click={() => sendEmoji(5)} class="w3-bar-item w3-button w3-mobile w3-center"
-					>🛟</button
-				>
+			</p>
+			<div class="w3-dropdown-hover w3-mobile" style="margin-top: auto; margin-bottom: auto;">
+				<button class="w3-button w3-ripple w3-yellow w3-round">😀 Send Emoji</button>
+				<div class="w3-dropdown-content w3-dark-yellow">
+					<button on:click={() => sendEmoji(0)} class="w3-bar-item w3-button w3-mobile w3-center"
+						>😜</button
+					>
+					<button on:click={() => sendEmoji(1)} class="w3-bar-item w3-button w3-mobile w3-center"
+						>🫡</button
+					>
+					<button on:click={() => sendEmoji(2)} class="w3-bar-item w3-button w3-mobile w3-center"
+						>😵</button
+					>
+					<button on:click={() => sendEmoji(3)} class="w3-bar-item w3-button w3-mobile w3-center"
+						>🤯</button
+					>
+					<button on:click={() => sendEmoji(4)} class="w3-bar-item w3-button w3-mobile w3-center"
+						>🫣</button
+					>
+					<button on:click={() => sendEmoji(5)} class="w3-bar-item w3-button w3-mobile w3-center"
+						>🛟</button
+					>
+				</div>
 			</div>
-		</div>
-		<p>
-			<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
-		</p>
-		<p>
-			Turn number: {turn}
-		</p>
-	{/if}
+			<p>
+				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
+			</p>
+			<p>
+				Turn number: {turn}
+			</p>
+		{/if}
+	{/if}		
 </div>
 
 <div style="display: flex; flex-direction: row; width: max-content;">
@@ -938,5 +951,9 @@
 		width: 85%;
 		text-align: center;
 		margin: auto;
+	}
+
+	:global(#buttons .wrapper) {
+		display: inline-flex;
 	}
 </style>

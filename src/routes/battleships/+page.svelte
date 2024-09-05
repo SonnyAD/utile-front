@@ -79,6 +79,9 @@
 
 	let opponentMuted = false;
 
+	/**
+	 * @type {Promise<any>}
+	 */
 	let stats;
 
 	/**
@@ -954,7 +957,7 @@
 						Online Players: {data.onlinePlayers} <br />
 						Matches: {data.pendingMatches} (Pending), {data.ongoingMatches} (Ongoing), {data.finishedMatches}
 						(Finished), {data.totalMatches} (Total)
-					{:catch error}
+					{:catch}
 						...
 					{/await}
 				</em></small

@@ -215,6 +215,17 @@
 		stats = getStats();
 	});
 
+	/**
+	 * @type {string | number | NodeJS.Timeout | undefined}
+	 */
+	let clear;
+	$: {
+		clearInterval(clear);
+		clear = setInterval(() => {
+			stats = getStats();
+		}, 5000);
+	}
+
 	async function signIn() {
 		websocket.send('signin ' + getPlayerId());
 		connected = true;

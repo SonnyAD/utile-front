@@ -3,6 +3,7 @@
 	import { Moon } from 'svelte-loading-spinners';
 	import { API_URL, DEBUG } from '$lib/Env.js';
 	import { startWebsocket } from '$lib/battleships/websocket.js';
+	import { settings } from '$lib/battleships/playerSettings.js';
 	import { generateCommitment } from '$lib/sha256.js';
 	import { clamp } from '$lib/mathutils';
 	import { onMount } from 'svelte';
@@ -69,8 +70,6 @@
 	let turn = 1;
 	let hp = 17;
 	let canLockShipPositions = false;
-
-	let opponentMuted = false;
 
 	/**
 	 * @type {Promise<any>}
@@ -213,6 +212,8 @@
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		stats = getStats();
+
+		settings.subscribe((value) => console.log(value));
 	});
 
 	/**
@@ -276,7 +277,7 @@
 					10000
 				);
 				gameState = GameState.Over;
-			} else if (matches[1].toString() == 'receive' && !opponentMuted) {
+			} else if (matches[1].toString() == 'receive' && !$settings.opponentMuted) {
 				notifier.info('Opponent sent you: ' + matches[7].toString(), 5000);
 			} else if (matches[1].toString() == 'joined') {
 				notifier.danger('An opponent joined you! Good luck, commander.', 5000);
@@ -827,10 +828,6 @@
 		myCanvas.renderAll();
 	}
 
-	function muteOpponent() {
-		opponentMuted = !opponentMuted;
-	}
-
 	/**
 	 * @param {number} emojiIndex
 	 */
@@ -921,8 +918,10 @@
 
 		{#if gameState == GameState.InGame}
 			<p style="margin: auto;">
-				<button class="w3-button w3-ripple w3-green w3-round" on:click={muteOpponent}
-					>{#if opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
+				<button
+					class="w3-button w3-ripple w3-green w3-round"
+					on:click={() => settings.muteOpponent(!$settings.opponentMuted)}
+					>{#if $settings.opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
 				>
 			</p>
 			<div class="w3-dropdown-hover w3-mobile" style="margin: auto 0;">

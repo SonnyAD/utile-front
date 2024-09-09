@@ -1,7 +1,8 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
 	import { Moon } from 'svelte-loading-spinners';
-	import { API_URL } from '$lib/Env.js';
+	import { API_URL, DEBUG } from '$lib/Env.js';
+	import { startWebsocket } from '$lib/battleships/websocket.js';
 	import { generateCommitment } from '$lib/sha256.js';
 	import { clamp } from '$lib/mathutils';
 	import { onMount } from 'svelte';
@@ -19,8 +20,6 @@
 
 	const gridSize = 10;
 	const cellSize = 50;
-
-	let connected = false;
 
 	let gameState = GameState.Pending;
 	let shipId = 0;
@@ -71,18 +70,18 @@
 	let hp = 17;
 	let canLockShipPositions = false;
 
-	/**
-	 * @type {WebSocket}
-	 */
-	let conn;
-	let websocketOutput = '';
-
 	let opponentMuted = false;
 
 	/**
 	 * @type {Promise<any>}
 	 */
 	let stats;
+
+	/**
+	 * @type {WebSocket}
+	 */
+	let websocket;
+	let connected = false;
 
 	/**
 	 * @param {{ left?: number; top?: number; set?: (arg0: string, arg1: boolean) => void; selectable?: boolean; evented?: boolean; _setOriginToCenter?: () => void; animate?: any; angle?: any; }} obj
@@ -147,6 +146,7 @@
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
 
+		// Load ships assets and nest them in a group to be able to scale them properly
 		for (let i = 0; i < assets.length; i++) {
 			// @ts-ignore
 			fabric.loadSVGFromURL(
@@ -210,148 +210,142 @@
 		myBoard = Array.from({ length: gridSize * gridSize }, () => 0);
 		opponentBoard = Array.from({ length: gridSize * gridSize }, () => null);
 
-		const WS_URL = API_URL.replace('http://', 'ws://');
-		conn = new WebSocket(WS_URL + '/battleships/ws');
-
-		conn.onclose = function (evt) {
-			console.log('Websocket connection lost: ' + evt.reason);
-		};
-
-		conn.onmessage = async function (evt) {
-			websocketOutput = evt.data;
-			console.log(websocketOutput);
-
-			const lines = websocketOutput.split(/\r?\n/);
-			console.log(lines.length);
-
-			lines.forEach(async (line) => {
-				const re = new RegExp(
-					/^(turn|shot|hit|miss|sink|prove|proof|gaveup|receive|joined|youjoined|commit|battlestart|lose)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+(.))?$/gu
-				);
-				const matches = [...line.matchAll(re)][0];
-
-				if (matches) {
-					if (matches[1].toString() == 'shot') {
-						const s = matches[5].split(',');
-						const cell = { x: s[0], y: s[1] };
-						// @ts-ignore
-						receiveShot(cell);
-						// @ts-ignore
-						if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 0) {
-							conn.send('miss ' + matches[5]);
-							// @ts-ignore
-						} else if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 1) {
-							conn.send('hit ' + matches[5]);
-							// @ts-ignore
-							myBoard[cell.x - 1 + (cell.y - 1) * gridSize] = 1;
-							if (--hp == 0) {
-								conn.send('lose');
-								gameState = GameState.Over;
-								notifier.danger('You lose. RIP Commander!', 10000);
-							}
-						}
-					} else if (matches[1].toString() == 'gaveup') {
-						notifier.success(
-							'You won the battle, Commander. The opponent is retreating! Congratulations',
-							10000
-						);
-						gameState = GameState.Over;
-					} else if (matches[1].toString() == 'lose') {
-						notifier.success(
-							'You won the battle, Commander. The opponent has been annihilated! Congratulations',
-							10000
-						);
-						gameState = GameState.Over;
-					} else if (matches[1].toString() == 'receive' && !opponentMuted) {
-						notifier.info('Opponent sent you: ' + matches[7].toString(), 5000);
-					} else if (matches[1].toString() == 'joined') {
-						notifier.danger('An opponent joined you! Good luck, commander.', 5000);
-					} else if (matches[1].toString() == 'youjoined') {
-						notifier.danger('You joined a mighty opponent!', 5000);
-						gameState = GameState.Positioning;
-					} else if (matches[1].toString() == 'turn') {
-						console.log('YOUR TURN!!');
-						myTurn = true;
-						turn++;
-						opponentGridCursor.opacity = 0.5;
-					} else if (matches[1].toString() == 'battlestart') {
-						console.log(opponentCommitments);
-					} else if (matches[1].toString() == 'commit') {
-						const s = matches[5].split(',');
-						const flatIndex = parseInt(s[0]);
-						opponentCommitments[flatIndex] = matches[3];
-						console.log(`opponentCommitments[${flatIndex}] = ${matches[3]}`);
-					} else if (matches[1].toString() == 'prove') {
-						const s = matches[5].split(',');
-						const cell = { x: s[0], y: s[1] };
-						const proof = getProof(cell);
-						conn.send('proof ' + proof + ' ' + matches[5]);
-					} else if (matches[1].toString() == 'proof') {
-						const s = matches[5].split(',');
-						const cell = { x: s[0], y: s[1] };
-						await verifyProof(cell, matches[3]);
-					} else if (matches[1].toString() == 'miss') {
-						// @ts-ignore
-						fabric.loadSVGFromURL(
-							'/miss.svg',
-							function (/** @type {any} */ objects, /** @type {any} */ options) {
-								// @ts-ignore
-								var obj = fabric.util.groupSVGElements(objects, options);
-								obj.set('width', cellSize);
-								obj.set('height', cellSize);
-
-								let s = matches[5].toString().split(',');
-								const x = parseInt(s[0]);
-								const y = parseInt(s[1]);
-								obj.left = x * cellSize;
-								obj.top = y * cellSize;
-
-								obj.selectable = false;
-								obj.evented = false;
-
-								opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
-								opponentCanvas.add(obj);
-								opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
-							}
-						);
-						conn.send('prove ' + matches[5]);
-					} else if (matches[1].toString() == 'hit') {
-						// @ts-ignore
-						fabric.loadSVGFromURL(
-							'/hit.svg',
-							function (/** @type {any} */ objects, /** @type {any} */ options) {
-								// @ts-ignore
-								var obj = fabric.util.groupSVGElements(objects, options);
-								obj.set('width', cellSize);
-								obj.set('height', cellSize);
-
-								let s = matches[5].toString().split(',');
-								const x = parseInt(s[0]);
-								const y = parseInt(s[1]);
-								obj.left = x * cellSize;
-								obj.top = y * cellSize;
-
-								obj.selectable = false;
-								obj.evented = false;
-
-								opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
-								opponentCanvas.add(obj);
-								opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
-							}
-						);
-						conn.send('prove ' + matches[5]);
-					}
-				}
-			});
-		};
-
-		conn.onopen = function () {
-			conn.send('signin ' + getPlayerId());
-			connected = true;
-		};
+		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		stats = getStats();
 	});
+
+	async function signIn() {
+		websocket.send('signin ' + getPlayerId());
+		connected = true;
+	}
+
+	async function connectionLost() {
+		connected = false;
+	}
+
+	/**
+	 * @param {string} line
+	 */
+	async function parseCommand(line) {
+		const re = new RegExp(
+			/^(turn|shot|hit|miss|sink|prove|proof|gaveup|receive|joined|youjoined|commit|battlestart|lose)(\s+([0-9a-f-]*))?(\s+([0-9]+,[0-9]+))?(\s+(.))?$/gu
+		);
+		const matches = [...line.matchAll(re)][0];
+
+		if (matches) {
+			if (matches[1].toString() == 'shot') {
+				const s = matches[5].split(',');
+				const cell = { x: s[0], y: s[1] };
+				// @ts-ignore
+				receiveShot(cell);
+				// @ts-ignore
+				if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 0) {
+					websocket.send('miss ' + matches[5]);
+					// @ts-ignore
+				} else if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 1) {
+					websocket.send('hit ' + matches[5]);
+					// @ts-ignore
+					myBoard[cell.x - 1 + (cell.y - 1) * gridSize] = 1;
+					if (--hp == 0) {
+						websocket.send('lose');
+						gameState = GameState.Over;
+						notifier.danger('You lose. RIP Commander!', 10000);
+					}
+				}
+			} else if (matches[1].toString() == 'gaveup') {
+				notifier.success(
+					'You won the battle, Commander. The opponent is retreating! Congratulations',
+					10000
+				);
+				gameState = GameState.Over;
+			} else if (matches[1].toString() == 'lose') {
+				notifier.success(
+					'You won the battle, Commander. The opponent has been annihilated! Congratulations',
+					10000
+				);
+				gameState = GameState.Over;
+			} else if (matches[1].toString() == 'receive' && !opponentMuted) {
+				notifier.info('Opponent sent you: ' + matches[7].toString(), 5000);
+			} else if (matches[1].toString() == 'joined') {
+				notifier.danger('An opponent joined you! Good luck, commander.', 5000);
+			} else if (matches[1].toString() == 'youjoined') {
+				notifier.danger('You joined a mighty opponent!', 5000);
+				gameState = GameState.Positioning;
+			} else if (matches[1].toString() == 'turn') {
+				if (DEBUG) console.log('YOUR TURN!!');
+				myTurn = true;
+				turn++;
+				opponentGridCursor.opacity = 0.5;
+			} else if (matches[1].toString() == 'battlestart') {
+				console.log(opponentCommitments);
+			} else if (matches[1].toString() == 'commit') {
+				const s = matches[5].split(',');
+				const flatIndex = parseInt(s[0]);
+				opponentCommitments[flatIndex] = matches[3];
+				console.log(`opponentCommitments[${flatIndex}] = ${matches[3]}`);
+			} else if (matches[1].toString() == 'prove') {
+				const s = matches[5].split(',');
+				const cell = { x: s[0], y: s[1] };
+				const proof = getProof(cell);
+				websocket.send('proof ' + proof + ' ' + matches[5]);
+			} else if (matches[1].toString() == 'proof') {
+				const s = matches[5].split(',');
+				const cell = { x: s[0], y: s[1] };
+				await verifyProof(cell, matches[3]);
+			} else if (matches[1].toString() == 'miss') {
+				// @ts-ignore
+				fabric.loadSVGFromURL(
+					'/miss.svg',
+					function (/** @type {any} */ objects, /** @type {any} */ options) {
+						// @ts-ignore
+						var obj = fabric.util.groupSVGElements(objects, options);
+						obj.set('width', cellSize);
+						obj.set('height', cellSize);
+
+						let s = matches[5].toString().split(',');
+						const x = parseInt(s[0]);
+						const y = parseInt(s[1]);
+						obj.left = x * cellSize;
+						obj.top = y * cellSize;
+
+						obj.selectable = false;
+						obj.evented = false;
+
+						opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
+						opponentCanvas.add(obj);
+						opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
+					}
+				);
+				websocket.send('prove ' + matches[5]);
+			} else if (matches[1].toString() == 'hit') {
+				// @ts-ignore
+				fabric.loadSVGFromURL(
+					'/hit.svg',
+					function (/** @type {any} */ objects, /** @type {any} */ options) {
+						// @ts-ignore
+						var obj = fabric.util.groupSVGElements(objects, options);
+						obj.set('width', cellSize);
+						obj.set('height', cellSize);
+
+						let s = matches[5].toString().split(',');
+						const x = parseInt(s[0]);
+						const y = parseInt(s[1]);
+						obj.left = x * cellSize;
+						obj.top = y * cellSize;
+
+						obj.selectable = false;
+						obj.evented = false;
+
+						opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
+						opponentCanvas.add(obj);
+						opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
+					}
+				);
+				websocket.send('prove ' + matches[5]);
+			}
+		}
+	}
 
 	/**
 	 * @param {string} id
@@ -513,7 +507,7 @@
 	}
 
 	function startNewGame() {
-		conn.send('startgame');
+		websocket.send('startgame');
 		gameState = GameState.Positioning;
 		dropShips();
 
@@ -685,7 +679,7 @@
 	function joinGame() {
 		gameState = GameState.Lobby;
 
-		conn.send('join');
+		websocket.send('join');
 
 		dropShips();
 	}
@@ -731,7 +725,7 @@
 					myTurn = false;
 					opponentGridCursor.opacity = 0;
 
-					conn.send('shoot ' + cell.x + ',' + cell.y);
+					websocket.send('shoot ' + cell.x + ',' + cell.y);
 				}
 			},
 			'mouse:move': function (/** @type {{ pointer: { x: number; y: number; }; }} */ e) {
@@ -758,7 +752,7 @@
 				mySalts[flatIndex] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 
 				const commit = await generateCommitment(myBoard[flatIndex], mySalts[flatIndex]);
-				conn.send('commit ' + commit + ' ' + flatIndex + ',0');
+				websocket.send('commit ' + commit + ' ' + flatIndex + ',0');
 			}
 		}
 	}
@@ -831,11 +825,11 @@
 	 */
 	function sendEmoji(emojiIndex) {
 		const emojis = ['😜', '🫡', '😵', '🤯', '🫣', '🛟'];
-		conn.send('emoji ' + emojis[emojiIndex]);
+		websocket.send('emoji ' + emojis[emojiIndex]);
 	}
 
 	function giveUp() {
-		conn.send('giveup');
+		websocket.send('giveup');
 		gameState = GameState.Over;
 
 		notifier.warning(
@@ -902,7 +896,9 @@
 				<button
 					class="w3-button w3-ripple w3-red-light w3-round"
 					class:w3-disabled={!canLockShipPositions}
-					on:click={lockPositions}>🔒 Lock Positions</button
+					on:click={() => {
+						if (canLockShipPositions) lockPositions();
+					}}>🔒 Lock Positions</button
 				>
 			</p>
 			<p>
@@ -913,12 +909,12 @@
 		{/if}
 
 		{#if gameState == GameState.InGame}
-			<p>
+			<p style="margin: auto;">
 				<button class="w3-button w3-ripple w3-green w3-round" on:click={muteOpponent}
 					>{#if opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
 				>
 			</p>
-			<div class="w3-dropdown-hover w3-mobile" style="margin-top: auto; margin-bottom: auto;">
+			<div class="w3-dropdown-hover w3-mobile" style="margin: auto 0;">
 				<button class="w3-button w3-ripple w3-yellow w3-round">😀 Send Emoji</button>
 				<div class="w3-dropdown-content w3-dark-yellow">
 					<button on:click={() => sendEmoji(0)} class="w3-bar-item w3-button w3-mobile w3-center"
@@ -941,11 +937,12 @@
 					>
 				</div>
 			</div>
-			<p>
+			<p style="margin: auto;">
 				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
 			</p>
 			<p style="maring: auto 0;">
-				Turn number: {turn}
+				<small><em>Turn number:</em></small>
+				{turn}
 			</p>
 		{/if}
 		<p style="maring: auto 0;">

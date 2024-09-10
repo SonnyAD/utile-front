@@ -1,55 +1,29 @@
 <script>
 	import Header from '$lib/components/Header.svelte';
 	import { Moon } from 'svelte-loading-spinners';
-	import { API_URL, DEBUG } from '$lib/Env.js';
-	import { startWebsocket } from '$lib/battleships/websocket.js';
-	import { settings } from '$lib/battleships/playerSettings.js';
-	import { generateCommitment } from '$lib/sha256.js';
+	import { gridSize, cellSize } from '$lib/battleships/constants';
+	import { API_URL, DEBUG } from '$lib/Env';
+	import { startWebsocket } from '$lib/battleships/websocket';
+	import { getPlayerId } from '$lib/battleships/playerId';
+	import { settings } from '$lib/battleships/playerSettings';
+	import { gameState, GameState } from '$lib/battleships/gameState';
+	import { generateCommitment } from '$lib/sha256';
 	import { clamp } from '$lib/mathutils';
 	import { onMount } from 'svelte';
 	import { notifier } from '$lib/notifications';
-	import { v7 as uuidv7 } from 'uuid';
 	import { fabric } from 'fabric';
 
-	const GameState = {
-		Pending: 'Pending',
-		Positioning: 'Positioning',
-		InGame: 'InGame',
-		Lobby: 'Lobby',
-		Over: 'Over'
-	};
-
-	const gridSize = 10;
-	const cellSize = 50;
-
-	let gameState = GameState.Pending;
 	let shipId = 0;
 
 	/**
 	 * @type {any}
 	 */
 	let myCanvas;
-	/**
-	 * @type {number[] | { toString: () => any; }[]}
-	 */
-	let myBoard = [];
-	/**
-	 * @type {{ toString: () => any; }[]}
-	 */
-	let mySalts = [];
 
 	/**
 	 * @type {any}
 	 */
 	let opponentCanvas;
-	/**
-	 * @type {any[]}
-	 */
-	let opponentBoard = [];
-	/**
-	 * @type {string[]}
-	 */
-	let opponentCommitments = [];
 
 	/**
 	 * @type {any[]}
@@ -66,11 +40,6 @@
 	 */
 	let opponentGridCursor;
 
-	let myTurn = false;
-	let turn = 1;
-	let hp = 17;
-	let canLockShipPositions = false;
-
 	/**
 	 * @type {Promise<any>}
 	 */
@@ -81,6 +50,7 @@
 	 */
 	let websocket;
 	let connected = false;
+
 
 	/**
 	 * @param {{ left?: number; top?: number; set?: (arg0: string, arg1: boolean) => void; selectable?: boolean; evented?: boolean; _setOriginToCenter?: () => void; animate?: any; angle?: any; }} obj
@@ -206,14 +176,12 @@
 		opponentGridCursor = makeCursor(cellSize, '#32a797');
 		opponentCanvas.add(opponentGridCursor);
 
-		myBoard = Array.from({ length: gridSize * gridSize }, () => 0);
-		opponentBoard = Array.from({ length: gridSize * gridSize }, () => null);
-
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		stats = getStats();
 
-		settings.subscribe((value) => console.log(value));
+		/*settings.subscribe((value) => console.log(value));
+		gameState.subscribe((value) => console.log(value));*/
 	});
 
 	/**
@@ -248,20 +216,23 @@
 		if (matches) {
 			if (matches[1].toString() == 'shot') {
 				const s = matches[5].split(',');
-				const cell = { x: s[0], y: s[1] };
+				const cell = { x: parseInt(s[0]), y: parseInt(s[1]) };
+				const flatIndex = cell.x - 1 + (cell.y - 1) * gridSize;
 				// @ts-ignore
 				receiveShot(cell);
 				// @ts-ignore
-				if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 0) {
+				if ($gameState.myBoard[flatIndex] == 0) {
 					websocket.send('miss ' + matches[5]);
 					// @ts-ignore
-				} else if (myBoard[cell.x - 1 + (cell.y - 1) * gridSize] == 1) {
+				} else if ($gameState.myBoard[flatIndex] == 1) {
 					websocket.send('hit ' + matches[5]);
 					// @ts-ignore
-					myBoard[cell.x - 1 + (cell.y - 1) * gridSize] = 1;
-					if (--hp == 0) {
+					gameState.signalShip(cell.x, cell.y);
+					gameState.decreaseHp();
+
+					if ($gameState.hp == 0) {
 						websocket.send('lose');
-						gameState = GameState.Over;
+						gameState.endMatch();
 						notifier.danger('You lose. RIP Commander!', 10000);
 					}
 				}
@@ -270,32 +241,31 @@
 					'You won the battle, Commander. The opponent is retreating! Congratulations',
 					10000
 				);
-				gameState = GameState.Over;
+				gameState.endMatch();
 			} else if (matches[1].toString() == 'lose') {
 				notifier.success(
 					'You won the battle, Commander. The opponent has been annihilated! Congratulations',
 					10000
 				);
-				gameState = GameState.Over;
+				gameState.endMatch();
 			} else if (matches[1].toString() == 'receive' && !$settings.opponentMuted) {
 				notifier.info('Opponent sent you: ' + matches[7].toString(), 5000);
 			} else if (matches[1].toString() == 'joined') {
 				notifier.danger('An opponent joined you! Good luck, commander.', 5000);
 			} else if (matches[1].toString() == 'youjoined') {
 				notifier.danger('You joined a mighty opponent!', 5000);
-				gameState = GameState.Positioning;
+				gameState.joinMatch();
 			} else if (matches[1].toString() == 'turn') {
 				if (DEBUG) console.log('YOUR TURN!!');
-				myTurn = true;
-				turn++;
+				gameState.newTurn();
 				opponentGridCursor.opacity = 0.5;
 			} else if (matches[1].toString() == 'battlestart') {
-				console.log(opponentCommitments);
+				if (DEBUG) console.log($gameState.opponentCommitments);
 			} else if (matches[1].toString() == 'commit') {
 				const s = matches[5].split(',');
 				const flatIndex = parseInt(s[0]);
-				opponentCommitments[flatIndex] = matches[3];
-				console.log(`opponentCommitments[${flatIndex}] = ${matches[3]}`);
+				gameState.recordOpponentCommitment(flatIndex, matches[3])
+				if (DEBUG) console.log(`opponentCommitments[${flatIndex}] = ${matches[3]}`);
 			} else if (matches[1].toString() == 'prove') {
 				const s = matches[5].split(',');
 				const cell = { x: s[0], y: s[1] };
@@ -324,9 +294,9 @@
 						obj.selectable = false;
 						obj.evented = false;
 
-						opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
+						opponentCanvas.remove($gameState.opponentBoard[x - 1 + (y - 1) * gridSize]);
 						opponentCanvas.add(obj);
-						opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
+						gameState.recordOpponentResult(x - 1 + (y - 1) * gridSize, obj);
 					}
 				);
 				websocket.send('prove ' + matches[5]);
@@ -349,9 +319,9 @@
 						obj.selectable = false;
 						obj.evented = false;
 
-						opponentCanvas.remove(opponentBoard[x - 1 + (y - 1) * gridSize]);
+						opponentCanvas.remove($gameState.opponentBoard[x - 1 + (y - 1) * gridSize]);
 						opponentCanvas.add(obj);
-						opponentBoard[x - 1 + (y - 1) * gridSize] = obj;
+						gameState.recordOpponentResult(x - 1 + (y - 1) * gridSize, obj);
 					}
 				);
 				websocket.send('prove ' + matches[5]);
@@ -520,7 +490,7 @@
 
 	function startNewGame() {
 		websocket.send('startgame');
-		gameState = GameState.Positioning;
+		gameState.newGame();
 		dropShips();
 
 		notifier.info(
@@ -604,17 +574,17 @@
 
 				e.target.setCoords();
 
-				if (snapshotShipsPosition() == 17) canLockShipPositions = true;
+				if (snapshotShipsPosition() == 17) gameState.positionShip();
 			},
 			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
-				if (gameState != GameState.Positioning) return;
+				if ($gameState.gameState != GameState.Positioning) return;
 
 				for (var i = 0; i < ships.length; i++) {
 					if (ships[i].containsPoint(e.pointer)) {
 						toggleShip(ships[i], cellSize);
 						myCanvas.renderAll();
 
-						if (snapshotShipsPosition() == 17) canLockShipPositions = true;
+						if (snapshotShipsPosition() == 17) gameState.positionShip();
 						break;
 					}
 				}
@@ -630,16 +600,6 @@
 		}
 
 		myCanvas.add(...ships);
-	}
-
-	function getPlayerId() {
-		let playerId = localStorage.getItem('playerId');
-		if (!playerId) {
-			const newPlayerId = uuidv7().toString();
-			localStorage.setItem('playerId', newPlayerId);
-			playerId = newPlayerId;
-		}
-		return playerId;
 	}
 
 	function snapshotShipsPosition() {
@@ -658,12 +618,12 @@
 			if (width && cell && testRectInsideGrid(ship, gridSize, cellSize)) {
 				if (isHorizontal(ship)) {
 					for (let i = 0; i < width; i++) {
-						myBoard[cell.x - 1 + i + (cell.y - 1) * gridSize] = 1;
+						gameState.signalShip(cell.x, cell.y);
 						cellOccupied++;
 					}
 				} else {
 					for (let i = 0; i < width; i++) {
-						myBoard[cell.x - 1 + (cell.y - 1 + i) * gridSize] = 1;
+						gameState.signalShip(cell.x, cell.y);
 						cellOccupied++;
 					}
 				}
@@ -689,7 +649,8 @@
 	}
 
 	function joinGame() {
-		gameState = GameState.Lobby;
+		gameState.openLobby();
+		gameState.joinMatch('random-id');
 
 		websocket.send('join');
 
@@ -697,7 +658,7 @@
 	}
 
 	async function lockPositions() {
-		gameState = GameState.InGame;
+		gameState.lockShips();
 
 		for (var i = 0; i < ships.length; i++) {
 			ships[i].selectable = ships[i].evented = false;
@@ -709,11 +670,11 @@
 
 		opponentCanvas.on({
 			'mouse:down': function (/** @type {{ pointer: { x: number; y: number; }; }} */ e) {
-				if (gameState != GameState.InGame || !myTurn) return;
+				if ($gameState.gameState != GameState.InGame || !$gameState.myTurn) return;
 
 				let cell = pointToGridCell(e.pointer);
 
-				if (cell && opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] == null) {
+				if (cell && $gameState.opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] == null) {
 					// @ts-ignore
 					fabric.loadSVGFromURL(
 						'/pending.svg',
@@ -730,18 +691,18 @@
 							obj.evented = false;
 
 							opponentCanvas.add(obj);
-							opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] = obj;
+							gameState.recordOpponentResult(cell.x - 1 + (cell.y - 1) * gridSize, obj);
 						}
 					);
 
-					myTurn = false;
+					gameState.finishTurn();
 					opponentGridCursor.opacity = 0;
 
 					websocket.send('shoot ' + cell.x + ',' + cell.y);
 				}
 			},
 			'mouse:move': function (/** @type {{ pointer: { x: number; y: number; }; }} */ e) {
-				if (myTurn) {
+				if ($gameState.myTurn) {
 					opponentGridCursor.left = clamp(
 						Math.floor(e.pointer.x / cellSize) * cellSize,
 						cellSize,
@@ -760,10 +721,9 @@
 
 		for (var x = 1; x <= 10; x++) {
 			for (var y = 1; y <= 10; y++) {
+				gameState.generateSalt(x, y);
 				const flatIndex = x - 1 + (y - 1) * gridSize;
-				mySalts[flatIndex] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-
-				const commit = await generateCommitment(myBoard[flatIndex], mySalts[flatIndex]);
+				const commit = await generateCommitment($gameState.myBoard[flatIndex], $gameState.mySalts[flatIndex]);
 				websocket.send('commit ' + commit + ' ' + flatIndex + ',0');
 			}
 		}
@@ -774,7 +734,7 @@
 	 */
 	function getProof(cell) {
 		const flatIndex = cell.x - 1 + (cell.y - 1) * gridSize;
-		return myBoard[flatIndex].toString() + mySalts[flatIndex].toString();
+		return $gameState.myBoard[flatIndex].toString() + $gameState.mySalts[flatIndex].toString();
 	}
 
 	/**
@@ -797,10 +757,10 @@
 				' ' +
 				computedCommit +
 				', ' +
-				opponentCommitments[flatIndex]
+				$gameState.opponentCommitments[flatIndex]
 		);
 
-		if (computedCommit != opponentCommitments[flatIndex]) {
+		if (computedCommit != $gameState.opponentCommitments[flatIndex]) {
 			console.log('CHEATER detected!');
 		} else {
 			console.log('All good');
@@ -826,6 +786,7 @@
 			ships[i].setCoords();
 		}
 		myCanvas.renderAll();
+		gameState.resetShipsPosition();
 	}
 
 	/**
@@ -837,8 +798,9 @@
 	}
 
 	function giveUp() {
+		gameState.endMatch();
+		gameState.reset();
 		websocket.send('giveup');
-		gameState = GameState.Over;
 
 		notifier.warning(
 			"You lose the battle, commander. But at least you saved your men's life. The war is not over yet.",
@@ -886,7 +848,7 @@
 			</button>
 		</p>
 	{:else}
-		{#if gameState == GameState.Pending || gameState == GameState.Over}
+		{#if $gameState.gameState == GameState.Pending || $gameState.gameState == GameState.Over}
 			<p>
 				<button class="w3-button w3-ripple w3-green w3-round" on:click={startNewGame}
 					>🎮 Start New Game</button
@@ -899,24 +861,31 @@
 			</p>
 		{/if}
 
-		{#if gameState == GameState.Positioning || gameState == GameState.Lobby}
-			<p>
+		{#if $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
+			<p style="margin: auto 0;">
+				{#if $gameState.gameState == GameState.Positioning}
+				<button
+					class="w3-button w3-ripple w3-red-light w3-round w3-disabled"
+					>🔒 Lock Positions</button
+				>
+				{:else}
 				<button
 					class="w3-button w3-ripple w3-red-light w3-round"
-					class:w3-disabled={!canLockShipPositions}
-					on:click={() => {
-						if (canLockShipPositions) lockPositions();
-					}}>🔒 Lock Positions</button
+					on:click={lockPositions}>🔒 Lock Positions</button
 				>
+				{/if}
 			</p>
-			<p>
+			<p style="margin: auto 0;">
 				<button class="w3-button w3-ripple w3-blue w3-round" on:click={resetPositions}
 					>↩️ Reset Positions</button
 				>
 			</p>
+			<p style="margin: auto;">
+				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
+			</p>			
 		{/if}
 
-		{#if gameState == GameState.InGame}
+		{#if $gameState.gameState == GameState.InGame}
 			<p style="margin: auto;">
 				<button
 					class="w3-button w3-ripple w3-green w3-round"
@@ -950,9 +919,9 @@
 			<p style="margin: auto;">
 				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
 			</p>
-			<p style="maring: auto 0;">
+			<p style="margin: auto 0;">
 				<small><em>Turn number:</em></small>
-				{turn}
+				{$gameState.turn}
 			</p>
 		{/if}
 		<p style="maring: auto 0;">

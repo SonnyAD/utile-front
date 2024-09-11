@@ -1,6 +1,5 @@
 import { persistent } from '@furudean/svelte-persistent-store';
 import { gridSize } from './constants';
-import { generateCommitment } from '$lib/sha256';
 
 export const GameState = {
 	Pending: 'Pending',
@@ -19,6 +18,7 @@ const defaultGameState = {
 	myBoard: Array.from({ length: gridSize * gridSize }, () => 0),
 	/** @type {number[]} */ mySalts: [],
 	/** @type {string|null} */ matchID: null,
+	opponentJoined: false,
 	opponentBoard: Array.from({ length: gridSize * gridSize }, () => null),
 	/** @type {string[]} */ opponentCommitments: []
 };
@@ -61,6 +61,7 @@ export const gameState = {
 
 			state.matchID = matchID;
 			state.turn = 1;
+			state.opponentJoined = true;
 			state.gameState = GameState.Positioning;
 
 			return state;
@@ -98,21 +99,49 @@ export const gameState = {
 
 			return state;
 		}),
-    decreaseHp: () => update((state) => { state.hp--; return state;}),
-    newTurn: () => update((state) => { state.turn++; state.myTurn = true; return state;}),
-    finishTurn: () => update((state) => { state.myTurn = false; return state; }),
+	decreaseHp: () =>
+		update((state) => {
+			state.hp--;
+			return state;
+		}),
+	newTurn: () =>
+		update((state) => {
+			state.turn++;
+			state.myTurn = true;
+			return state;
+		}),
+	finishTurn: () =>
+		update((state) => {
+			state.myTurn = false;
+			return state;
+		}),
 
-    generateSalt: (/** @type {number} */ x, /** @type {number} */ y) => update((state) => {
-        const flatIndex = x - 1 + (y - 1) * gridSize;
-        state.mySalts[flatIndex] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-        return state;
-    }),
-    signalShip: (/** @type {number} */ x, /** @type {number} */ y) => update((state) => {
-        const flatIndex = x - 1 + (y - 1) * gridSize;
-        state.myBoard[flatIndex] = 1;
-        return state;
-    }),
-    recordOpponentCommitment: (/** @type {number} */key, /** @type {string} */value) => update((state) => { state.opponentCommitments[key] = value; return state; }),
-    recordOpponentResult: (/** @type {number} */key, /** @type {any} */value) => update((state) => { state.opponentBoard[key] = value; return state; }),
+	generateSalt: (/** @type {number} */ x, /** @type {number} */ y) =>
+		update((state) => {
+			const flatIndex = x - 1 + (y - 1) * gridSize;
+			state.mySalts[flatIndex] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+			return state;
+		}),
+	signalShip: (/** @type {number} */ x, /** @type {number} */ y) =>
+		update((state) => {
+			const flatIndex = x - 1 + (y - 1) * gridSize;
+			state.myBoard[flatIndex] = 1;
+			return state;
+		}),
+	opponentJoin: () =>
+		update((state) => {
+			state.opponentJoined = true;
+			return state;
+		}),
+	recordOpponentCommitment: (/** @type {number} */ key, /** @type {string} */ value) =>
+		update((state) => {
+			state.opponentCommitments[key] = value;
+			return state;
+		}),
+	recordOpponentResult: (/** @type {number} */ key, /** @type {any} */ value) =>
+		update((state) => {
+			state.opponentBoard[key] = value;
+			return state;
+		}),
 	reset: () => set(defaultGameState)
 };

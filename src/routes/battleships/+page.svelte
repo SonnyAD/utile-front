@@ -51,7 +51,6 @@
 	let websocket;
 	let connected = false;
 
-
 	/**
 	 * @param {{ left?: number; top?: number; set?: (arg0: string, arg1: boolean) => void; selectable?: boolean; evented?: boolean; _setOriginToCenter?: () => void; animate?: any; angle?: any; }} obj
 	 */
@@ -252,6 +251,7 @@
 				notifier.info('Opponent sent you: ' + matches[7].toString(), 5000);
 			} else if (matches[1].toString() == 'joined') {
 				notifier.danger('An opponent joined you! Good luck, commander.', 5000);
+				gameState.opponentJoin();
 			} else if (matches[1].toString() == 'youjoined') {
 				notifier.danger('You joined a mighty opponent!', 5000);
 				gameState.joinMatch();
@@ -264,7 +264,7 @@
 			} else if (matches[1].toString() == 'commit') {
 				const s = matches[5].split(',');
 				const flatIndex = parseInt(s[0]);
-				gameState.recordOpponentCommitment(flatIndex, matches[3])
+				gameState.recordOpponentCommitment(flatIndex, matches[3]);
 				if (DEBUG) console.log(`opponentCommitments[${flatIndex}] = ${matches[3]}`);
 			} else if (matches[1].toString() == 'prove') {
 				const s = matches[5].split(',');
@@ -723,7 +723,10 @@
 			for (var y = 1; y <= 10; y++) {
 				gameState.generateSalt(x, y);
 				const flatIndex = x - 1 + (y - 1) * gridSize;
-				const commit = await generateCommitment($gameState.myBoard[flatIndex], $gameState.mySalts[flatIndex]);
+				const commit = await generateCommitment(
+					$gameState.myBoard[flatIndex],
+					$gameState.mySalts[flatIndex]
+				);
 				websocket.send('commit ' + commit + ' ' + flatIndex + ',0');
 			}
 		}
@@ -864,15 +867,13 @@
 		{#if $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
 			<p style="margin: auto 0;">
 				{#if $gameState.gameState == GameState.Positioning}
-				<button
-					class="w3-button w3-ripple w3-red-light w3-round w3-disabled"
-					>🔒 Lock Positions</button
-				>
+					<button class="w3-button w3-ripple w3-red-light w3-round w3-disabled"
+						>🔒 Lock Positions</button
+					>
 				{:else}
-				<button
-					class="w3-button w3-ripple w3-red-light w3-round"
-					on:click={lockPositions}>🔒 Lock Positions</button
-				>
+					<button class="w3-button w3-ripple w3-red-light w3-round" on:click={lockPositions}
+						>🔒 Lock Positions</button
+					>
 				{/if}
 			</p>
 			<p style="margin: auto 0;">
@@ -880,9 +881,6 @@
 					>↩️ Reset Positions</button
 				>
 			</p>
-			<p style="margin: auto;">
-				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
-			</p>			
 		{/if}
 
 		{#if $gameState.gameState == GameState.InGame}
@@ -916,25 +914,40 @@
 					>
 				</div>
 			</div>
-			<p style="margin: auto;">
-				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
-			</p>
 			<p style="margin: auto 0;">
 				<small><em>Turn number:</em></small>
 				{$gameState.turn}
 			</p>
 		{/if}
-		<p style="maring: auto 0;">
+
+		{#if $gameState.gameState == GameState.InGame || $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
+			<p style="margin: auto;">
+				<small><em>
+				{#if !$gameState.opponentJoined}
+					Pending opponent...
+				{:else}
+					Opponent joined!
+				{/if}
+				</em></small>
+			</p>
+			<p style="margin: auto;">
+				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
+			</p>
+		{/if}
+
+		<p style="margin: auto 0;">
 			<small
 				><em>
 					{#await stats}
-						...
+						Online Players: ... <br />
+						Matches: ... (Pending), ... (Ongoing), ... (Finished), ... (Total)
 					{:then data}
 						Online Players: {data.onlinePlayers} <br />
 						Matches: {data.pendingMatches} (Pending), {data.ongoingMatches} (Ongoing), {data.finishedMatches}
 						(Finished), {data.totalMatches} (Total)
 					{:catch}
-						...
+						Online Players: ... <br />
+						Matches: ... (Pending), ... (Ongoing), ... (Finished), ... (Total)
 					{/await}
 				</em></small
 			>

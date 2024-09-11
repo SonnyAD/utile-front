@@ -546,9 +546,11 @@
 				/** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
 			) {
 				gridCursor.opacity = 0;
-
+				
 				// @ts-ignore
-				if (isHorizontal(e.target)) {
+				const horizontal = isHorizontal(e.target);
+
+				if (horizontal) {
 					e.target.left = clamp(
 						Math.round(e.target.left / cellSize) * cellSize,
 						cellSize,
@@ -574,7 +576,16 @@
 
 				e.target.setCoords();
 
-				if (snapshotShipsPosition() == 17) gameState.positionShip();
+				const cell = pointToGridCell({
+					x: e.target.left + (horizontal ? 0 : -cellSize),
+					y: e.target.top
+				});
+
+				if (cell) {
+					// @ts-ignore
+					gameState.positionShip(e.target.customID, cell.x, cell.y, horizontal);
+					snapshotShipsPosition();
+				}
 			},
 			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
 				if ($gameState.gameState != GameState.Positioning) return;
@@ -583,8 +594,18 @@
 					if (ships[i].containsPoint(e.pointer)) {
 						toggleShip(ships[i], cellSize);
 						myCanvas.renderAll();
+						
+						const horizontal = isHorizontal(ships[i]);
+						const cell = pointToGridCell({
+							x: ships[i].left + (horizontal ? 0 : -cellSize),
+							y: ships[i].top
+						});
 
-						if (snapshotShipsPosition() == 17) gameState.positionShip();
+						if (cell) {
+							gameState.positionShip(ships[i].customID, cell.x, cell.y, horizontal);
+							snapshotShipsPosition();							
+						}
+
 						break;
 					}
 				}
@@ -657,6 +678,10 @@
 		dropShips();
 	}
 
+	/*function matchedAgainstAI() {
+		notifier.info('No opponent found. So we are matching you against our strongest AI!', 5000);
+	}*/
+
 	async function lockPositions() {
 		gameState.lockShips();
 
@@ -665,8 +690,6 @@
 			ships[i].setCoords();
 		}
 		myCanvas.renderAll();
-
-		notifier.info('No opponent found. So we are matching you against our strongest AI!', 5000);
 
 		opponentCanvas.on({
 			'mouse:down': function (/** @type {{ pointer: { x: number; y: number; }; }} */ e) {

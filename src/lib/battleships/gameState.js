@@ -1,5 +1,5 @@
 import { persistent } from '@furudean/svelte-persistent-store';
-import { gridSize } from './constants';
+import { gridSize, totalHP, shipsCount } from './constants';
 
 export const GameState = {
 	Pending: 'Pending',
@@ -14,7 +14,8 @@ const defaultGameState = {
 	gameState: GameState.Pending,
 	myTurn: false,
 	turn: 0,
-	hp: 17,
+	hp: totalHP,
+	/** @type {any[]} */ myShips: [],
 	myBoard: Array.from({ length: gridSize * gridSize }, () => 0),
 	/** @type {number[]} */ mySalts: [],
 	/** @type {string|null} */ matchID: null,
@@ -66,10 +67,12 @@ export const gameState = {
 
 			return state;
 		}),
-	positionShip: () =>
+	positionShip: (/** @type {number} */ shipId, /** @type {number} */ x, /** @type {number} */ y, /** @type {boolean} */ isHorizontal) =>
 		update((state) => {
-			// TODO: tests if all ships are positioned
-			if (state.gameState == GameState.Positioning) {
+			state.myShips[shipId] = {x, y, isHorizontal};
+			
+			// verify mySHips none are null
+			if (state.gameState == GameState.Positioning && state.myShips.length == shipsCount) {
 				state.gameState = GameState.Positioned;
 			}
 

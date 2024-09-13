@@ -1,7 +1,7 @@
 <script>
 	export let title;
 	export let subtitle;
-	export let clientWidth;
+	export let clientWidth = 0;
 </script>
 
 <h1 class="w3-xxlarge">{title}</h1>

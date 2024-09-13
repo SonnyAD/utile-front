@@ -82,14 +82,19 @@
 	}
 
 	async function getStats() {
-		const res = await fetch(API_URL + '/battleships/stats', {
-			method: 'GET',
-			headers: {
-				Accept: 'application/json'
-			}
-		});
+		let res;
+		try {
+			res = await fetch(API_URL + '/battleships/stats', {
+				method: 'GET',
+				headers: {
+					Accept: 'application/json'
+				}
+			});
 
-		return res.json();
+			return res.json();
+		} catch {
+			return res;
+		}
 	}
 
 	let assets = [
@@ -218,20 +223,20 @@
 		const matches = [...line.matchAll(re)][0];
 
 		if (matches) {
-			if (matches[1].toString() == 'shot') {
-				const s = matches[5].split(',');
-				const cell = { x: parseInt(s[0]), y: parseInt(s[1]) };
-				const flatIndex = cell.x - 1 + (cell.y - 1) * gridSize;
+			const command = matches[1].toString();
+			const commitment = matches[3];
+			const cell = stringToCell(matches[5]);
+
+
+			if (command == 'shot') {
 				// @ts-ignore
 				receiveShot(cell);
 				// @ts-ignore
-				if ($gameState.myBoard[flatIndex] == 0) {
+				if ($gameState.myBoard[cell.x-1][cell.y-1] == 0) {
 					websocket.send('miss ' + matches[5]);
 					// @ts-ignore
-				} else if ($gameState.myBoard[flatIndex] == 1) {
+				} else if ($gameState.myBoard[cell.x-1][cell.y-1] == 1) {
 					websocket.send('hit ' + matches[5]);
-					// @ts-ignore
-					gameState.signalShip(cell.x, cell.y);
 					gameState.decreaseHp();
 
 					if ($gameState.hp == 0) {
@@ -240,47 +245,45 @@
 						notifier.danger('You lose. RIP Commander!', 10000);
 					}
 				}
-			} else if (matches[1].toString() == 'gaveup') {
+			} else if (command == 'gaveup') {
 				notifier.success(
 					'You won the battle, Commander. The opponent is retreating! Congratulations',
 					10000
 				);
 				gameState.endMatch();
-			} else if (matches[1].toString() == 'lose') {
+			} else if (command == 'lose') {
 				notifier.success(	
 					'You won the battle, Commander. The opponent has been annihilated! Congratulations',
 					10000
 				);
 				gameState.endMatch();
-			} else if (matches[1].toString() == 'receive' && !$settings.opponentMuted) {
+			} else if (command == 'receive' && !$settings.opponentMuted) {
 				notifier.info('Opponent sent you: ' + matches[7].toString(), 5000);
-			} else if (matches[1].toString() == 'joined') {
+			} else if (command == 'joined') {
 				notifier.danger('An opponent joined you! Good luck, commander.', 5000);
 				gameState.opponentJoin();
-			} else if (matches[1].toString() == 'youjoined') {
+			} else if (command == 'youjoined') {
 				notifier.danger('You joined a mighty opponent!', 5000);
 				gameState.joinMatch();
-			} else if (matches[1].toString() == 'turn') {
+			} else if (command == 'turn') {
 				if (DEBUG) console.log('YOUR TURN!!');
 				gameState.newTurn();
 				opponentGridCursor.opacity = 0.5;
-			} else if (matches[1].toString() == 'battlestart') {
+			} else if (command == 'battlestart') {
 				if (DEBUG) console.log($gameState.opponentCommitments);
-			} else if (matches[1].toString() == 'commit') {
-				const s = matches[5].split(',');
-				const flatIndex = parseInt(s[0]);
-				gameState.recordOpponentCommitment(flatIndex, matches[3]);
-				if (DEBUG) console.log(`opponentCommitments[${flatIndex}] = ${matches[3]}`);
-			} else if (matches[1].toString() == 'prove') {
-				const s = matches[5].split(',');
-				const cell = { x: s[0], y: s[1] };
+			} else if (command == 'commit') {
+				// @ts-ignore
+				gameState.recordOpponentCommitment(cell.x, cell.y, commitment);
+				// @ts-ignore
+				if (DEBUG) console.log(`opponentCommitments[${cell.x-1}][${cell.y-1}] = ${commitment}`);
+			} else if (command == 'prove') {
+				// @ts-ignore
 				const proof = getProof(cell);
 				websocket.send('proof ' + proof + ' ' + matches[5]);
-			} else if (matches[1].toString() == 'proof') {
-				const s = matches[5].split(',');
-				const cell = { x: s[0], y: s[1] };
-				await verifyProof(cell, matches[3]);
-			} else if (matches[1].toString() == 'miss') {
+			} else if (command == 'proof') {
+				// @ts-ignore
+				await verifyProof(cell, commitment);
+			} else if (command == 'miss') {
 				// @ts-ignore
 				fabric.loadSVGFromURL(
 					'/miss.svg',
@@ -290,22 +293,23 @@
 						obj.set('width', cellSize);
 						obj.set('height', cellSize);
 
-						let s = matches[5].toString().split(',');
-						const x = parseInt(s[0]);
-						const y = parseInt(s[1]);
-						obj.left = x * cellSize;
-						obj.top = y * cellSize;
+						// @ts-ignore
+						obj.left = cell.x * cellSize;
+						// @ts-ignore
+						obj.top = cell.y * cellSize;
 
 						obj.selectable = false;
 						obj.evented = false;
 
-						opponentCanvas.remove($gameState.opponentBoard[x - 1 + (y - 1) * gridSize]);
+						// @ts-ignore
+						opponentCanvas.remove($gameState.opponentBoard[cell.x - 1][cell.y - 1]);
 						opponentCanvas.add(obj);
-						gameState.recordOpponentResult(x - 1 + (y - 1) * gridSize, obj);
+						// @ts-ignore
+						gameState.recordOpponentResult(cell.x, cell.y, obj);
 					}
 				);
 				websocket.send('prove ' + matches[5]);
-			} else if (matches[1].toString() == 'hit') {
+			} else if (command == 'hit') {
 				// @ts-ignore
 				fabric.loadSVGFromURL(
 					'/hit.svg',
@@ -315,23 +319,40 @@
 						obj.set('width', cellSize);
 						obj.set('height', cellSize);
 
-						let s = matches[5].toString().split(',');
-						const x = parseInt(s[0]);
-						const y = parseInt(s[1]);
-						obj.left = x * cellSize;
-						obj.top = y * cellSize;
+						// @ts-ignore
+						obj.left = cell.x * cellSize;
+						// @ts-ignore
+						obj.top = cell.y * cellSize;
 
 						obj.selectable = false;
 						obj.evented = false;
 
-						opponentCanvas.remove($gameState.opponentBoard[x - 1 + (y - 1) * gridSize]);
+						
+						// @ts-ignore
+						opponentCanvas.remove($gameState.opponentBoard[cell.x - 1][cell.y - 1]);
 						opponentCanvas.add(obj);
-						gameState.recordOpponentResult(x - 1 + (y - 1) * gridSize, obj);
+						// @ts-ignore
+						gameState.recordOpponentResult(cell.x, cell.y, obj);
 					}
 				);
 				websocket.send('prove ' + matches[5]);
 			}
 		}
+	}
+
+	/**
+	 * @param {string} str
+	 * @returns {{x: number, y: number}|null}
+	 */
+	function stringToCell(str) {
+		if (!str)
+			return null;
+
+		const s = str.split(',');
+		if (s.length != 2)
+			return null;
+
+		return { x: parseInt(s[0]), y: parseInt(s[1]) };		
 	}
 
 	/**
@@ -591,9 +612,9 @@
 				});
 
 				if (cell) {
+					snapshotShipsPosition();
 					// @ts-ignore
 					gameState.positionShip(e.target.customID, cell.x, cell.y, horizontal);
-					snapshotShipsPosition();
 				}
 			},
 			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
@@ -611,8 +632,8 @@
 						});
 
 						if (cell) {
-							gameState.positionShip(ships[i].customID, cell.x, cell.y, horizontal);
 							snapshotShipsPosition();
+							gameState.positionShip(ships[i].customID, cell.x, cell.y, horizontal);
 						}
 
 						break;
@@ -633,10 +654,6 @@
 	}
 
 	function snapshotShipsPosition() {
-		Array.from({ length: gridSize * gridSize }, () => 0);
-
-		let cellOccupied = 0;
-
 		for (var s = 0; s < ships.length; s++) {
 			const ship = ships[s];
 			const cell = pointToGridCell({
@@ -646,21 +663,14 @@
 			const width = shipIdToWidth(ship.customID);
 
 			if (width && cell && testRectInsideGrid(ship, gridSize, cellSize)) {
-				if (isHorizontal(ship)) {
-					for (let i = 0; i < width; i++) {
-						gameState.signalShip(cell.x, cell.y);
-						cellOccupied++;
-					}
-				} else {
-					for (let i = 0; i < width; i++) {
-						gameState.signalShip(cell.x, cell.y);
-						cellOccupied++;
-					}
+				for (let i = 0; i < width; i++) {
+					if (isHorizontal(ship)) 
+						gameState.signalShip(cell.x + i, cell.y);
+					else 
+						gameState.signalShip(cell.x, cell.y + i);
 				}
 			}
 		}
-
-		return cellOccupied;
 	}
 
 	/**
@@ -706,7 +716,7 @@
 
 				let cell = pointToGridCell(e.pointer);
 
-				if (cell && $gameState.opponentBoard[cell.x - 1 + (cell.y - 1) * gridSize] == null) {
+				if (cell && $gameState.opponentBoard[cell.x - 1][cell.y - 1] == null) {
 					// @ts-ignore
 					fabric.loadSVGFromURL(
 						'/pending.svg',
@@ -723,7 +733,7 @@
 							obj.evented = false;
 
 							opponentCanvas.add(obj);
-							gameState.recordOpponentResult(cell.x - 1 + (cell.y - 1) * gridSize, obj);
+							gameState.recordOpponentResult(cell.x, cell.y, obj);
 						}
 					);
 
@@ -754,12 +764,11 @@
 		for (var x = 1; x <= 10; x++) {
 			for (var y = 1; y <= 10; y++) {
 				gameState.generateSalt(x, y);
-				const flatIndex = x - 1 + (y - 1) * gridSize;
 				const commit = await generateCommitment(
-					$gameState.myBoard[flatIndex],
-					$gameState.mySalts[flatIndex]
+					$gameState.myBoard[x-1][y-1],
+					$gameState.mySalts[x-1][y-1]
 				);
-				websocket.send('commit ' + commit + ' ' + flatIndex + ',0');
+				websocket.send('commit ' + commit + ' ' + x.toString() + ',' + y.toString());
 			}
 		}
 	}
@@ -768,8 +777,7 @@
 	 * @param {{ x: any; y: any; }} cell
 	 */
 	function getProof(cell) {
-		const flatIndex = cell.x - 1 + (cell.y - 1) * gridSize;
-		return $gameState.myBoard[flatIndex].toString() + $gameState.mySalts[flatIndex].toString();
+		return $gameState.myBoard[cell.x-1][cell.y-1].toString() + $gameState.mySalts[cell.x-1][cell.y-1].toString();
 	}
 
 	/**
@@ -777,14 +785,13 @@
 	 * @param {string} proof
 	 */
 	async function verifyProof(cell, proof) {
-		const flatIndex = parseInt(cell.x) - 1 + (parseInt(cell.y) - 1) * gridSize;
 		// @ts-ignore
 		const computedCommit = await generateCommitment(proof.at(0), proof.substring(1));
 
 		console.log(cell);
 		console.log(
 			'CHECK: ' +
-				flatIndex +
+				cell +
 				' ' +
 				proof.at(0) +
 				' ' +
@@ -792,10 +799,10 @@
 				' ' +
 				computedCommit +
 				', ' +
-				$gameState.opponentCommitments[flatIndex]
+				$gameState.opponentCommitments[cell.x-1][cell.y-1]
 		);
 
-		if (computedCommit != $gameState.opponentCommitments[flatIndex]) {
+		if (computedCommit != $gameState.opponentCommitments[cell.x-1][cell.y-1]) {
 			console.log('CHEATER detected!');
 		} else {
 			console.log('All good');
@@ -964,11 +971,11 @@
 		{/if}
 
 		{#if $gameState.gameState == GameState.InGame || $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
-			<button class="w3-bar-item w3-button w3-mobile w3-theme w3-right" on:click={giveUp}>🏳️ Give Up</button>
+			<button class="w3-bar-item w3-button w3-mobile w3-theme" on:click={giveUp}>🏳️ Give Up</button>
 		{/if}
 
 		{#if $gameState.gameState == GameState.InGame}
-			<p class="w3-bar-item" style="margin: auto 0;">
+			<p class="w3-bar-item w3-mobile w3-center" style="margin: auto;">
 				<small><em>Turn number:</em></small>
 				{$gameState.turn}
 			</p>
@@ -987,7 +994,9 @@
 					style="background-color: rgb(82 177 65);"
 				>
 					{#if !$gameState.opponentJoined}
-						<Moon size="15" color="#ffffff" unit="px" duration="1s" />
+						<div style="display: inline-block;">
+							<Moon size="15" color="#ffffff" unit="px" duration="1s" />
+						</div>
 						Waiting for an opponent...
 					{:else}
 						🟢 Opponent online.
@@ -995,7 +1004,7 @@
 				</button>
 			{/if}
 
-			{#if $gameState.gameState == GameState.InGame}
+			{#if ($gameState.gameState == GameState.InGame || $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned) && $gameState.opponentJoined}
 				<button
 					class="w3-bar-item w3-button w3-mobile w3-green w3-right"
 					on:click={() => settings.muteOpponent(!$settings.opponentMuted)}
@@ -1035,12 +1044,12 @@
 				<button class="w3-bar-item w3-button w3-mobile w3-blue w3-right" on:click={resetPositions}
 					>↩️ Reset Positions</button
 				>
-				{#if $gameState.gameState == GameState.Positioning}
-					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-disabled w3-right"
+				{#if $gameState.gameState == GameState.Positioned && $gameState.opponentJoined}
+					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-right" on:click={lockPositions}
 						>🔒 Lock Positions</button
 					>
 				{:else}
-					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-right" on:click={lockPositions}
+					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-disabled w3-right"
 						>🔒 Lock Positions</button
 					>
 				{/if}

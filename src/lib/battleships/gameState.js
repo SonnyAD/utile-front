@@ -1,5 +1,6 @@
 import { persistent } from '@furudean/svelte-persistent-store';
 import { gridSize, totalHP, shipsCount } from './constants';
+import { DEBUG } from '$lib/Env';
 
 export const GameState = {
 	Pending: 'Pending',
@@ -16,12 +17,12 @@ const defaultGameState = {
 	turn: 0,
 	hp: totalHP,
 	/** @type {any[]} */ myShips: [],
-	myBoard: Array.from({ length: gridSize * gridSize }, () => 0),
-	/** @type {number[]} */ mySalts: [],
+	myBoard: Array.from({ length: gridSize }, () => Array.from({ length: gridSize }, () => 0)),
+	/** @type {number[][]} */ mySalts: Array.from({ length: gridSize }, () => []),
 	/** @type {string|null} */ matchID: null,
 	opponentJoined: false,
-	opponentBoard: Array.from({ length: gridSize * gridSize }, () => null),
-	/** @type {string[]} */ opponentCommitments: []
+	/** @type {any[][]} */ opponentBoard: Array.from({ length: gridSize }, () => Array.from({ length: gridSize }, () => null)),
+	/** @type {string[][]} */ opponentCommitments: Array.from({ length: gridSize }, () => [])
 };
 
 const { subscribe, update, set } = persistent({
@@ -76,8 +77,13 @@ export const gameState = {
 		update((state) => {
 			state.myShips[shipId] = { x, y, isHorizontal };
 
+			let sum = 0;
+			state.myBoard.forEach((row)=> {
+				sum += row.reduce((total, val) => total + val);
+			});
+
 			// verify mySHips none are null
-			if (state.gameState == GameState.Positioning && state.myShips.length == shipsCount) {
+			if (state.gameState == GameState.Positioning && state.myShips.length == shipsCount && sum == totalHP) {
 				state.gameState = GameState.Positioned;
 			}
 
@@ -126,14 +132,14 @@ export const gameState = {
 
 	generateSalt: (/** @type {number} */ x, /** @type {number} */ y) =>
 		update((state) => {
-			const flatIndex = x - 1 + (y - 1) * gridSize;
-			state.mySalts[flatIndex] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+			state.mySalts[x-1][y-1] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 			return state;
 		}),
+
+	// TODO: Merge with positionShip?
 	signalShip: (/** @type {number} */ x, /** @type {number} */ y) =>
 		update((state) => {
-			const flatIndex = x - 1 + (y - 1) * gridSize;
-			state.myBoard[flatIndex] = 1;
+			state.myBoard[x-1][y-1] = 1;
 			return state;
 		}),
 	opponentJoin: () =>
@@ -141,14 +147,15 @@ export const gameState = {
 			state.opponentJoined = true;
 			return state;
 		}),
-	recordOpponentCommitment: (/** @type {number} */ key, /** @type {string} */ value) =>
+	recordOpponentCommitment: (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ value) =>
 		update((state) => {
-			state.opponentCommitments[key] = value;
+			if (DEBUG) console.log('recordOpponentCommitment ' + x + ',' + y)
+			state.opponentCommitments[x-1][y-1] = value;
 			return state;
 		}),
-	recordOpponentResult: (/** @type {number} */ key, /** @type {any} */ value) =>
+	recordOpponentResult: (/** @type {number} */ x, /** @type {number} */ y, /** @type {any} */ value) =>
 		update((state) => {
-			state.opponentBoard[key] = value;
+			state.opponentBoard[x-1][y-1] = value;
 			return state;
 		}),
 	reset: () => set(defaultGameState)

@@ -67,10 +67,15 @@ export const gameState = {
 
 			return state;
 		}),
-	positionShip: (/** @type {number} */ shipId, /** @type {number} */ x, /** @type {number} */ y, /** @type {boolean} */ isHorizontal) =>
+	positionShip: (
+		/** @type {number} */ shipId,
+		/** @type {number} */ x,
+		/** @type {number} */ y,
+		/** @type {boolean} */ isHorizontal
+	) =>
 		update((state) => {
-			state.myShips[shipId] = {x, y, isHorizontal};
-			
+			state.myShips[shipId] = { x, y, isHorizontal };
+
 			// verify mySHips none are null
 			if (state.gameState == GameState.Positioning && state.myShips.length == shipsCount) {
 				state.gameState = GameState.Positioned;

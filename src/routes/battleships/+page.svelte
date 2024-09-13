@@ -16,6 +16,11 @@
 	let shipId = 0;
 
 	/**
+	 * @type {number}
+	 */
+	let canvasWidth;
+
+	/**
 	 * @type {any}
 	 */
 	let myCanvas;
@@ -242,7 +247,7 @@
 				);
 				gameState.endMatch();
 			} else if (matches[1].toString() == 'lose') {
-				notifier.success(
+				notifier.success(	
 					'You won the battle, Commander. The opponent has been annihilated! Congratulations',
 					10000
 				);
@@ -338,6 +343,10 @@
 		canvas.hoverCursor = 'pointer';
 		canvas.selection = false;
 		canvas.targetFindTolerance = 2;
+
+		let canvasHeight = (canvasWidth-10) * 600 / 800;	
+
+		canvas.setDimensions({width: canvasWidth - 10, height: canvasHeight});
 		makeGrid({ x: 0, y: 0 }, gridSize, cellSize, canvas);
 
 		return canvas;
@@ -546,7 +555,7 @@
 				/** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
 			) {
 				gridCursor.opacity = 0;
-				
+
 				// @ts-ignore
 				const horizontal = isHorizontal(e.target);
 
@@ -594,7 +603,7 @@
 					if (ships[i].containsPoint(e.pointer)) {
 						toggleShip(ships[i], cellSize);
 						myCanvas.renderAll();
-						
+
 						const horizontal = isHorizontal(ships[i]);
 						const cell = pointToGridCell({
 							x: ships[i].left + (horizontal ? 0 : -cellSize),
@@ -603,7 +612,7 @@
 
 						if (cell) {
 							gameState.positionShip(ships[i].customID, cell.x, cell.y, horizontal);
-							snapshotShipsPosition();							
+							snapshotShipsPosition();
 						}
 
 						break;
@@ -860,147 +869,188 @@
 	}
 </script>
 
-<Header title="Battleships" subtitle="Battleships game with zero knowledge proof" />
+<Header bind:clientWidth={canvasWidth} title="Battleships" subtitle="Battleships game with zero knowledge proof" />
 
-<div id="buttons" style="margin-left: 1rem; display: flex; flex-direction: row; gap: 1rem;">
+<p>&nbsp;</p>
+
+<div id="buttons" class="w3-bar w3-blue-grey" style="font-size: small;">
 	{#if !connected}
-		<p>
-			<button
-				class="w3-button w3-ripple w3-round w3-text-white"
-				style="background-color: #c83737ff;"
-			>
-				<Moon size="15" color="#ffffff" unit="px" duration="1s" />
-				Connecting to server ...
-			</button>
-		</p>
+		<button
+			class="w3-bar-item w3-button w3-mobile w3-text-white"
+			style="background-color: #c83737ff;"
+		>
+			<Moon size="15" color="#ffffff" unit="px" duration="1s" />
+			Connecting to server ...
+		</button>
 	{:else}
+		<div class="w3-dropdown-hover w3-mobile w3-right" style="margin: auto 0;">
+			<button class="w3-button w3-mobile w3-khaki">🔍 Stats</button>
+			<div class="w3-dropdown-content w3-dark-yellow">
+				<p style="padding: 0 1rem;">
+					<small
+						><em>
+							{#await stats}
+								Online Players: ...
+							{:then data}
+								Online Players: {data.onlinePlayers}
+							{:catch}
+								Online Players: ...
+							{/await}
+						</em></small
+					>
+				</p>
+				<p style="padding: 0 1rem;">
+					<small
+						><em>
+							{#await stats}
+								Pending Matches: ...
+							{:then data}
+								Pending Matches: {data.pendingMatches}
+							{:catch}
+								Pending Matches: ... 
+							{/await}
+						</em></small
+					>
+				</p>
+				<p style="padding: 0 1rem;">
+					<small
+						><em>
+							{#await stats}
+								Ongoing Matches: ...
+							{:then data}
+								Ongoing Matches: {data.ongoingMatches}
+							{:catch}
+								Ongoing Matches: ...
+							{/await}
+						</em></small
+					>
+				</p>
+				<p style="padding: 0 1rem;">
+					<small
+						><em>
+							{#await stats}
+								Finished Matches: ...
+							{:then data}
+								Finished Matches: {data.finishedMatches}
+							{:catch}
+								Finished Matches: ...
+							{/await}
+						</em></small
+					>
+				</p>
+				<p style="padding: 0 1rem;">
+					<small
+						><em>
+							{#await stats}
+								Total Matches: ...
+							{:then data}
+								Total Matches: {data.totalMatches}
+							{:catch}
+								Total Matches: ...
+							{/await}
+						</em></small
+					>
+				</p>
+			</div>
+		</div>
+
 		{#if $gameState.gameState == GameState.Pending || $gameState.gameState == GameState.Over}
-			<p>
-				<button class="w3-button w3-ripple w3-green w3-round" on:click={startNewGame}
-					>🎮 Start New Game</button
-				>
-			</p>
-			<p>
-				<button class="w3-button w3-ripple w3-green-alt w3-round" on:click={joinGame}
-					>🚪 Join Game</button
-				>
-			</p>
+			<button class="w3-bar-item w3-button w3-mobile w3-green" on:click={startNewGame}
+				>🎮 Start New Game</button
+			>
+			<button class="w3-bar-item w3-button w3-mobile w3-green-alt" on:click={joinGame}
+				>🚪 Join Game</button
+			>
 		{/if}
 
-		{#if $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
-			<p style="margin: auto 0;">
-				{#if $gameState.gameState == GameState.Positioning}
-					<button class="w3-button w3-ripple w3-red-light w3-round w3-disabled"
-						>🔒 Lock Positions</button
-					>
-				{:else}
-					<button class="w3-button w3-ripple w3-red-light w3-round" on:click={lockPositions}
-						>🔒 Lock Positions</button
-					>
-				{/if}
-			</p>
-			<p style="margin: auto 0;">
-				<button class="w3-button w3-ripple w3-blue w3-round" on:click={resetPositions}
-					>↩️ Reset Positions</button
-				>
-			</p>
+		{#if $gameState.gameState == GameState.InGame || $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
+			<button class="w3-bar-item w3-button w3-mobile w3-theme w3-right" on:click={giveUp}>🏳️ Give Up</button>
 		{/if}
 
 		{#if $gameState.gameState == GameState.InGame}
-			<p style="margin: auto;">
-				<button
-					class="w3-button w3-ripple w3-green w3-round"
-					on:click={() => settings.muteOpponent(!$settings.opponentMuted)}
-					>{#if $settings.opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
-				>
-			</p>
-			<div class="w3-dropdown-hover w3-mobile" style="margin: auto 0;">
-				<button class="w3-button w3-ripple w3-yellow w3-round">😀 Send Emoji</button>
-				<div class="w3-dropdown-content w3-dark-yellow">
-					<button on:click={() => sendEmoji(0)} class="w3-bar-item w3-button w3-mobile w3-center"
-						>😜</button
-					>
-					<button on:click={() => sendEmoji(1)} class="w3-bar-item w3-button w3-mobile w3-center"
-						>🫡</button
-					>
-					<button on:click={() => sendEmoji(2)} class="w3-bar-item w3-button w3-mobile w3-center"
-						>😵</button
-					>
-					<button on:click={() => sendEmoji(3)} class="w3-bar-item w3-button w3-mobile w3-center"
-						>🤯</button
-					>
-					<button on:click={() => sendEmoji(4)} class="w3-bar-item w3-button w3-mobile w3-center"
-						>🫣</button
-					>
-					<button on:click={() => sendEmoji(5)} class="w3-bar-item w3-button w3-mobile w3-center"
-						>🛟</button
-					>
-				</div>
-			</div>
-			<p style="margin: auto 0;">
+			<p class="w3-bar-item" style="margin: auto 0;">
 				<small><em>Turn number:</em></small>
 				{$gameState.turn}
 			</p>
 		{/if}
-
-		{#if $gameState.gameState == GameState.InGame || $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
-			<p style="margin: auto;">
-				<small><em>
-				{#if !$gameState.opponentJoined}
-					Pending opponent...
-				{:else}
-					Opponent joined!
-				{/if}
-				</em></small>
-			</p>
-			<p style="margin: auto;">
-				<button class="w3-button w3-ripple w3-theme w3-round" on:click={giveUp}>🏳️ Give Up</button>
-			</p>
-		{/if}
-
-		<p style="margin: auto 0;">
-			<small
-				><em>
-					{#await stats}
-						Online Players: ... <br />
-						Matches: ... (Pending), ... (Ongoing), ... (Finished), ... (Total)
-					{:then data}
-						Online Players: {data.onlinePlayers} <br />
-						Matches: {data.pendingMatches} (Pending), {data.ongoingMatches} (Ongoing), {data.finishedMatches}
-						(Finished), {data.totalMatches} (Total)
-					{:catch}
-						Online Players: ... <br />
-						Matches: ... (Pending), ... (Ongoing), ... (Finished), ... (Total)
-					{/await}
-				</em></small
-			>
-		</p>
 	{/if}
 </div>
 
-<div style="display: flex; flex-direction: row; width: max-content;">
+<div class="w3-container w3-border" style="display: flex; flex-direction: column; padding: 0;">
 	<div>
-		<div>
-			<h2>Opponent's board</h2>
-			<canvas id="opponent" width="800" height="600"></canvas>
+		<div class="w3-bar w3-dark-grey">
+			<span class="w3-bar-item w3-mobile"><strong>Opponent's board</strong></span>
+
+			{#if $gameState.gameState == GameState.InGame || $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
+				<button
+					class="w3-bar-item w3-button w3-mobile w3-text-white w3-right"
+					style="background-color: rgb(82 177 65);"
+				>
+					{#if !$gameState.opponentJoined}
+						<Moon size="15" color="#ffffff" unit="px" duration="1s" />
+						Waiting for an opponent...
+					{:else}
+						🟢 Opponent online.
+					{/if}
+				</button>
+			{/if}
+
+			{#if $gameState.gameState == GameState.InGame}
+				<button
+					class="w3-bar-item w3-button w3-mobile w3-green w3-right"
+					on:click={() => settings.muteOpponent(!$settings.opponentMuted)}
+					>{#if $settings.opponentMuted}🔊 Unm{:else}🤐 M{/if}ute Opponent</button
+				>
+				<div class="w3-dropdown-hover w3-mobile w3-right" style="margin: auto 0;">
+					<button class="w3-button w3-mobile w3-yellow">😀 Send Emoji</button>
+					<div class="w3-dropdown-content w3-dark-yellow">
+						<button on:click={() => sendEmoji(0)} class="w3-bar-item w3-button w3-mobile w3-center"
+							>😜</button
+						>
+						<button on:click={() => sendEmoji(1)} class="w3-bar-item w3-button w3-mobile w3-center"
+							>🫡</button
+						>
+						<button on:click={() => sendEmoji(2)} class="w3-bar-item w3-button w3-mobile w3-center"
+							>😵</button
+						>
+						<button on:click={() => sendEmoji(3)} class="w3-bar-item w3-button w3-mobile w3-center"
+							>🤯</button
+						>
+						<button on:click={() => sendEmoji(4)} class="w3-bar-item w3-button w3-mobile w3-center"
+							>🫣</button
+						>
+						<button on:click={() => sendEmoji(5)} class="w3-bar-item w3-button w3-mobile w3-center"
+							>🛟</button
+						>
+					</div>
+				</div>
+			{/if}
 		</div>
-		<hr style="" />
-		<div>
-			<h2>My board</h2>
-			<canvas id="mine" width="800" height="600"></canvas>
+		<canvas style="margin: auto;" id="opponent"></canvas>
+	</div>
+	<div class="w3-bar">
+		<div class="w3-bar w3-dark-grey">
+			<span class="w3-bar-item w3-mobile"><strong>My board</strong></span>
+			{#if $gameState.gameState == GameState.Positioning || $gameState.gameState == GameState.Positioned}
+				<button class="w3-bar-item w3-button w3-mobile w3-blue w3-right" on:click={resetPositions}
+					>↩️ Reset Positions</button
+				>
+				{#if $gameState.gameState == GameState.Positioning}
+					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-disabled w3-right"
+						>🔒 Lock Positions</button
+					>
+				{:else}
+					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-right" on:click={lockPositions}
+						>🔒 Lock Positions</button
+					>
+				{/if}
+			{/if}
 		</div>
+		<canvas style="margin: auto;" id="mine"></canvas>
 	</div>
 </div>
 
 <style>
-	hr {
-		border: 1px solid var(--jet);
-		border-radius: 1px;
-		width: 85%;
-		text-align: center;
-		margin: auto;
-	}
-
 	:global(#buttons .wrapper) {
 		display: inline-flex;
 	}

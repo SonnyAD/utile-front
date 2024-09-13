@@ -1,11 +1,12 @@
 <script>
 	export let title;
 	export let subtitle;
+	export let clientWidth;
 </script>
 
 <h1 class="w3-xxlarge">{title}</h1>
 
-<p>{subtitle}</p>
+<p bind:clientWidth={clientWidth}>{subtitle}</p>
 
 <style>
 	h1 {

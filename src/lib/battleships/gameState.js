@@ -95,6 +95,8 @@ export const gameState = {
 				state.gameState = GameState.Positioning;
 			}
 
+			state.myShips = [];
+
 			return state;
 		}),
 	lockShips: () =>

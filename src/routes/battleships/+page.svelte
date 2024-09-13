@@ -13,8 +13,6 @@
 	import { notifier } from '$lib/notifications';
 	import { fabric } from 'fabric';
 
-	let shipId = 0;
-
 	/**
 	 * @type {number}
 	 */
@@ -120,6 +118,118 @@
 		opponentCanvas = drawCanvas('opponent');
 		myCanvas = drawCanvas('mine');
 
+		myCanvas.on({
+			'object:moving': function (
+				/** @type {{ target: { width?: any; angle: any; left?: any; top?: any; }; }} */ e
+			) {
+				if (gridCursor.opacity == 0) {
+					gridCursor.opacity = 0.5;
+					gridCursor.set('width', e.target.width);
+					gridCursor.angle = e.target.angle;
+				}
+
+				if (isHorizontal(e.target)) {
+					gridCursor.left = clamp(
+						Math.round(e.target.left / cellSize) * cellSize,
+						cellSize,
+						cellSize * gridSize - e.target.width + cellSize
+					);
+					gridCursor.top = clamp(
+						Math.round(e.target.top / cellSize) * cellSize,
+						cellSize,
+						cellSize * gridSize
+					);
+				} else {
+					gridCursor.left = clamp(
+						Math.round(e.target.left / cellSize) * cellSize,
+						2 * cellSize,
+						cellSize * gridSize + cellSize
+					);
+					gridCursor.top = clamp(
+						Math.round(e.target.top / cellSize) * cellSize,
+						cellSize,
+						cellSize * gridSize - e.target.width + cellSize
+					);
+				}
+
+				if (!testRectInsideGrid(gridCursor, gridSize, cellSize)) {
+					gridCursor.set('fill', '#c7121f');
+					console.log('outside');
+				} else {
+					gridCursor.set('fill', '#32a797');
+					console.log('inside');
+				}
+			},
+			'object:modified': function (
+				/** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
+			) {
+				gridCursor.opacity = 0;
+
+				// @ts-ignore
+				const horizontal = isHorizontal(e.target);
+
+				if (horizontal) {
+					e.target.left = clamp(
+						Math.round(e.target.left / cellSize) * cellSize,
+						cellSize,
+						cellSize * gridSize - e.target.width + cellSize
+					);
+					e.target.top = clamp(
+						Math.round(e.target.top / cellSize) * cellSize,
+						cellSize,
+						cellSize * gridSize
+					);
+				} else {
+					e.target.left = clamp(
+						Math.round(e.target.left / cellSize) * cellSize,
+						2 * cellSize,
+						cellSize * gridSize + cellSize
+					);
+					e.target.top = clamp(
+						Math.round(e.target.top / cellSize) * cellSize,
+						cellSize,
+						cellSize * gridSize - e.target.width + cellSize
+					);
+				}
+
+				e.target.setCoords();
+
+				const cell = pointToGridCell({
+					x: e.target.left + (horizontal ? 0 : -cellSize),
+					y: e.target.top
+				});
+
+				if (cell) {
+					snapshotShipsPosition();
+					// @ts-ignore
+					gameState.positionShip(e.target.customID, cell.x, cell.y, horizontal);
+				}
+			},
+			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
+				if ($gameState.gameState != GameState.Positioning && $gameState.gameState != GameState.Positioned ) return;
+
+				for (var i = 0; i < ships.length; i++) {
+					if (ships[i].containsPoint(e.pointer)) {
+						toggleShip(ships[i], cellSize);
+						myCanvas.renderAll();
+
+						const horizontal = isHorizontal(ships[i]);
+						const cell = pointToGridCell({
+							x: ships[i].left + (horizontal ? 0 : -cellSize),
+							y: ships[i].top
+						});
+
+						if (cell) {
+							snapshotShipsPosition();
+							gameState.positionShip(ships[i].customID, cell.x, cell.y, horizontal);
+						}
+
+						break;
+					}
+				}
+			}
+		});		
+
 		// My Grid Cursor
 		gridCursor = makeCursor(cellSize, '#32a797');
 		myCanvas.add(gridCursor);
@@ -143,6 +253,13 @@
 
 					ships[i] = g;
 					console.log('Loaded ' + assets[i].url);
+					
+					if ($gameState.myShips[i]) {
+						dropShip(i, $gameState.myShips[i].x, $gameState.myShips[i].y, $gameState.myShips[i].isHorizontal);
+					} 
+					else if ($gameState.gameState == GameState.Positioning) {
+						dropShip(i);
+					}
 				}
 			);
 		}
@@ -188,9 +305,6 @@
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		stats = getStats();
-
-		/*settings.subscribe((value) => console.log(value));
-		gameState.subscribe((value) => console.log(value));*/
 	});
 
 	/**
@@ -530,127 +644,37 @@
 	}
 
 	function dropShips() {
-		myCanvas.on({
-			'object:moving': function (
-				/** @type {{ target: { width?: any; angle: any; left?: any; top?: any; }; }} */ e
-			) {
-				if (gridCursor.opacity == 0) {
-					gridCursor.opacity = 0.5;
-					gridCursor.set('width', e.target.width);
-					gridCursor.angle = e.target.angle;
-				}
-
-				if (isHorizontal(e.target)) {
-					gridCursor.left = clamp(
-						Math.round(e.target.left / cellSize) * cellSize,
-						cellSize,
-						cellSize * gridSize - e.target.width + cellSize
-					);
-					gridCursor.top = clamp(
-						Math.round(e.target.top / cellSize) * cellSize,
-						cellSize,
-						cellSize * gridSize
-					);
-				} else {
-					gridCursor.left = clamp(
-						Math.round(e.target.left / cellSize) * cellSize,
-						2 * cellSize,
-						cellSize * gridSize + cellSize
-					);
-					gridCursor.top = clamp(
-						Math.round(e.target.top / cellSize) * cellSize,
-						cellSize,
-						cellSize * gridSize - e.target.width + cellSize
-					);
-				}
-
-				if (!testRectInsideGrid(gridCursor, gridSize, cellSize)) {
-					gridCursor.set('fill', '#c7121f');
-					console.log('outside');
-				} else {
-					gridCursor.set('fill', '#32a797');
-					console.log('inside');
-				}
-			},
-			'object:modified': function (
-				/** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
-			) {
-				gridCursor.opacity = 0;
-
-				// @ts-ignore
-				const horizontal = isHorizontal(e.target);
-
-				if (horizontal) {
-					e.target.left = clamp(
-						Math.round(e.target.left / cellSize) * cellSize,
-						cellSize,
-						cellSize * gridSize - e.target.width + cellSize
-					);
-					e.target.top = clamp(
-						Math.round(e.target.top / cellSize) * cellSize,
-						cellSize,
-						cellSize * gridSize
-					);
-				} else {
-					e.target.left = clamp(
-						Math.round(e.target.left / cellSize) * cellSize,
-						2 * cellSize,
-						cellSize * gridSize + cellSize
-					);
-					e.target.top = clamp(
-						Math.round(e.target.top / cellSize) * cellSize,
-						cellSize,
-						cellSize * gridSize - e.target.width + cellSize
-					);
-				}
-
-				e.target.setCoords();
-
-				const cell = pointToGridCell({
-					x: e.target.left + (horizontal ? 0 : -cellSize),
-					y: e.target.top
-				});
-
-				if (cell) {
-					snapshotShipsPosition();
-					// @ts-ignore
-					gameState.positionShip(e.target.customID, cell.x, cell.y, horizontal);
-				}
-			},
-			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
-				if ($gameState.gameState != GameState.Positioning) return;
-
-				for (var i = 0; i < ships.length; i++) {
-					if (ships[i].containsPoint(e.pointer)) {
-						toggleShip(ships[i], cellSize);
-						myCanvas.renderAll();
-
-						const horizontal = isHorizontal(ships[i]);
-						const cell = pointToGridCell({
-							x: ships[i].left + (horizontal ? 0 : -cellSize),
-							y: ships[i].top
-						});
-
-						if (cell) {
-							snapshotShipsPosition();
-							gameState.positionShip(ships[i].customID, cell.x, cell.y, horizontal);
-						}
-
-						break;
-					}
-				}
-			}
-		});
-
 		for (let i = 0; i < ships.length; i++) {
-			ships[i].left = (gridSize + 1) * cellSize;
-			ships[i].top = (i + 1) * cellSize;
-			ships[i].customID = shipId++;
+			dropShip(i);
+		}
+	}
+
+	/**
+	 * @param {number} i
+	 * @param {number | undefined} [x]
+	 * @param {number | undefined} [y]
+	 * @param {boolean | undefined} [isHorizontal]
+	 */
+	function dropShip(i, x, y, isHorizontal) {
+		if (ships[i]) {
+			if(x)
+				ships[i].left = (x + (isHorizontal?0:1)) * cellSize;
+			else
+				ships[i].left = (gridSize + 1) * cellSize;
+			if(y)
+				ships[i].top = y * cellSize;
+			else
+				ships[i].top = (i + 1) * cellSize;
+
+			if (isHorizontal !== undefined && !isHorizontal)
+				ships[i].angle = 90;
+			
+			ships[i].customID = i;
 			ships[i].perPixelTargetFind = true;
 			ships[i].hasControls = ships[i].hasBorders = false;
 		}
 
-		myCanvas.add(...ships);
+		myCanvas.add(ships[i]);
 	}
 
 	function snapshotShipsPosition() {
@@ -825,6 +849,7 @@
 		for (var i = 0; i < ships.length; i++) {
 			ships[i].left = (gridSize + 1) * cellSize;
 			ships[i].top = (parseInt(ships[i].customID) + 1) * cellSize;
+			ships[i].angle = 0;
 			ships[i].setCoords();
 		}
 		myCanvas.renderAll();

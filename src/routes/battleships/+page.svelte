@@ -206,7 +206,11 @@
 				}
 			},
 			'mouse:dblclick': function (/** @type {{ pointer: any; }} */ e) {
-				if ($gameState.gameState != GameState.Positioning && $gameState.gameState != GameState.Positioned ) return;
+				if (
+					$gameState.gameState != GameState.Positioning &&
+					$gameState.gameState != GameState.Positioned
+				)
+					return;
 
 				for (var i = 0; i < ships.length; i++) {
 					if (ships[i].containsPoint(e.pointer)) {
@@ -228,7 +232,7 @@
 					}
 				}
 			}
-		});		
+		});
 
 		// My Grid Cursor
 		gridCursor = makeCursor(cellSize, '#32a797');
@@ -253,11 +257,15 @@
 
 					ships[i] = g;
 					console.log('Loaded ' + assets[i].url);
-					
+
 					if ($gameState.myShips[i]) {
-						dropShip(i, $gameState.myShips[i].x, $gameState.myShips[i].y, $gameState.myShips[i].isHorizontal);
-					} 
-					else if ($gameState.gameState == GameState.Positioning) {
+						dropShip(
+							i,
+							$gameState.myShips[i].x,
+							$gameState.myShips[i].y,
+							$gameState.myShips[i].isHorizontal
+						);
+					} else if ($gameState.gameState == GameState.Positioning) {
 						dropShip(i);
 					}
 				}
@@ -341,15 +349,14 @@
 			const commitment = matches[3];
 			const cell = stringToCell(matches[5]);
 
-
 			if (command == 'shot') {
 				// @ts-ignore
 				receiveShot(cell);
 				// @ts-ignore
-				if ($gameState.myBoard[cell.x-1][cell.y-1] == 0) {
+				if ($gameState.myBoard[cell.x - 1][cell.y - 1] == 0) {
 					websocket.send('miss ' + matches[5]);
 					// @ts-ignore
-				} else if ($gameState.myBoard[cell.x-1][cell.y-1] == 1) {
+				} else if ($gameState.myBoard[cell.x - 1][cell.y - 1] == 1) {
 					websocket.send('hit ' + matches[5]);
 					gameState.decreaseHp();
 
@@ -366,7 +373,7 @@
 				);
 				gameState.endMatch();
 			} else if (command == 'lose') {
-				notifier.success(	
+				notifier.success(
 					'You won the battle, Commander. The opponent has been annihilated! Congratulations',
 					10000
 				);
@@ -389,7 +396,7 @@
 				// @ts-ignore
 				gameState.recordOpponentCommitment(cell.x, cell.y, commitment);
 				// @ts-ignore
-				if (DEBUG) console.log(`opponentCommitments[${cell.x-1}][${cell.y-1}] = ${commitment}`);
+				if (DEBUG) console.log(`opponentCommitments[${cell.x - 1}][${cell.y - 1}] = ${commitment}`);
 			} else if (command == 'prove') {
 				// @ts-ignore
 				const proof = getProof(cell);
@@ -441,7 +448,6 @@
 						obj.selectable = false;
 						obj.evented = false;
 
-						
 						// @ts-ignore
 						opponentCanvas.remove($gameState.opponentBoard[cell.x - 1][cell.y - 1]);
 						opponentCanvas.add(obj);
@@ -459,14 +465,12 @@
 	 * @returns {{x: number, y: number}|null}
 	 */
 	function stringToCell(str) {
-		if (!str)
-			return null;
+		if (!str) return null;
 
 		const s = str.split(',');
-		if (s.length != 2)
-			return null;
+		if (s.length != 2) return null;
 
-		return { x: parseInt(s[0]), y: parseInt(s[1]) };		
+		return { x: parseInt(s[0]), y: parseInt(s[1]) };
 	}
 
 	/**
@@ -479,9 +483,9 @@
 		canvas.selection = false;
 		canvas.targetFindTolerance = 2;
 
-		let canvasHeight = (canvasWidth-10) * 600 / 800;	
+		let canvasHeight = ((canvasWidth - 10) * 600) / 800;
 
-		canvas.setDimensions({width: canvasWidth - 10, height: canvasHeight});
+		canvas.setDimensions({ width: canvasWidth - 10, height: canvasHeight });
 		makeGrid({ x: 0, y: 0 }, gridSize, cellSize, canvas);
 
 		return canvas;
@@ -657,18 +661,13 @@
 	 */
 	function dropShip(i, x, y, isHorizontal) {
 		if (ships[i]) {
-			if(x)
-				ships[i].left = (x + (isHorizontal?0:1)) * cellSize;
-			else
-				ships[i].left = (gridSize + 1) * cellSize;
-			if(y)
-				ships[i].top = y * cellSize;
-			else
-				ships[i].top = (i + 1) * cellSize;
+			if (x) ships[i].left = (x + (isHorizontal ? 0 : 1)) * cellSize;
+			else ships[i].left = (gridSize + 1) * cellSize;
+			if (y) ships[i].top = y * cellSize;
+			else ships[i].top = (i + 1) * cellSize;
 
-			if (isHorizontal !== undefined && !isHorizontal)
-				ships[i].angle = 90;
-			
+			if (isHorizontal !== undefined && !isHorizontal) ships[i].angle = 90;
+
 			ships[i].customID = i;
 			ships[i].perPixelTargetFind = true;
 			ships[i].hasControls = ships[i].hasBorders = false;
@@ -688,10 +687,8 @@
 
 			if (width && cell && testRectInsideGrid(ship, gridSize, cellSize)) {
 				for (let i = 0; i < width; i++) {
-					if (isHorizontal(ship)) 
-						gameState.signalShip(cell.x + i, cell.y);
-					else 
-						gameState.signalShip(cell.x, cell.y + i);
+					if (isHorizontal(ship)) gameState.signalShip(cell.x + i, cell.y);
+					else gameState.signalShip(cell.x, cell.y + i);
 				}
 			}
 		}
@@ -789,8 +786,8 @@
 			for (var y = 1; y <= 10; y++) {
 				gameState.generateSalt(x, y);
 				const commit = await generateCommitment(
-					$gameState.myBoard[x-1][y-1],
-					$gameState.mySalts[x-1][y-1]
+					$gameState.myBoard[x - 1][y - 1],
+					$gameState.mySalts[x - 1][y - 1]
 				);
 				websocket.send('commit ' + commit + ' ' + x.toString() + ',' + y.toString());
 			}
@@ -801,7 +798,10 @@
 	 * @param {{ x: any; y: any; }} cell
 	 */
 	function getProof(cell) {
-		return $gameState.myBoard[cell.x-1][cell.y-1].toString() + $gameState.mySalts[cell.x-1][cell.y-1].toString();
+		return (
+			$gameState.myBoard[cell.x - 1][cell.y - 1].toString() +
+			$gameState.mySalts[cell.x - 1][cell.y - 1].toString()
+		);
 	}
 
 	/**
@@ -823,10 +823,10 @@
 				' ' +
 				computedCommit +
 				', ' +
-				$gameState.opponentCommitments[cell.x-1][cell.y-1]
+				$gameState.opponentCommitments[cell.x - 1][cell.y - 1]
 		);
 
-		if (computedCommit != $gameState.opponentCommitments[cell.x-1][cell.y-1]) {
+		if (computedCommit != $gameState.opponentCommitments[cell.x - 1][cell.y - 1]) {
 			console.log('CHEATER detected!');
 		} else {
 			console.log('All good');
@@ -901,7 +901,11 @@
 	}
 </script>
 
-<Header bind:clientWidth={canvasWidth} title="Battleships" subtitle="Battleships game with zero knowledge proof" />
+<Header
+	bind:clientWidth={canvasWidth}
+	title="Battleships"
+	subtitle="Battleships game with zero knowledge proof"
+/>
 
 <p>&nbsp;</p>
 
@@ -939,7 +943,7 @@
 							{:then data}
 								Pending Matches: {data.pendingMatches}
 							{:catch}
-								Pending Matches: ... 
+								Pending Matches: ...
 							{/await}
 						</em></small
 					>
@@ -1070,8 +1074,9 @@
 					>↩️ Reset Positions</button
 				>
 				{#if $gameState.gameState == GameState.Positioned && $gameState.opponentJoined}
-					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-right" on:click={lockPositions}
-						>🔒 Lock Positions</button
+					<button
+						class="w3-bar-item w3-button w3-mobile w3-red-light w3-right"
+						on:click={lockPositions}>🔒 Lock Positions</button
 					>
 				{:else}
 					<button class="w3-bar-item w3-button w3-mobile w3-red-light w3-disabled w3-right"

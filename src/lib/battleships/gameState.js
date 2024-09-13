@@ -21,7 +21,9 @@ const defaultGameState = {
 	/** @type {number[][]} */ mySalts: Array.from({ length: gridSize }, () => []),
 	/** @type {string|null} */ matchID: null,
 	opponentJoined: false,
-	/** @type {any[][]} */ opponentBoard: Array.from({ length: gridSize }, () => Array.from({ length: gridSize }, () => null)),
+	/** @type {any[][]} */ opponentBoard: Array.from({ length: gridSize }, () =>
+		Array.from({ length: gridSize }, () => null)
+	),
 	/** @type {string[][]} */ opponentCommitments: Array.from({ length: gridSize }, () => [])
 };
 
@@ -78,12 +80,16 @@ export const gameState = {
 			state.myShips[shipId] = { x, y, isHorizontal };
 
 			let sum = 0;
-			state.myBoard.forEach((row)=> {
+			state.myBoard.forEach((row) => {
 				sum += row.reduce((total, val) => total + val);
 			});
 
 			// verify mySHips none are null
-			if (state.gameState == GameState.Positioning && state.myShips.length == shipsCount && sum == totalHP) {
+			if (
+				state.gameState == GameState.Positioning &&
+				state.myShips.length == shipsCount &&
+				sum == totalHP
+			) {
 				state.gameState = GameState.Positioned;
 			}
 
@@ -134,14 +140,14 @@ export const gameState = {
 
 	generateSalt: (/** @type {number} */ x, /** @type {number} */ y) =>
 		update((state) => {
-			state.mySalts[x-1][y-1] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+			state.mySalts[x - 1][y - 1] = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 			return state;
 		}),
 
 	// TODO: Merge with positionShip?
 	signalShip: (/** @type {number} */ x, /** @type {number} */ y) =>
 		update((state) => {
-			state.myBoard[x-1][y-1] = 1;
+			state.myBoard[x - 1][y - 1] = 1;
 			return state;
 		}),
 	opponentJoin: () =>
@@ -149,15 +155,23 @@ export const gameState = {
 			state.opponentJoined = true;
 			return state;
 		}),
-	recordOpponentCommitment: (/** @type {number} */ x, /** @type {number} */ y, /** @type {string} */ value) =>
+	recordOpponentCommitment: (
+		/** @type {number} */ x,
+		/** @type {number} */ y,
+		/** @type {string} */ value
+	) =>
 		update((state) => {
-			if (DEBUG) console.log('recordOpponentCommitment ' + x + ',' + y)
-			state.opponentCommitments[x-1][y-1] = value;
+			if (DEBUG) console.log('recordOpponentCommitment ' + x + ',' + y);
+			state.opponentCommitments[x - 1][y - 1] = value;
 			return state;
 		}),
-	recordOpponentResult: (/** @type {number} */ x, /** @type {number} */ y, /** @type {any} */ value) =>
+	recordOpponentResult: (
+		/** @type {number} */ x,
+		/** @type {number} */ y,
+		/** @type {any} */ value
+	) =>
 		update((state) => {
-			state.opponentBoard[x-1][y-1] = value;
+			state.opponentBoard[x - 1][y - 1] = value;
 			return state;
 		}),
 	reset: () => set(defaultGameState)

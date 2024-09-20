@@ -409,24 +409,30 @@
 				fabric.loadSVGFromURL(
 					'/miss.svg',
 					function (/** @type {any} */ objects, /** @type {any} */ options) {
-						// @ts-ignore
-						var obj = fabric.util.groupSVGElements(objects, options);
-						obj.set('width', cellSize);
-						obj.set('height', cellSize);
+						const obj = fabric.util.groupSVGElements(objects, options);
+
+						let g = new fabric.Group([], {
+							width: cellSize,
+							height: cellSize
+						});
+
+						obj.scaleToWidth(g.width);
+
+						g.addWithUpdate(obj);
 
 						// @ts-ignore
-						obj.left = cell.x * cellSize;
+						g.left = cell.x * cellSize;
 						// @ts-ignore
-						obj.top = cell.y * cellSize;
+						g.top = cell.y * cellSize;
 
-						obj.selectable = false;
-						obj.evented = false;
+						g.selectable = false;
+						g.evented = false;
 
 						// @ts-ignore
 						opponentCanvas.remove($gameState.opponentBoard[cell.x - 1][cell.y - 1]);
-						opponentCanvas.add(obj);
+						opponentCanvas.add(g);
 						// @ts-ignore
-						gameState.recordOpponentResult(cell.x, cell.y, obj);
+						gameState.recordOpponentResult(cell.x, cell.y, g);
 					}
 				);
 				websocket.send('prove ' + matches[5]);
@@ -435,24 +441,30 @@
 				fabric.loadSVGFromURL(
 					'/hit.svg',
 					function (/** @type {any} */ objects, /** @type {any} */ options) {
-						// @ts-ignore
-						var obj = fabric.util.groupSVGElements(objects, options);
-						obj.set('width', cellSize);
-						obj.set('height', cellSize);
+						const obj = fabric.util.groupSVGElements(objects, options);
+						
+						let g = new fabric.Group([], {
+							width: cellSize,
+							height: cellSize
+						});
+
+						obj.scaleToWidth(g.width);
+
+						g.addWithUpdate(obj);
 
 						// @ts-ignore
-						obj.left = cell.x * cellSize;
+						g.left = cell.x * cellSize;
 						// @ts-ignore
-						obj.top = cell.y * cellSize;
+						g.top = cell.y * cellSize;
 
-						obj.selectable = false;
-						obj.evented = false;
+						g.selectable = false;
+						g.evented = false;
 
 						// @ts-ignore
 						opponentCanvas.remove($gameState.opponentBoard[cell.x - 1][cell.y - 1]);
-						opponentCanvas.add(obj);
+						opponentCanvas.add(g);
 						// @ts-ignore
-						gameState.recordOpponentResult(cell.x, cell.y, obj);
+						gameState.recordOpponentResult(cell.x, cell.y, g);
 					}
 				);
 				websocket.send('prove ' + matches[5]);
@@ -742,19 +754,24 @@
 					fabric.loadSVGFromURL(
 						'/pending.svg',
 						function (/** @type {any} */ objects, /** @type {any} */ options) {
-							// @ts-ignore
-							var obj = fabric.util.groupSVGElements(objects, options);
-							obj.set('width', cellSize);
-							obj.set('height', cellSize);
+							const obj = fabric.util.groupSVGElements(objects, options);
 
-							obj.left = cell.x * cellSize;
-							obj.top = cell.y * cellSize;
+							let g = new fabric.Group([], {
+								width: cellSize,
+								height: cellSize
+							});
 
-							obj.selectable = false;
-							obj.evented = false;
+							obj.scaleToWidth(g.width);
 
-							opponentCanvas.add(obj);
-							gameState.recordOpponentResult(cell.x, cell.y, obj);
+							g.addWithUpdate(obj);
+							g.left = cell.x * cellSize;
+							g.top = cell.y * cellSize;
+
+							g.selectable = false;
+							g.evented = false;
+
+							opponentCanvas.add(g);
+							gameState.recordOpponentResult(cell.x, cell.y, g);
 						}
 					);
 

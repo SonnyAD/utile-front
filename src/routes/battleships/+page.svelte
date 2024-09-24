@@ -442,7 +442,7 @@
 					'/hit.svg',
 					function (/** @type {any} */ objects, /** @type {any} */ options) {
 						const obj = fabric.util.groupSVGElements(objects, options);
-						
+
 						let g = new fabric.Group([], {
 							width: cellSize,
 							height: cellSize

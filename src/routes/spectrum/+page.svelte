@@ -1,4 +1,6 @@
 <script>
+// @ts-nocheck
+
 	import Header from '$lib/components/Header.svelte';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
@@ -32,7 +34,7 @@
 	 * @type {WebSocket}
 	 */
 	let websocket;
-	let connected = false;
+	//let connected = false;
 	/**
 	 * @type {string}
 	 */
@@ -52,15 +54,13 @@
 		myCanvas = drawCanvas('spectrum');
 
 		myCanvas.on({
-			'object:moving': function (
-				/** @type {{ target: { width?: any; angle: any; left?: any; top?: any; }; }} */ e
-			) {
+			'object:moving': function () {
+				// /** @type {{ target: { width?: any; angle: any; left?: any; top?: any; }; }} */ e
 				moving = true;
 				//websocket.send(`update ${userId} ${e.target.left},${e.target.top}`);
 			},
-			'object:modified': function (
-				/** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
-			) {
+			'object:modified': function () {
+				// /** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
 				moving = false;
 			}
 		});
@@ -175,7 +175,7 @@
 		};
 	}
 
-	function computeMeanSpeed(points) {
+	/*function computeMeanSpeed(points) {
 		const speeds = [];
 		for (let i = 1, j = 0; i < points.length; i++, j++) {
 			speeds[j] = {
@@ -203,7 +203,7 @@
 				y: speeds[3].y * 0.5 + speeds[2].y * 0.25 + speeds[1].y * 0.125 + speeds[0].y * 0.125
 			};
 		}
-	}
+	}*/
 
 	function animatePellet(userId, target) {
 		return {
@@ -256,7 +256,7 @@
 	/**
 	 * @type {string | number | NodeJS.Timeout | undefined}
 	 */
-	let clear;
+	//let clear;
 	$: {
 		/*clearInterval(clear);
 		clear = setInterval(() => {
@@ -283,7 +283,7 @@
 
 	function signIn() {
 		websocket.send('signin ' + getPlayerId());
-		connected = true;
+		//connected = true;
 	}
 
 	/**

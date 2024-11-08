@@ -28,7 +28,7 @@
 	/**
 	 * @type {number}
 	 */
-	const updateTick = 300;
+	const updateTick = 125;
 
 	/**
 	 * @type {WebSocket}
@@ -321,6 +321,8 @@
 />
 
 <p>&nbsp;</p>
+
+<h2>Claim: All toilets should be mixed-gender</h2>
 
 <div class="w3-container w3-border" style="display: flex; flex-direction: column; padding: 0;">
 	<canvas style="margin: auto;" id="spectrum"></canvas>

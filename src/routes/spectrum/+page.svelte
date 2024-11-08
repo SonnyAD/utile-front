@@ -24,6 +24,11 @@
 	//let stats;
 
 	/**
+	 * @type {number}
+	 */
+	const updateTick = 300;
+
+	/**
 	 * @type {WebSocket}
 	 */
 	let websocket;
@@ -58,7 +63,7 @@
 			) {
 				moving = false;
 			}
-		})
+		});
 
 		// @ts-ignore
 		fabric.loadSVGFromURL(
@@ -89,7 +94,7 @@
 	});
 
 	function initPellet() {
-		console.log("Initalizing Your Pellet")
+		console.log('Initalizing Your Pellet');
 		var options = {
 			top: 230,
 			left: 330
@@ -97,7 +102,7 @@
 		// @ts-ignore
 		options.radius = 10;
 
-		userId = palette[fabric.util.getRandomInt(0, 6)]
+		userId = palette[fabric.util.getRandomInt(0, 6)];
 		let circle = new fabric.Circle({
 			...options,
 			fill: `#${userId}`,
@@ -109,15 +114,15 @@
 		myCanvas.add(circle);
 		myPellet = circle;
 
-		setInterval(updateMyPellet, 300);
-		animate();
+		setInterval(updateMyPellet, updateTick);
+		//animate();
 	}
 
 	/**
 	 * @param {string} userId
 	 */
 	function initOtherPellet(userId) {
-		console.log("Initalizing Other Pellet")
+		console.log('Initalizing Other Pellet: ' + userId);
 		var options = {
 			top: 230,
 			left: 330
@@ -125,7 +130,6 @@
 		// @ts-ignore
 		options.radius = 10;
 
-		userId = palette[fabric.util.getRandomInt(0, 6)]
 		let circle = new fabric.Circle({
 			...options,
 			fill: `#${userId}`,
@@ -135,7 +139,7 @@
 			selectable: false,
 			evented: false,
 			hasControls: false,
-			hasBorders: false,
+			hasBorders: false
 		});
 		myCanvas.add(circle);
 		return circle;
@@ -146,19 +150,92 @@
 	 * @param {{ x: number; y: number; } | null} coords
 	 */
 	function updatePellet(otherUserId, coords) {
-		if (!others[otherUserId])
-			others[otherUserId] = { pellet: initOtherPellet(otherUserId), target: coords };
+		// New user
+		if (!others[otherUserId]) {
+			others[otherUserId] = { pellet: initOtherPellet(otherUserId), targets: [coords] };
+		} else {
+			// known user
+			others[otherUserId].targets.push(coords);
 
-		others[otherUserId].target = coords;
+			// Only keep 5 points max
+			if (others[otherUserId].targets.length >= 5)
+				others[otherUserId].targets = others[otherUserId].targets.slice(1, 6);
+		}
 
-		/*others[otherUserId].pellet.left = coords.x;
-		others[otherUserId].pellet.top = coords.y;
-		others[otherUserId].pellet.setCoords();
-		myCanvas.renderAll();*/
-		//smoothDamp(others[otherUserId].pellet);
+		if (others[otherUserId].cancel) {
+			others[otherUserId].cancel();
+		}
+
+		//others[otherUserId].target = coords;
+
+		const cancel = animatePellet(otherUserId, coords);
+		others[otherUserId].cancel = () => {
+			cancel.cancelX();
+			cancel.cancelY();
+		};
 	}
 
-	function animate() {
+	function computeMeanSpeed(points) {
+		const speeds = [];
+		for (let i = 1, j = 0; i < points.length; i++, j++) {
+			speeds[j] = {
+				x: (points[i].x + points[i - 1].x) / updateTick,
+				y: (points[i].y + points[i - 1].y) / updateTick
+			};
+		}
+
+		if (speeds.length == 1) {
+			// 1
+			return speeds[0];
+		} else if (speeds.length == 2) {
+			// 0.5 + 0.5
+			return { x: (speeds[1].x + speeds[0].x) / 2, y: (speeds[1].y + speeds[0].y) / 2 };
+		} else if (speeds.length == 3) {
+			// 0.5 + 0.25 + 0.25
+			return {
+				x: speeds[2].x * 0.5 + speeds[1].x * 0.25 + speeds[0].x * 0.25,
+				y: speeds[2].y * 0.5 + speeds[1].y * 0.25 + speeds[0].y * 0.25
+			};
+		} else if (speeds.length == 4) {
+			// 0.5 + 0.25 + 0.125 + 0.125
+			return {
+				x: speeds[3].x * 0.5 + speeds[2].x * 0.25 + speeds[1].x * 0.125 + speeds[0].x * 0.125,
+				y: speeds[3].y * 0.5 + speeds[2].y * 0.25 + speeds[1].y * 0.125 + speeds[0].y * 0.125
+			};
+		}
+	}
+
+	function animatePellet(userId, target) {
+		return {
+			cancelX: fabric.util.animate({
+				startValue: others[userId].pellet.left,
+				endValue: target.x,
+				duration: updateTick,
+				onChange: function (value) {
+					others[userId].pellet.left = value;
+					myCanvas.renderAll();
+				},
+				onComplete: function () {
+					others[userId].pellet.setCoords();
+				}
+				//easing: fabric.util.ease.easeOutExpo,
+			}),
+			cancelY: fabric.util.animate({
+				startValue: others[userId].pellet.top,
+				endValue: target.y,
+				duration: updateTick,
+				onChange: function (value) {
+					others[userId].pellet.top = value;
+				},
+				onComplete: function () {
+					others[userId].pellet.setCoords();
+				}
+				//easing: fabric.util.ease.easeOutExpo,
+			})
+		};
+	}
+
+	/*function animate() {
 		for (let key in others) {
 			let obj = others[key].pellet;
 			let center = obj.getCenterPoint();
@@ -169,11 +246,11 @@
 		}
 		myCanvas.renderAll();
 		fabric.util.requestAnimFrame(animate);
-  	}
+  	}*/
 
 	function updateMyPellet() {
 		if (moving)
-			websocket.send(`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)}`)
+			websocket.send(`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)}`);
 	}
 
 	/**
@@ -213,9 +290,7 @@
 	 * @param {string} line
 	 */
 	function parseCommand(line) {
-		const re = new RegExp(
-			/^(ack|update)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?$/gu
-		);
+		const re = new RegExp(/^(ack|update)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?$/gu);
 		const matches = [...line.matchAll(re)][0];
 
 		if (matches) {
@@ -231,15 +306,12 @@
 			if (command == 'ack') {
 				initPellet();
 			} else if (command == 'update') {
-				if (otherUserId != userId)
-					updatePellet(otherUserId, coords);
+				if (otherUserId != userId) updatePellet(otherUserId, coords);
 			}
 		}
 	}
 
 	function connectionLost() {}
-
-
 </script>
 
 <Header

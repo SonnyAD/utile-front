@@ -7,7 +7,6 @@
 	import { getPlayerId } from '$lib/battleships/playerId';
 	import { onMount } from 'svelte';
 	import { fabric } from 'fabric';
-	console.log(fabric)
 
 	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9'];
 
@@ -122,26 +121,25 @@
 		myCanvas.add(circle);
 		myPellet = circle;
 
-		myCanvas.on({ 
-			'object:moving': function ({target}) {
-				if (target!= myPellet)
-					return;
+		myCanvas.on({
+			'object:moving': function ({ target }) {
+				if (target != myPellet) return;
 
 				for (let i = 0; i < cells.length; i++) {
+					const cell = cells[i];
+					const points = [];
 
-					const cell = cells[i]
-					const points = []
+					for (let index = 0; index < cell.path.length - 2; index++) {
+						let pathPoint = cell.path[index];
 
-					for (let index = 0; index < cell.path.length -2; index++) {
-						let pathPoint = cell.path[index]
-
-						let p = [(pathPoint[pathPoint.length -2]) * cell.scaleX -18, (pathPoint[pathPoint.length -1] ) * cell.scaleY - 55 ];
-						points.push(p)
+						let p = [
+							pathPoint[pathPoint.length - 2] * cell.scaleX - 18,
+							pathPoint[pathPoint.length - 1] * cell.scaleY - 55
+						];
+						points.push(p);
 					}
-					
-					if (
-						pointInPolygon(points, [myPellet.left, myPellet.top])
-					) {
+
+					if (pointInPolygon(points, [myPellet.left, myPellet.top])) {
 						cell.set({ fill: 'blue' });
 						console.log(cell);
 					} else {
@@ -169,18 +167,22 @@
 		//For each edge (In this case for each point of the polygon and the previous one)
 		for (let i = 0, j = polygon.length - 1; i < polygon.length; i++) {
 			//If a line from the point into infinity crosses this edge
-			if (((polygon[i][1] > point[1]) !== (polygon[j][1] > point[1])) // One point needs to be above, one below our y coordinate
+			if (
+				polygon[i][1] > point[1] !== polygon[j][1] > point[1] && // One point needs to be above, one below our y coordinate
 				// ...and the edge doesn't cross our Y corrdinate before our x coordinate (but between our x coordinate and infinity)
-				&& (point[0] < ((polygon[j][0] - polygon[i][0]) * (point[1] - polygon[i][1]) / (polygon[j][1] - polygon[i][1]) + polygon[i][0]))) {
+				point[0] <
+					((polygon[j][0] - polygon[i][0]) * (point[1] - polygon[i][1])) /
+						(polygon[j][1] - polygon[i][1]) +
+						polygon[i][0]
+			) {
 				// Invert odd
 				odd = !odd;
 			}
 			j = i;
-
 		}
 		//If the number of crossings was odd, the point is in the polygon
 		return odd;
-	};	
+	};
 
 	/**
 	 * @param {string} userId

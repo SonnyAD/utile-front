@@ -241,35 +241,13 @@
 		};
 	}
 
-	/*function computeMeanSpeed(points) {
-		const speeds = [];
-		for (let i = 1, j = 0; i < points.length; i++, j++) {
-			speeds[j] = {
-				x: (points[i].x + points[i - 1].x) / updateTick,
-				y: (points[i].y + points[i - 1].y) / updateTick
-			};
+	function updateClaim(event) {
+		if (websocket) {
+			const data = new FormData(event.currentTarget);
+			console.log(data);
+			websocket.send("claim " + data.get("claim"));
 		}
-
-		if (speeds.length == 1) {
-			// 1
-			return speeds[0];
-		} else if (speeds.length == 2) {
-			// 0.5 + 0.5
-			return { x: (speeds[1].x + speeds[0].x) / 2, y: (speeds[1].y + speeds[0].y) / 2 };
-		} else if (speeds.length == 3) {
-			// 0.5 + 0.25 + 0.25
-			return {
-				x: speeds[2].x * 0.5 + speeds[1].x * 0.25 + speeds[0].x * 0.25,
-				y: speeds[2].y * 0.5 + speeds[1].y * 0.25 + speeds[0].y * 0.25
-			};
-		} else if (speeds.length == 4) {
-			// 0.5 + 0.25 + 0.125 + 0.125
-			return {
-				x: speeds[3].x * 0.5 + speeds[2].x * 0.25 + speeds[1].x * 0.125 + speeds[0].x * 0.125,
-				y: speeds[3].y * 0.5 + speeds[2].y * 0.25 + speeds[1].y * 0.125 + speeds[0].y * 0.125
-			};
-		}
-	}*/
+	}
 
 	function animatePellet(userId, target) {
 		return {
@@ -339,10 +317,11 @@
 		canvas.hoverCursor = 'pointer';
 		canvas.selection = false;
 		canvas.targetFindTolerance = 2;
+		canvas.backgroundColor = "white";
 
-		let canvasHeight = ((canvasWidth - 10) * 600) / 800;
+		let canvasHeight = (canvasWidth * 600) / 800;
 
-		canvas.setDimensions({ width: canvasWidth - 10, height: canvasHeight });
+		canvas.setDimensions({ width: canvasWidth, height: canvasHeight });
 
 		return canvas;
 	}
@@ -388,11 +367,30 @@
 
 <p>&nbsp;</p>
 
-<h2>Claim: All toilets should be mixed-gender</h2>
+<div class="w3-card">
+	<header class="w3-container" style="padding: 0; font-family: monospace;">
+		<form method="POST" on:submit|preventDefault={updateClaim}>
+			<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold">Claim:</label>
+			<input name="claim" class="w3-col w3-input" style="width: 80%" type="text" value="All toilets should be mixed-gender" />
+			<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;">Update</button>
+		</form>
+	</header>
 
-<div class="w3-container w3-border" style="display: flex; flex-direction: column; padding: 0;">
-	<canvas style="margin: auto;" id="spectrum"></canvas>
+	<div class="w3-container w3-border" style="display: flex; flex-direction: column; padding: 0;">
+		<canvas style="margin: auto;" id="spectrum"></canvas>
+	</div>
+
+	<footer class="w3-container">
+
+	</footer>
 </div>
 
 <style>
+	header {
+		width: 100%;
+	}
+
+	input {
+		width: max-content;
+	}
 </style>

@@ -245,7 +245,7 @@
 		if (websocket) {
 			const data = new FormData(event.currentTarget);
 			console.log(data);
-			websocket.send("claim " + data.get("claim"));
+			websocket.send('claim ' + data.get('claim'));
 		}
 	}
 
@@ -317,7 +317,7 @@
 		canvas.hoverCursor = 'pointer';
 		canvas.selection = false;
 		canvas.targetFindTolerance = 2;
-		canvas.backgroundColor = "white";
+		canvas.backgroundColor = 'white';
 
 		let canvasHeight = (canvasWidth * 600) / 800;
 
@@ -370,9 +370,19 @@
 <div class="w3-card">
 	<header class="w3-container" style="padding: 0; font-family: monospace;">
 		<form method="POST" on:submit|preventDefault={updateClaim}>
-			<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold">Claim:</label>
-			<input name="claim" class="w3-col w3-input" style="width: 80%" type="text" value="All toilets should be mixed-gender" />
-			<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;">Update</button>
+			<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
+				>Claim:</label
+			>
+			<input
+				name="claim"
+				class="w3-col w3-input"
+				style="width: 80%"
+				type="text"
+				value="All toilets should be mixed-gender"
+			/>
+			<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;"
+				>Update</button
+			>
 		</form>
 	</header>
 
@@ -380,9 +390,7 @@
 		<canvas style="margin: auto;" id="spectrum"></canvas>
 	</div>
 
-	<footer class="w3-container">
-
-	</footer>
+	<footer class="w3-container"></footer>
 </div>
 
 <style>

@@ -48,6 +48,8 @@
 	const cells = [];
 	const others = {};
 
+	let claim = 'All toilets should be mixed-gender';
+
 	onMount(() => {
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
@@ -249,6 +251,11 @@
 		}
 	}
 
+	function receivedClaim(c) {
+		console.log(c);
+		claim = c;
+	}
+
 	function animatePellet(userId, target) {
 		return {
 			cancelX: fabric.util.animate({
@@ -335,7 +342,7 @@
 	 * @param {string} line
 	 */
 	function parseCommand(line) {
-		const re = new RegExp(/^(ack|update)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?$/gu);
+		const re = new RegExp(/^(ack|update|claim)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s(.+))?$/gu);
 		const matches = [...line.matchAll(re)][0];
 
 		if (matches) {
@@ -352,6 +359,8 @@
 				initPellet();
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords);
+			} else if (command == 'claim') {
+				if (otherUserId != userId) receivedClaim(matches[7]);
 			}
 		}
 	}
@@ -378,7 +387,7 @@
 				class="w3-col w3-input"
 				style="width: 80%"
 				type="text"
-				value="All toilets should be mixed-gender"
+				bind:value={claim}
 			/>
 			<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;"
 				>Update</button

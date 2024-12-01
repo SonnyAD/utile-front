@@ -55,7 +55,7 @@
 
 	let claim = '';
 
-	onMount(() => {
+	function initSpectrum() {
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		// Prepare Both Canvas
@@ -109,7 +109,9 @@
 				myCanvas.sendToBack(g);
 			}
 		);
-	});
+
+		initialzed = true;
+	}
 
 	function initPellet() {
 		console.log('Initalizing Your Pellet');
@@ -326,6 +328,10 @@
 	 */
 	//let clear;
 	$: {
+		if (userName && !initialzed) {
+			console.log("Initiliazing!")
+			initSpectrum();
+		}
 		/*clearInterval(clear);
 		clear = setInterval(() => {
 			//stats = getStats();
@@ -352,6 +358,7 @@
 
 	function signIn() {
 		websocket.send('signin ' + getPlayerId());
+		websocket.send('nickname ' + userName);
 		//connected = true;
 	}
 
@@ -489,6 +496,12 @@
 	</div>
 </div>
 
+{#if !userName}
+<form method="POST" on:submit|preventDefault={setUsername}>
+	<input type="text" name="username" placeholder="Please enter a nickname (don't use your real name)" bind:value={nickname}>
+	<button type="submit">Join Spectrum</button>
+</form>
+{:else}
 <div class="w3-card">
 	<header class="w3-container" style="padding: 0; font-family: monospace;">
 		<form method="POST" on:submit|preventDefault={updateClaim}>
@@ -514,6 +527,8 @@
 
 	<footer class="w3-container"></footer>
 </div>
+{/if}
+
 
 <style>
 	header {

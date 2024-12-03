@@ -42,9 +42,8 @@
 	/**
 	 * @type {string}
 	 */
-	let userName;
 	let nickname;
-	let initialzed = false;
+	let initialized = false;
 
 	/**
 	 * @type {{ left: any; top: any; }}
@@ -54,9 +53,9 @@
 	const cells = [];
 	const others = {};
 
-	let claim = 'All toilets should be mixed-gender';
+	let claim = '';
 
-	function initSpectrum() {
+	onMount(() => {
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		// Prepare Both Canvas
@@ -101,18 +100,16 @@
 				for (let i = 2; i <= 10; i++) {
 					cells.push(svgObjects[i]);
 
-					if (svgObjects[i].id == "notReplied") {
-					console.log(svgObjects[i].path);
-				}
+					if (svgObjects[i].id == 'notReplied') {
+						console.log(svgObjects[i].path);
+					}
 				}
 
 				myCanvas.add(g);
 				myCanvas.sendToBack(g);
 			}
 		);
-
-		initialzed = true;
-	}
+	});
 
 	function initPellet() {
 		console.log('Initalizing Your Pellet');
@@ -153,7 +150,7 @@
 						points.push(p);
 					}
 
-					if (cell.id == "notReplied") {
+					if (cell.id == 'notReplied') {
 						console.log(points);
 					}
 
@@ -161,8 +158,8 @@
 						cell.set({ fill: 'blue' });
 						console.log(cell);
 					} else {
-						if (cell.id == "notReplied" || cell.id == "indifferent") {
-							cell.set({ fill: '#cccccc' });							
+						if (cell.id == 'notReplied' || cell.id == 'indifferent') {
+							cell.set({ fill: '#cccccc' });
 						} else {
 							cell.set({ fill: 'black' });
 						}
@@ -329,10 +326,6 @@
 	 */
 	//let clear;
 	$: {
-		if (userName && !initialzed) {
-			console.log("Initiliazing!")
-			initSpectrum();
-		}
 		/*clearInterval(clear);
 		clear = setInterval(() => {
 			//stats = getStats();
@@ -359,7 +352,6 @@
 
 	function signIn() {
 		websocket.send('signin ' + getPlayerId());
-		websocket.send('nickname ' + userName);
 		//connected = true;
 	}
 
@@ -381,7 +373,8 @@
 			}
 
 			if (command == 'ack') {
-				initPellet();
+				if (!initialized) initialized = true;
+				else initPellet();
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords);
 			} else if (command == 'claim') {
@@ -393,7 +386,8 @@
 	function connectionLost() {}
 
 	function setUsername() {
-		userName = nickname;
+		websocket.send('nickname ' + nickname);
+		document.getElementById('join-modal').style.display = 'none';
 	}
 </script>
 
@@ -403,14 +397,98 @@
 	subtitle="Online tool to help you run spectrum online with a party of 2 to 6 people"
 />
 
-<p>&nbsp;</p>
+<div class="w3-container w3-margin" style="font-family: monospace;">
+	<div class="w3-bar">
+		<button
+			onclick="document.getElementById('join-modal').style.display='block'"
+			class="w3-bar-item w3-button w3-green">Join Spectrum</button
+		>
 
-{#if !userName}
-<form method="POST" on:submit|preventDefault={setUsername}>
-	<input type="text" name="username" placeholder="Please enter a nickname (don't use your real name)" bind:value={nickname}>
-	<button type="submit">Join Spectrum</button>
-</form>
-{:else}
+		<button
+			onclick="document.getElementById('create-modal').style.display='block'"
+			class="w3-bar-item w3-button w3-red w3-right">Create Spectrum</button
+		>
+	</div>
+
+	<div id="join-modal" class="w3-modal">
+		<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
+			<div class="w3-center">
+				<br />
+				<span
+					onclick="document.getElementById('join-modal').style.display='none'"
+					class="w3-button w3-xlarge w3-hover-red w3-display-topright"
+					title="Close Modal">&times;</span
+				>
+			</div>
+
+			<form class="w3-container" on:submit|preventDefault={setUsername}>
+				<div class="w3-section">
+					<label for="nickname"><b>Nickname</b></label>
+					<input
+						class="w3-input w3-border w3-margin-bottom"
+						type="text"
+						placeholder="Please enter a nickname (don't use your real name)"
+						bind:value={nickname}
+						id="nickname"
+						style="width: 100%;"
+						required
+					/>
+					<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
+						>Join Spectrum</button
+					>
+				</div>
+			</form>
+
+			<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+				<button
+					onclick="document.getElementById('join-modal').style.display='none'"
+					type="button"
+					class="w3-button w3-red">Cancel</button
+				>
+			</div>
+		</div>
+	</div>
+
+	<div id="create-modal" class="w3-modal">
+		<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
+			<div class="w3-center">
+				<br />
+				<span
+					onclick="document.getElementById('create-modal').style.display='none'"
+					class="w3-button w3-xlarge w3-hover-red w3-display-topright"
+					title="Close Modal">&times;</span
+				>
+			</div>
+
+			<form class="w3-container">
+				<div class="w3-section">
+					<label for="claim"><b>Initial claim</b></label>
+					<input
+						class="w3-input w3-border w3-margin-bottom"
+						type="text"
+						placeholder="Please enter the initial claim"
+						id="claim"
+						style="width: 100%;"
+						required
+					/>
+					<button
+						class="w3-button w3-block w3-green w3-section w3-disabled w3-padding"
+						type="submit">Not Available Yet</button
+					>
+				</div>
+			</form>
+
+			<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+				<button
+					onclick="document.getElementById('create-modal').style.display='none'"
+					type="button"
+					class="w3-button w3-red">Cancel</button
+				>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="w3-card">
 	<header class="w3-container" style="padding: 0; font-family: monospace;">
 		<form method="POST" on:submit|preventDefault={updateClaim}>
@@ -436,8 +514,6 @@
 
 	<footer class="w3-container"></footer>
 </div>
-{/if}
-
 
 <style>
 	header {

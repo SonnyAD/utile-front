@@ -8,7 +8,7 @@
 	import { onMount } from 'svelte';
 	import { fabric } from 'fabric';
 
-	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9'];
+	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9', '000000'];
 
 	/**
 	 * @type {number}
@@ -114,23 +114,72 @@
 	function initPellet() {
 		console.log('Initalizing Your Pellet');
 		var options = {
-			top: 230,
-			left: 330
+			top: 0,
+			left: 0
 		};
+
 		// @ts-ignore
 		options.radius = 10;
 
-		userId = palette[fabric.util.getRandomInt(0, 6)];
+		userId = palette[fabric.util.getRandomInt(0, palette.length - 1)];
+
 		let circle = new fabric.Circle({
 			...options,
 			fill: `#${userId}`,
 			stroke: '#f9f9f9',
 			strokeWidth: 3,
-			strokeUniform: true
+			strokeUniform: true,
+			hasBorders: false,
+			hasContext: false
 		});
-		circle.hasBorders = circle.hasControls = false;
-		myCanvas.add(circle);
-		myPellet = circle;
+
+		let text = new fabric.Text(nickname, {
+			fontFamily: 'monospace',
+			left: circle.left + circle.radius + 18,
+			top: circle.top - circle.radius - 13,
+			fontSize: 14,
+			color: '#f9f9f9',
+			hasBorders: false,
+			hasContext: false,
+			opacity: 0.5
+		});
+
+		let rect = new fabric.Rect({
+			left: circle.left + circle.radius + 13,
+			top: circle.top - circle.radius - 18,
+			width: text.width + 10,
+			height: text.height + 10,
+			fill: `#${userId}`,
+			stroke: '#f9f9f9',
+			strokeWidth: 3,
+			strokeUniform: true,
+			hasBorders: false,
+			hasContext: false,
+			opacity: 0.5
+		});
+
+		let g = new fabric.Group([circle, rect, text], {
+			top: 230,
+			left: 330,
+			hasBorders: false,
+			hasControls: false
+		});
+
+		g.on({
+			mouseover: () => {
+				rect.set({ opacity: 1 });
+				text.set({ opacity: 1 });
+				myCanvas.renderAll();
+			},
+			mouseout: () => {
+				rect.set({ opacity: 0.5 });
+				text.set({ opacity: 0.5 });
+				myCanvas.renderAll();
+			}
+		});
+
+		myCanvas.add(g);
+		myPellet = g;
 
 		myCanvas.on({
 			'object:moving': function ({ target }) {
@@ -206,11 +255,11 @@
 	/**
 	 * @param {string} userId
 	 */
-	function initOtherPellet(userId) {
+	function initOtherPellet(userId, nickname) {
 		console.log('Initalizing Other Pellet: ' + userId);
 		var options = {
-			top: 230,
-			left: 330
+			top: 0,
+			left: 0
 		};
 		// @ts-ignore
 		options.radius = 10;
@@ -226,18 +275,52 @@
 			hasControls: false,
 			hasBorders: false
 		});
-		myCanvas.add(circle);
-		return circle;
+
+		let text = new fabric.Text(nickname, {
+			fontFamily: 'monospace',
+			left: circle.left + circle.radius + 18,
+			top: circle.top - circle.radius - 13,
+			fontSize: 14,
+			color: '#f9f9f9',
+			evented: false,
+			hasBorders: false,
+			hasContext: false
+		});
+
+		let rect = new fabric.Rect({
+			left: circle.left + circle.radius + 13,
+			top: circle.top - circle.radius - 18,
+			width: text.width + 10,
+			height: text.height + 10,
+			fill: `#${userId}`,
+			stroke: '#f9f9f9',
+			strokeWidth: 3,
+			strokeUniform: true,
+			evented: false,
+			hasBorders: false,
+			hasContext: false
+		});
+
+		let g = new fabric.Group([circle, rect, text], {
+			top: 230,
+			left: 330,
+			evented: false,
+			hasBorders: false,
+			hasControls: false
+		});
+
+		myCanvas.add(g);
+		return g;
 	}
 
 	/**
 	 * @param {string} otherUserId
 	 * @param {{ x: number; y: number; } | null} coords
 	 */
-	function updatePellet(otherUserId, coords) {
+	function updatePellet(otherUserId, coords, nickname) {
 		// New user
 		if (!others[otherUserId]) {
-			others[otherUserId] = { pellet: initOtherPellet(otherUserId), targets: [coords] };
+			others[otherUserId] = { pellet: initOtherPellet(otherUserId, nickname), targets: [coords] };
 		} else {
 			// known user
 			others[otherUserId].targets.push(coords);
@@ -318,7 +401,9 @@
 
 	function updateMyPellet() {
 		if (moving)
-			websocket.send(`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)}`);
+			websocket.send(
+				`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)} ${nickname}`
+			);
 	}
 
 	/**
@@ -376,7 +461,7 @@
 				if (!initialized) initialized = true;
 				else initPellet();
 			} else if (command == 'update') {
-				if (otherUserId != userId) updatePellet(otherUserId, coords);
+				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			}

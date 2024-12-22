@@ -8,7 +8,11 @@
 	import { onMount } from 'svelte';
 	import { fabric } from 'fabric';
 
+	import { page } from '$app/stores';
+
 	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9', '000000'];
+
+	export let spectrumId;
 
 	/**
 	 * @type {number}
@@ -56,6 +60,7 @@
 	let claim = '';
 
 	onMount(() => {
+		spectrumId = $page.params.id;
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
 		// Prepare Both Canvas
@@ -444,7 +449,7 @@
 	 * @param {string} line
 	 */
 	function parseCommand(line) {
-		const re = new RegExp(/^(ack|update|claim)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s(.+))?$/gu);
+		const re = new RegExp(/^(ack|update|claim|spectrum)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu);
 		const matches = [...line.matchAll(re)][0];
 
 		if (matches) {
@@ -464,7 +469,11 @@
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
+			} else if (command == 'spectrum') {
+				const s = matches[7].toString().split(' ');
+				startAdminMode(s[1]);
 			}
+
 		}
 	}
 
@@ -472,7 +481,27 @@
 
 	function setUsername() {
 		websocket.send('nickname ' + nickname);
+	}
+
+	let initialClaim;
+	function createSpectrum() {
+		claim = initialClaim;
+		initialClaim = '';
+		websocket.send('startspectrum');
+		document.getElementById('create-modal').style.display = 'none';
+	}
+
+	function joinSpectrum() {
+		websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
 		document.getElementById('join-modal').style.display = 'none';
+	}
+
+	let password;
+	let adminModeOn = false;
+	function startAdminMode(id) {
+		spectrumId = id;
+		console.log(`spectrumId = ${id}`);
+		adminModeOn = true;
 	}
 </script>
 
@@ -484,6 +513,7 @@
 
 <div class="w3-container w3-margin" style="font-family: monospace;">
 	<div class="w3-bar">
+		{#if !spectrumId}
 		<button
 			onclick="document.getElementById('join-modal').style.display='block'"
 			class="w3-bar-item w3-button w3-green">Join Spectrum</button
@@ -493,6 +523,9 @@
 			onclick="document.getElementById('create-modal').style.display='block'"
 			class="w3-bar-item w3-button w3-red w3-right">Create Spectrum</button
 		>
+		{:else}
+			Spectrum Started - ID: <a href="/spectrum/{spectrumId}" title="Spectrum link">{spectrumId}</a>
+		{/if}
 	</div>
 
 	<div id="join-modal" class="w3-modal">
@@ -506,18 +539,41 @@
 				>
 			</div>
 
-			<form class="w3-container" on:submit|preventDefault={setUsername}>
+			<form class="w3-container" on:submit|preventDefault={joinSpectrum}>
 				<div class="w3-section">
-					<label for="nickname"><b>Nickname</b></label>
+					<label for="spectrumId"><b>Spectrum ID</b></label>
 					<input
 						class="w3-input w3-border w3-margin-bottom"
 						type="text"
-						placeholder="Please enter a nickname (don't use your real name)"
-						bind:value={nickname}
-						id="nickname"
+						placeholder="Please enter the ID of the spectrum you want to join"
+						id="spectrumId"
+						bind:value={spectrumId}
 						style="width: 100%;"
 						required
 					/>
+					<hr/>
+					<label for="nickname1"><b>Nickname</b></label>
+					<input
+						class="w3-input w3-border w3-margin-bottom"
+						type="text"
+						placeholder="Please enter your nickname (don't use your real name)"
+						bind:value={nickname}
+						id="nickname1"
+						style="width: 100%;"
+						required
+					/>
+					<hr/>
+					<p><b>Pick a color</b></p>
+					<div class="w3-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+						{#each palette as color}
+						<div class="">
+							<label class="form-control">
+								<input class="w3-radio" type="radio" name="color" value={color} style="background-color: #{color} !important;">
+								{ color }
+							</label>
+						</div>
+						{/each}
+					</div>
 					<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
 						>Join Spectrum</button
 					>
@@ -545,8 +601,19 @@
 				>
 			</div>
 
-			<form class="w3-container">
+			<form class="w3-container" on:submit|preventDefault={createSpectrum}>
 				<div class="w3-section">
+					<label for="nickname2"><b>Nickname</b></label>
+					<input
+						class="w3-input w3-border w3-margin-bottom"
+						type="text"
+						placeholder="Please enter your nickname (don't use your real name)"
+						bind:value={nickname}
+						id="nickname2"
+						style="width: 100%;"
+						required
+					/>
+					<hr/>
 					<label for="claim"><b>Initial claim</b></label>
 					<input
 						class="w3-input w3-border w3-margin-bottom"
@@ -554,11 +621,12 @@
 						placeholder="Please enter the initial claim"
 						id="claim"
 						style="width: 100%;"
+						bind:value={initialClaim}
 						required
 					/>
 					<button
-						class="w3-button w3-block w3-green w3-section w3-disabled w3-padding"
-						type="submit">Not Available Yet</button
+						class="w3-button w3-block w3-green w3-section w3-padding"
+						type="submit">Create Spectrum</button
 					>
 				</div>
 			</form>
@@ -583,13 +651,14 @@
 			<input
 				name="claim"
 				class="w3-col w3-input"
-				style="width: 80%"
+				style="width: {adminModeOn ? '80' : '90'}%"
 				type="text"
+				readonly={!adminModeOn}
 				bind:value={claim}
 			/>
-			<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;"
-				>Update</button
-			>
+			{#if adminModeOn}
+			<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;">Update</button>
+			{/if}
 		</form>
 	</header>
 
@@ -608,4 +677,55 @@
 	input {
 		width: max-content;
 	}
+
+	.form-control {
+  font-family: system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  vertical-align:text-bottom;
+  display: grid;
+  grid-template-columns: 1.5rem auto;
+  gap: 0.5rem;
+}
+
+
+	input[type="radio"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  /* Remove most all native input styles */
+  appearance: none;
+  /* For iOS < 15 */
+  background-color: greenyellow;
+  /* Not removed via appearance */
+  margin: 0;
+
+  font: inherit;
+
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  transform: translateY(-0.075em);
+
+  display: grid;
+ 
+  place-content: center;
+}
+
+
+input[type="radio"]::before {
+  content: "";
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1rem 1rem rgb(244, 244, 244);
+  /* Windows High Contrast Mode */
+  /*background-color: CanvasText;*/
+}
+
+input[type="radio"]:checked::before {
+  transform: scale(1);
+}
+
 </style>

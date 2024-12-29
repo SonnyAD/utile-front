@@ -7,7 +7,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="%sveltekit.assets%/w3.css" />
 		<style>
-			footer {
+			#footer {
 				position: fixed;
 				left: 0;
 				bottom: 0;
@@ -22,7 +22,7 @@
 	<body data-sveltekit-preload-data="hover" class="w3-light-grey">
 		<div style="margin-bottom: 70px">%sveltekit.body%</div>
 
-		<footer class="" style="background: var(--madder-lake); color: white">
+		<footer id="footer" class="" style="background: var(--madder-lake); color: white">
 			<p>
 				utile.space v%sveltekit.env.PUBLIC_VERSION% &copy;
 				<script>

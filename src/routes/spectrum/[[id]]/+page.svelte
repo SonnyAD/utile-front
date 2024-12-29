@@ -114,6 +114,11 @@
 				myCanvas.sendToBack(g);
 			}
 		);
+
+		// We're joining a spectrum
+		if (spectrumId) {
+			toggleJoinModal();
+		}
 	});
 
 	function initPellet() {
@@ -404,8 +409,8 @@
 		fabric.util.requestAnimFrame(animate);
   	}*/
 
-	function updateMyPellet() {
-		if (moving)
+	function updateMyPellet(force = false) {
+		if (moving || force)
 			websocket.send(
 				`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)} ${nickname}`
 			);
@@ -450,7 +455,7 @@
 	 */
 	function parseCommand(line) {
 		const re = new RegExp(
-			/^(ack|update|claim|spectrum)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
+			/^(ack|update|claim|spectrum|newposition)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
 		);
 		const matches = [...line.matchAll(re)][0];
 
@@ -469,16 +474,27 @@
 				else initPellet();
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
+			} else if (command == 'newposition') {
+				myPellet.left = coords.x;
+				myPellet.top = coords.y;
+				myPellet.setCoords();
+				myCanvas.renderAll();
+				updateMyPellet(true);
+				moving = false;
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			} else if (command == 'spectrum') {
 				const s = matches[7].toString().split(' ');
-				startAdminMode(s[1]);
+				joinedSpectrum(s[1]);
 			}
 		}
 	}
 
 	function connectionLost() {}
+
+	function resetPositions() {
+		websocket.send('resetpositions');
+	}
 
 	let initialClaim;
 	function createSpectrum() {
@@ -486,18 +502,37 @@
 		initialClaim = '';
 		websocket.send('startspectrum');
 		document.getElementById('create-modal').style.display = 'none';
+		adminModeOn = true;
 	}
 
 	function joinSpectrum() {
 		websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
-		document.getElementById('join-modal').style.display = 'none';
+		toggleJoinModal();
 	}
 
 	let adminModeOn = false;
-	function startAdminMode(id) {
+	function joinedSpectrum(id) {
 		spectrumId = id;
 		console.log(`spectrumId = ${id}`);
-		adminModeOn = true;
+
+		if (!adminModeOn) {
+			initPellet();
+		}
+	}
+
+	let showJoinModal = false;
+	function toggleJoinModal() {
+		showJoinModal = !showJoinModal;
+	}
+
+	let showCreateModal = false;
+	function toggleCreateModal() {
+		showCreateModal = !showCreateModal;
+	}
+
+	function leaveSpectrum() {
+		websocket.send(`leavespectrum ${spectrumId}`);
+		spectrumId = undefined;
 	}
 </script>
 
@@ -507,140 +542,144 @@
 	subtitle="Online tool to help you run spectrum online with a party of 2 to 6 people"
 />
 
+<hr />
+
 <div class="w3-container w3-margin" style="font-family: monospace;">
 	<div class="w3-bar">
 		{#if !spectrumId}
-			<button
-				onclick="document.getElementById('join-modal').style.display='block'"
-				class="w3-bar-item w3-button w3-green">Join Spectrum</button
+			<button on:click={toggleJoinModal} class="w3-bar-item w3-button w3-green"
+				>Join Spectrum</button
 			>
 
-			<button
-				onclick="document.getElementById('create-modal').style.display='block'"
-				class="w3-bar-item w3-button w3-red w3-right">Create Spectrum</button
+			<button on:click={toggleCreateModal} class="w3-bar-item w3-button w3-red w3-right"
+				>Create Spectrum</button
 			>
 		{:else}
-			Spectrum Started - ID: <a href="/spectrum/{spectrumId}" title="Spectrum link">{spectrumId}</a>
+			Spectrum Joined &mdash; ID: <a href="/spectrum/{spectrumId}" title="Spectrum link"
+				>{spectrumId}</a
+			>
+
+			<button onclick={leaveSpectrum} class="w3-bar-item w3-button w3-red w3-right"
+				>Leave Spectrum</button
+			>
 		{/if}
 	</div>
 
-	<div id="join-modal" class="w3-modal">
-		<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
-			<div class="w3-center">
-				<br />
-				<span
-					onclick="document.getElementById('join-modal').style.display='none'"
-					class="w3-button w3-xlarge w3-hover-red w3-display-topright"
-					title="Close Modal">&times;</span
-				>
-			</div>
+	{#if showJoinModal}
+		<div id="join-modal" class="w3-modal" style="display: block;">
+			<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
+				<div class="w3-center">
+					<br />
+					<button
+						on:click={toggleJoinModal}
+						class="w3-button w3-xlarge w3-hover-red w3-display-topright"
+						title="Close Modal"
+						>&times;
+					</button>
+				</div>
 
-			<form class="w3-container" on:submit|preventDefault={joinSpectrum}>
-				<div class="w3-section">
-					<label for="spectrumId"><b>Spectrum ID</b></label>
-					<input
-						class="w3-input w3-border w3-margin-bottom"
-						type="text"
-						placeholder="Please enter the ID of the spectrum you want to join"
-						id="spectrumId"
-						bind:value={spectrumId}
-						style="width: 100%;"
-						required
-					/>
-					<hr />
-					<label for="nickname1"><b>Nickname</b></label>
-					<input
-						class="w3-input w3-border w3-margin-bottom"
-						type="text"
-						placeholder="Please enter your nickname (don't use your real name)"
-						bind:value={nickname}
-						id="nickname1"
-						style="width: 100%;"
-						required
-					/>
-					<hr />
-					<p><b>Pick a color</b></p>
-					<div class="w3-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-						{#each palette as color}
-							<div class="">
-								<label class="form-control">
-									<input
-										class="w3-radio"
-										type="radio"
-										name="color"
-										value={color}
-										style="background-color: #{color} !important;"
-									/>
-									{color}
-								</label>
-							</div>
-						{/each}
+				<form class="w3-container" on:submit|preventDefault={joinSpectrum}>
+					<div class="w3-section">
+						<label for="spectrumId"><b>Spectrum ID</b></label>
+						<input
+							class="w3-input w3-border w3-margin-bottom"
+							type="text"
+							placeholder="Please enter the ID of the spectrum you want to join"
+							id="spectrumId"
+							bind:value={spectrumId}
+							style="width: 100%;"
+							required
+						/>
+						<hr />
+						<label for="nickname1"><b>Nickname</b></label>
+						<input
+							class="w3-input w3-border w3-margin-bottom"
+							type="text"
+							placeholder="Please enter your nickname (don't use your real name)"
+							bind:value={nickname}
+							id="nickname1"
+							style="width: 100%;"
+							required
+						/>
+						<hr />
+						<p><b>Pick a color</b></p>
+						<div class="w3-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+							{#each palette as color}
+								<div class="">
+									<label class="form-control">
+										<input
+											class="w3-radio"
+											type="radio"
+											name="color"
+											value={color}
+											style="background-color: #{color} !important;"
+										/>
+										{color}
+									</label>
+								</div>
+							{/each}
+						</div>
+						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
+							>Join Spectrum</button
+						>
 					</div>
-					<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
-						>Join Spectrum</button
-					>
-				</div>
-			</form>
+				</form>
 
-			<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-				<button
-					onclick="document.getElementById('join-modal').style.display='none'"
-					type="button"
-					class="w3-button w3-red">Cancel</button
-				>
+				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+					<button on:click={toggleJoinModal} type="button" class="w3-button w3-red">Cancel</button>
+				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 
-	<div id="create-modal" class="w3-modal">
-		<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
-			<div class="w3-center">
-				<br />
-				<span
-					onclick="document.getElementById('create-modal').style.display='none'"
-					class="w3-button w3-xlarge w3-hover-red w3-display-topright"
-					title="Close Modal">&times;</span
-				>
-			</div>
-
-			<form class="w3-container" on:submit|preventDefault={createSpectrum}>
-				<div class="w3-section">
-					<label for="nickname2"><b>Nickname</b></label>
-					<input
-						class="w3-input w3-border w3-margin-bottom"
-						type="text"
-						placeholder="Please enter your nickname (don't use your real name)"
-						bind:value={nickname}
-						id="nickname2"
-						style="width: 100%;"
-						required
-					/>
-					<hr />
-					<label for="claim"><b>Initial claim</b></label>
-					<input
-						class="w3-input w3-border w3-margin-bottom"
-						type="text"
-						placeholder="Please enter the initial claim"
-						id="claim"
-						style="width: 100%;"
-						bind:value={initialClaim}
-						required
-					/>
-					<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
-						>Create Spectrum</button
+	{#if showCreateModal}
+		<div id="create-modal" class="w3-modal" style="display: block;">
+			<div class="w3-modal-content w3-card-4 w3-animate-zoom" style="max-width:600px">
+				<div class="w3-center">
+					<br />
+					<button
+						on:click={toggleCreateModal}
+						class="w3-button w3-xlarge w3-hover-red w3-display-topright"
+						title="Close Modal">&times;</button
 					>
 				</div>
-			</form>
 
-			<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-				<button
-					onclick="document.getElementById('create-modal').style.display='none'"
-					type="button"
-					class="w3-button w3-red">Cancel</button
-				>
+				<form class="w3-container" on:submit|preventDefault={createSpectrum}>
+					<div class="w3-section">
+						<label for="nickname2"><b>Nickname</b></label>
+						<input
+							class="w3-input w3-border w3-margin-bottom"
+							type="text"
+							placeholder="Please enter your nickname (don't use your real name)"
+							bind:value={nickname}
+							id="nickname2"
+							style="width: 100%;"
+							required
+						/>
+						<hr />
+						<label for="claim"><b>Initial claim</b></label>
+						<input
+							class="w3-input w3-border w3-margin-bottom"
+							type="text"
+							placeholder="Please enter the initial claim"
+							id="claim"
+							style="width: 100%;"
+							bind:value={initialClaim}
+							required
+						/>
+						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
+							>Create Spectrum</button
+						>
+					</div>
+				</form>
+
+				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
+					<button on:click={toggleCreateModal} type="button" class="w3-button w3-red">Cancel</button
+					>
+				</div>
 			</div>
 		</div>
-	</div>
+	{/if}
 </div>
 
 <div class="w3-card">
@@ -669,7 +708,13 @@
 		<canvas style="margin: auto;" id="spectrum"></canvas>
 	</div>
 
-	<footer class="w3-container"></footer>
+	<footer class="w3-container">
+		{#if adminModeOn}
+			<button class="w3-col w3-btn w3-red w3-round-large" on:click={resetPositions}
+				>Reset Positions</button
+			>
+		{/if}
+	</footer>
 </div>
 
 <style>

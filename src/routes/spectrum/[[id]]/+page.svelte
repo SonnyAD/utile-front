@@ -480,10 +480,6 @@
 
 	function connectionLost() {}
 
-	function setUsername() {
-		websocket.send('nickname ' + nickname);
-	}
-
 	let initialClaim;
 	function createSpectrum() {
 		claim = initialClaim;
@@ -497,7 +493,6 @@
 		document.getElementById('join-modal').style.display = 'none';
 	}
 
-	let password;
 	let adminModeOn = false;
 	function startAdminMode(id) {
 		spectrumId = id;

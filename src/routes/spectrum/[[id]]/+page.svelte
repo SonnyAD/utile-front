@@ -2,11 +2,13 @@
 	// @ts-nocheck
 
 	import Header from '$lib/components/Header.svelte';
+	import { notifier } from '$lib/notifications';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
 	import { getPlayerId } from '$lib/battleships/playerId';
 	import { onMount } from 'svelte';
 	import { fabric } from 'fabric';
+	import { copy } from 'svelte-copy';
 
 	import { page } from '$app/stores';
 
@@ -521,8 +523,12 @@
 	}
 
 	let showJoinModal = false;
+	let showSpectrumId = false;
 	function toggleJoinModal() {
 		showJoinModal = !showJoinModal;
+	}
+	function toggleShowSpectrumId() {
+		showSpectrumId = !showSpectrumId;
 	}
 
 	let showCreateModal = false;
@@ -534,6 +540,10 @@
 		websocket.send(`leavespectrum ${spectrumId}`);
 		spectrumId = undefined;
 	}
+
+	const copied = () => {
+		notifier.success('Spectrum link copied to clipboard!');
+	};
 </script>
 
 <Header
@@ -547,20 +557,36 @@
 <div class="w3-container w3-margin" style="font-family: monospace;">
 	<div class="w3-bar">
 		{#if !spectrumId}
-			<button on:click={toggleJoinModal} class="w3-bar-item w3-button w3-green"
+			<button on:click={toggleJoinModal} class="w3-bar-item w3-button w3-green w3-round w3-left"
 				>Join Spectrum</button
 			>
 
-			<button on:click={toggleCreateModal} class="w3-bar-item w3-button w3-red w3-right"
+			<button on:click={toggleCreateModal} class="w3-bar-item w3-button w3-red w3-round w3-right"
 				>Create Spectrum</button
 			>
 		{:else}
-			Spectrum Joined &mdash; ID: <a href="/spectrum/{spectrumId}" title="Spectrum link"
-				>{spectrumId}</a
-			>
+			<span class="w3-bar-item w3-left">
+				Spectrum Joined &mdash; ID=<b>{showSpectrumId ? spectrumId : 'OSR-****'}</b><button
+					class={showSpectrumId ? 'forbidden' : ''}
+					style="background: none; border: none; outline: none; box-shadow: none;"
+					on:click={toggleShowSpectrumId}>👁️</button
+				>
+			</span>
 
-			<button onclick={leaveSpectrum} class="w3-bar-item w3-button w3-red w3-right"
-				>Leave Spectrum</button
+			<button
+				class="w3-button w3-bar-item w3-round w3-green"
+				use:copy={'https://utile.space/spectrum/' + spectrumId}
+				on:svelte-copy={() => copied()}
+			>
+				Copy Link
+			</button>
+
+			<a
+				onclick={leaveSpectrum}
+				data-sveltekit-reload
+				title="Leave Spectrum"
+				href="/spectrum"
+				class="w3-bar-item w3-round w3-button w3-red w3-right">Leave Spectrum</a
 			>
 		{/if}
 	</div>
@@ -772,5 +798,12 @@
 
 	input[type='radio']:checked::before {
 		transform: scale(1);
+	}
+
+	.forbidden::after {
+		content: '🚫';
+		position: relative;
+		left: -1rem;
+		top: 0;
 	}
 </style>

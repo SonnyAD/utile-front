@@ -12,7 +12,7 @@
 
 	import { page } from '$app/stores';
 
-	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9', '000000'];
+	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9', 'aeaeae'];
 
 	export let spectrumId;
 
@@ -104,7 +104,7 @@
 
 				const svgObjects = svg.getObjects();
 
-				for (let i = 2; i <= 10; i++) {
+				for (let i = 0; i <= 8; i++) {
 					cells.push(svgObjects[i]);
 
 					if (svgObjects[i].id == 'notReplied') {

@@ -62,7 +62,9 @@
 	let claim = '';
 	let scale;
 
-	$: { scale = canvasWidth / 800;}
+	$: {
+		scale = canvasWidth / 800;
+	}
 
 	onMount(() => {
 		spectrumId = $page.params.id;
@@ -101,7 +103,7 @@
 				g.addWithUpdate(svg);
 
 				g.top = 15;
-				
+
 				g.selectable = false;
 				g.evented = false;
 
@@ -542,7 +544,7 @@
 	}
 
 	const copied = () => {
-		notifier.success('Spectrum link copied to clipboard!');
+		notifier.success('Lien du Spectrum copié!');
 	};
 </script>
 
@@ -563,8 +565,8 @@
 <hr />
 
 <div class="w3-container w3-margin" style="font-family: monospace;">
-	<div class="w3-bar">
-		{#if !spectrumId}
+	{#if !spectrumId}
+		<div class="w3-bar">
 			<button on:click={toggleJoinModal} class="w3-bar-item w3-button w3-green w3-round w3-left"
 				>Rejoindre un Spectrum</button
 			>
@@ -572,15 +574,19 @@
 			<button on:click={toggleCreateModal} class="w3-bar-item w3-button w3-red w3-round w3-right"
 				>Créer un Spectrum</button
 			>
-		{:else}
+		</div>
+	{:else}
+		<div class="w3-bar">
 			<span class="w3-bar-item w3-left">
-				Spectrum en cours &mdash; identifiant=<b>{showSpectrumId ? spectrumId : 'OSR-****'}</b><button
+				Spectrum en cours &mdash; identifiant=<b>{showSpectrumId ? spectrumId : 'OSR-****'}</b
+				><button
 					class={showSpectrumId ? 'forbidden' : ''}
 					style="background: none; border: none; outline: none; box-shadow: none;"
 					on:click={toggleShowSpectrumId}>👁️</button
 				>
 			</span>
-
+		</div>
+		<div class="w3-bar">
 			<button
 				class="w3-button w3-bar-item w3-round w3-green"
 				use:copy={'https://utile.space/spectrum/' + spectrumId}
@@ -596,8 +602,8 @@
 				href="/spectrum"
 				class="w3-bar-item w3-round w3-button w3-red w3-right">Quitter le Spectrum</a
 			>
-		{/if}
-	</div>
+		</div>
+	{/if}
 
 	{#if showJoinModal}
 		<div id="join-modal" class="w3-modal" style="display: block;">
@@ -710,7 +716,8 @@
 				</form>
 
 				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-					<button on:click={toggleCreateModal} type="button" class="w3-button w3-red">Annuler</button
+					<button on:click={toggleCreateModal} type="button" class="w3-button w3-red"
+						>Annuler</button
 					>
 				</div>
 			</div>

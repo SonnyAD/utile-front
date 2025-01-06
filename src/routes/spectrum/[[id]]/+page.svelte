@@ -524,6 +524,11 @@
 		}
 	}
 
+	function setAdminModeOn() {
+		adminModeOn = true;
+	}
+	window.setAdminModeOn = setAdminModeOn;
+
 	let showJoinModal = false;
 	let showSpectrumId = false;
 	function toggleJoinModal() {

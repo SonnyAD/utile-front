@@ -34,7 +34,7 @@
 	/**
 	 * @type {number}
 	 */
-	const updateTick = 125;
+	const updateTick = 80;
 
 	/**
 	 * @type {WebSocket}
@@ -106,10 +106,6 @@
 
 				for (let i = 0; i <= 8; i++) {
 					cells.push(svgObjects[i]);
-
-					if (svgObjects[i].id == 'notReplied') {
-						console.log(svgObjects[i].path);
-					}
 				}
 
 				myCanvas.add(g);
@@ -133,7 +129,8 @@
 		// @ts-ignore
 		options.radius = 10;
 
-		userId = palette[fabric.util.getRandomInt(0, palette.length - 1)];
+		// only if not assigned, then random
+		if (!userId) userId = palette[fabric.util.getRandomInt(0, palette.length - 1)];
 
 		let circle = new fabric.Circle({
 			...options,
@@ -638,6 +635,7 @@
 											type="radio"
 											name="color"
 											value={color}
+											bind:group={userId}
 											style="background-color: #{color} !important;"
 										/>
 										{color}

@@ -543,10 +543,18 @@
 	};
 </script>
 
+<!-- EN/US
 <Header
 	bind:clientWidth={canvasWidth}
 	title="Spectrum"
 	subtitle="Online tool to help you run spectrum online with a party of 2 to 6 people"
+/>
+-->
+
+<Header
+	bind:clientWidth={canvasWidth}
+	title="Spectrum"
+	subtitle="Outil pour vous aider à faire un spectrum en ligne avec 2 à 6 participants"
 />
 
 <hr />
@@ -555,15 +563,15 @@
 	<div class="w3-bar">
 		{#if !spectrumId}
 			<button on:click={toggleJoinModal} class="w3-bar-item w3-button w3-green w3-round w3-left"
-				>Join Spectrum</button
+				>Rejoindre un Spectrum</button
 			>
 
 			<button on:click={toggleCreateModal} class="w3-bar-item w3-button w3-red w3-round w3-right"
-				>Create Spectrum</button
+				>Créer un Spectrum</button
 			>
 		{:else}
 			<span class="w3-bar-item w3-left">
-				Spectrum Joined &mdash; ID=<b>{showSpectrumId ? spectrumId : 'OSR-****'}</b><button
+				Spectrum en cours &mdash; identifiant=<b>{showSpectrumId ? spectrumId : 'OSR-****'}</b><button
 					class={showSpectrumId ? 'forbidden' : ''}
 					style="background: none; border: none; outline: none; box-shadow: none;"
 					on:click={toggleShowSpectrumId}>👁️</button
@@ -575,7 +583,7 @@
 				use:copy={'https://utile.space/spectrum/' + spectrumId}
 				on:svelte-copy={() => copied()}
 			>
-				Copy Link
+				Copier Lien
 			</button>
 
 			<a
@@ -583,7 +591,7 @@
 				data-sveltekit-reload
 				title="Leave Spectrum"
 				href="/spectrum"
-				class="w3-bar-item w3-round w3-button w3-red w3-right">Leave Spectrum</a
+				class="w3-bar-item w3-round w3-button w3-red w3-right">Quitter le Spectrum</a
 			>
 		{/if}
 	</div>
@@ -603,29 +611,29 @@
 
 				<form class="w3-container" on:submit|preventDefault={joinSpectrum}>
 					<div class="w3-section">
-						<label for="spectrumId"><b>Spectrum ID</b></label>
+						<label for="spectrumId"><b>Identifiant du Spectrum</b></label>
 						<input
 							class="w3-input w3-border w3-margin-bottom"
 							type="text"
-							placeholder="Please enter the ID of the spectrum you want to join"
+							placeholder="Veuillez entrer l'identifiant du spectrum que vous voulez rejoindre"
 							id="spectrumId"
 							bind:value={spectrumId}
 							style="width: 100%;"
 							required
 						/>
 						<hr />
-						<label for="nickname1"><b>Nickname</b></label>
+						<label for="nickname1"><b>Pseudo</b></label>
 						<input
 							class="w3-input w3-border w3-margin-bottom"
 							type="text"
-							placeholder="Please enter your nickname (don't use your real name)"
+							placeholder="Veuillez entrer un pseudo (n'utilisez pas votre nom réel)"
 							bind:value={nickname}
 							id="nickname1"
 							style="width: 100%;"
 							required
 						/>
 						<hr />
-						<p><b>Pick a color</b></p>
+						<p><b>Choisissez une couleur</b></p>
 						<div class="w3-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
 							{#each palette as color}
 								<div class="">
@@ -644,13 +652,13 @@
 							{/each}
 						</div>
 						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
-							>Join Spectrum</button
+							>Rejoindre le Spectrum</button
 						>
 					</div>
 				</form>
 
 				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-					<button on:click={toggleJoinModal} type="button" class="w3-button w3-red">Cancel</button>
+					<button on:click={toggleJoinModal} type="button" class="w3-button w3-red">Annuler</button>
 				</div>
 			</div>
 		</div>
@@ -670,18 +678,18 @@
 
 				<form class="w3-container" on:submit|preventDefault={createSpectrum}>
 					<div class="w3-section">
-						<label for="nickname2"><b>Nickname</b></label>
+						<label for="nickname2"><b>Pseudo</b></label>
 						<input
 							class="w3-input w3-border w3-margin-bottom"
 							type="text"
-							placeholder="Please enter your nickname (don't use your real name)"
+							placeholder="Veuillez entrer un pseudo (n'utilisez pas votre nom réel)"
 							bind:value={nickname}
 							id="nickname2"
 							style="width: 100%;"
 							required
 						/>
 						<hr />
-						<label for="claim"><b>Initial claim</b></label>
+						<!--<label for="claim"><b>Initial claim</b></label>
 						<input
 							class="w3-input w3-border w3-margin-bottom"
 							type="text"
@@ -691,14 +699,15 @@
 							bind:value={initialClaim}
 							required
 						/>
+						-->
 						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
-							>Create Spectrum</button
+							>Créer un Spectrum</button
 						>
 					</div>
 				</form>
 
 				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-					<button on:click={toggleCreateModal} type="button" class="w3-button w3-red">Cancel</button
+					<button on:click={toggleCreateModal} type="button" class="w3-button w3-red">Annuler</button
 					>
 				</div>
 			</div>
@@ -735,7 +744,7 @@
 	<footer class="w3-container">
 		{#if adminModeOn}
 			<button class="w3-col w3-btn w3-red w3-round-large" on:click={resetPositions}
-				>Reset Positions</button
+				>Reset les Positions</button
 			>
 		{/if}
 	</footer>

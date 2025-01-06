@@ -67,6 +67,11 @@
 	}
 
 	onMount(() => {
+		window.setAdminModeOn = () => { 
+			websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
+			adminModeOn = true; 
+		};
+
 		spectrumId = $page.params.id;
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
 
@@ -479,9 +484,11 @@
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'newposition') {
-				myPellet.left = coords.x;
-				myPellet.top = coords.y;
-				myPellet.setCoords();
+				if(myPellet) {
+					myPellet.left = coords.x;
+					myPellet.top = coords.y;
+					myPellet.setCoords();
+				}
 				myCanvas.renderAll();
 				updateMyPellet(true);
 				moving = false;
@@ -523,11 +530,6 @@
 			initPellet();
 		}
 	}
-
-	function setAdminModeOn() {
-		adminModeOn = true;
-	}
-	window.setAdminModeOn = setAdminModeOn;
 
 	let showJoinModal = false;
 	let showSpectrumId = false;

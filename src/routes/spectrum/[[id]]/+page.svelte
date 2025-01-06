@@ -12,7 +12,23 @@
 
 	import { page } from '$app/stores';
 
-	const palette = ['ffe680', 'ff9955', 'ff5555', 'aade87', 'aaeeff', 'c6afe9', 'aeaeae'];
+	const palette = [
+		'aeaeae', // Neutral gray
+		'ff5555', // Bright red
+		'cd5334', // Burnt orange
+		'ff9955', // Vibrant orange
+		'ffe680', // Soft yellow
+		'2d3319', // Dark olive
+		'aade87', // Light green
+		'7ee081', // Vibrant green
+		'9fd8cb', // Pale teal
+		'17bebb', // Bright teal
+		'aaeeff', // Light cyan
+		'c6afe9', // Soft lavender
+		'4b1d3f', // Deep purple
+		'985f6f', // Muted mauve
+		'f6e8ea' // Light pink
+	];
 
 	export let spectrumId;
 
@@ -67,9 +83,9 @@
 	}
 
 	onMount(() => {
-		window.setAdminModeOn = () => { 
+		window.setAdminModeOn = () => {
 			websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
-			adminModeOn = true; 
+			adminModeOn = true;
 		};
 
 		spectrumId = $page.params.id;
@@ -484,7 +500,7 @@
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'newposition') {
-				if(myPellet) {
+				if (myPellet) {
 					myPellet.left = coords.x;
 					myPellet.top = coords.y;
 					myPellet.setCoords();

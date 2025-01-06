@@ -60,6 +60,9 @@
 	const others = {};
 
 	let claim = '';
+	let scale;
+
+	$: { scale = canvasWidth / 800;}
 
 	onMount(() => {
 		spectrumId = $page.params.id;
@@ -87,18 +90,18 @@
 				// @ts-ignore
 				const svg = fabric.util.groupSVGElements(objects, options);
 
+				let canvasHeight = (canvasWidth * 600) / 800;
 				let g = new fabric.Group([], {
-					width: 800,
-					height: 600
+					width: canvasWidth,
+					height: canvasHeight
 				});
 
-				svg.scaleToHeight(g.height);
+				svg.scaleToWidth(g.width);
 
 				g.addWithUpdate(svg);
 
-				g.left = 36;
-				g.top = 10;
-
+				g.top = 15;
+				
 				g.selectable = false;
 				g.evented = false;
 
@@ -202,19 +205,19 @@
 						let pathPoint = cell.path[index];
 
 						let p = [
-							pathPoint[pathPoint.length - 2] * cell.scaleX - 18,
-							pathPoint[pathPoint.length - 1] * cell.scaleY - 55
+							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 40,
+							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 80
 						];
 						points.push(p);
 					}
 
-					if (cell.id == 'notReplied') {
+					/*if (cell.id == 'neutral') {
 						console.log(points);
-					}
+					}*/
 
 					if (pointInPolygon(points, [myPellet.left, myPellet.top])) {
 						cell.set({ fill: 'blue' });
-						console.log(cell);
+						//console.log(cell);
 					} else {
 						if (cell.id == 'notReplied' || cell.id == 'indifferent') {
 							cell.set({ fill: '#cccccc' });

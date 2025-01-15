@@ -22,7 +22,7 @@
 		"@playwright/test": "^1.49.1",
 		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/adapter-node": "^5.2.9",
-		"@sveltejs/kit": "^2.9.0",
+		"@sveltejs/kit": "^2.15.3",
 		"@sveltejs/vite-plugin-svelte": "^3.1.2",
 		"eslint": "^9.12.0",
 		"eslint-config-prettier": "^9.1.0",

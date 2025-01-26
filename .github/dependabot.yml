@@ -13,3 +13,7 @@ updates:
     directory: '/'
     schedule:
       interval: 'daily'
+    ignore:
+      - dependency-name: "fabric"
+        versions:
+          - ">=6.0.0"

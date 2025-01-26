@@ -11,6 +11,7 @@
 	import { copy } from 'svelte-copy';
 
 	import { page } from '$app/stores';
+	import { PUBLIC_URL } from '$lib/Env';
 
 	const palette = [
 		'aeaeae', // Neutral gray
@@ -506,7 +507,12 @@
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			} else if (command == 'spectrum') {
-				joinedSpectrum(matches[7]);
+				const s = matches[7].toString().split(' ');
+				console.log(s[1])
+				if(s[1] == 'true') {
+					adminModeOn = true;
+				} 
+				joinedSpectrum(s[0]);
 			}
 		}
 	}
@@ -606,19 +612,16 @@
 		<div class="w3-bar">
 			<button
 				class="w3-button w3-bar-item w3-round w3-green"
-				use:copy={'https://utile.space/spectrum/' + spectrumId}
+				use:copy={ PUBLIC_URL + '/spectrum/' + spectrumId}
 				on:svelte-copy={() => copied()}
 			>
 				Copier Lien
 			</button>
 
-			<a
-				onclick={leaveSpectrum}
-				data-sveltekit-reload
-				title="Leave Spectrum"
-				href="/spectrum"
-				class="w3-bar-item w3-round w3-button w3-red w3-right">Quitter le Spectrum</a
-			>
+			<button
+				on:click={leaveSpectrum}
+				class="w3-bar-item w3-round w3-button w3-red w3-right"
+			>Quitter le Spectrum</button>
 		</div>
 	{/if}
 
@@ -787,10 +790,18 @@
 		<canvas style="margin: auto;" id="spectrum"></canvas>
 	</div>
 
-	<footer class="w3-container">
+	<footer class="w3-bar">
 		{#if adminModeOn}
-			<button class="w3-col w3-btn w3-red w3-round-large" on:click={resetPositions}
+			<button class="w3-bar-item w3-mobile w3-button w3-amber w3-round-large w3-monospace" on:click={resetPositions}
 				>Reset les Positions</button
+			>
+
+			<button class="w3-bar-item w3-mobile w3-button w3-deep-orange w3-round-large w3-monospace w3-disabled"
+				>Kick utilisateur</button
+			>
+
+			<button class="w3-bar-item w3-mobile w3-button w3-red w3-round-large w3-monospace w3-disabled"
+				>Clôturer le Spectrum</button
 			>
 		{/if}
 	</footer>

@@ -23,7 +23,7 @@
 		'9fd8cb', // Pale teal
 		'aaeeff', // Light cyan
 		'c6afe9', // Soft lavender
-		'985f6f', // Muted mauve
+		'985f6f' // Muted mauve
 	];
 
 	export let spectrumId;
@@ -508,10 +508,10 @@
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			} else if (command == 'spectrum') {
 				const s = matches[7].toString().split(' ');
-				console.log(s[1])
-				if(s[1] == 'true') {
+				console.log(s[1]);
+				if (s[1] == 'true') {
 					adminModeOn = true;
-				} 
+				}
 				joinedSpectrum(s[0]);
 			}
 		}
@@ -612,16 +612,15 @@
 		<div class="w3-bar">
 			<button
 				class="w3-button w3-bar-item w3-round w3-green"
-				use:copy={ PUBLIC_URL + '/spectrum/' + spectrumId}
+				use:copy={PUBLIC_URL + '/spectrum/' + spectrumId}
 				on:svelte-copy={() => copied()}
 			>
 				Copier Lien
 			</button>
 
-			<button
-				on:click={leaveSpectrum}
-				class="w3-bar-item w3-round w3-button w3-red w3-right"
-			>Quitter le Spectrum</button>
+			<button on:click={leaveSpectrum} class="w3-bar-item w3-round w3-button w3-red w3-right"
+				>Quitter le Spectrum</button
+			>
 		</div>
 	{/if}
 
@@ -792,11 +791,13 @@
 
 	<footer class="w3-bar">
 		{#if adminModeOn}
-			<button class="w3-bar-item w3-mobile w3-button w3-amber w3-round-large w3-monospace" on:click={resetPositions}
-				>Reset les Positions</button
+			<button
+				class="w3-bar-item w3-mobile w3-button w3-amber w3-round-large w3-monospace"
+				on:click={resetPositions}>Reset les Positions</button
 			>
 
-			<button class="w3-bar-item w3-mobile w3-button w3-deep-orange w3-round-large w3-monospace w3-disabled"
+			<button
+				class="w3-bar-item w3-mobile w3-button w3-deep-orange w3-round-large w3-monospace w3-disabled"
 				>Kick utilisateur</button
 			>
 

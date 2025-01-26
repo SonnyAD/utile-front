@@ -46,7 +46,7 @@
 	/**
 	 * @type {number}
 	 */
-	const updateTick = 80;
+	const updateTick = 100;
 
 	/**
 	 * @type {WebSocket}

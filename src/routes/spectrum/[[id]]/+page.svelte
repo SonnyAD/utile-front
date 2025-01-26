@@ -15,19 +15,14 @@
 	const palette = [
 		'aeaeae', // Neutral gray
 		'ff5555', // Bright red
-		'cd5334', // Burnt orange
+		'cd5334', // Burnt oran*-ge
 		'ff9955', // Vibrant orange
 		'ffe680', // Soft yellow
-		'2d3319', // Dark olive
 		'aade87', // Light green
-		'7ee081', // Vibrant green
 		'9fd8cb', // Pale teal
-		'17bebb', // Bright teal
 		'aaeeff', // Light cyan
 		'c6afe9', // Soft lavender
-		'4b1d3f', // Deep purple
 		'985f6f', // Muted mauve
-		'f6e8ea' // Light pink
 	];
 
 	export let spectrumId;
@@ -511,8 +506,7 @@
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			} else if (command == 'spectrum') {
-				const s = matches[7].toString().split(' ');
-				joinedSpectrum(s[1]);
+				joinedSpectrum(matches[7]);
 			}
 		}
 	}
@@ -527,13 +521,13 @@
 	function createSpectrum() {
 		claim = initialClaim;
 		initialClaim = '';
-		websocket.send('startspectrum');
+		websocket.send('startspectrum ' + userId);
 		document.getElementById('create-modal').style.display = 'none';
 		adminModeOn = true;
 	}
 
 	function joinSpectrum() {
-		websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
+		websocket.send(`joinspectrum ${spectrumId} ${nickname} ${userId}`);
 		toggleJoinModal();
 	}
 
@@ -666,10 +660,10 @@
 						/>
 						<hr />
 						<p><b>Choisissez une couleur</b></p>
-						<div class="w3-container" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+						<div class="w3-container" style="display: flex; flex-wrap: wrap;">
 							{#each palette as color}
-								<div class="">
-									<label class="form-control">
+								<div style="margin: 6px">
+									<label class="form-control w3-monospace">
 										<input
 											class="w3-radio"
 											type="radio"
@@ -732,6 +726,25 @@
 							required
 						/>
 						-->
+						<hr />
+						<p><b>Choisissez une couleur</b></p>
+						<div class="w3-container" style="display: flex; flex-wrap: wrap;">
+							{#each palette as color}
+								<div style="margin: 6px">
+									<label class="form-control w3-monospace">
+										<input
+											class="w3-radio"
+											type="radio"
+											name="color"
+											value={color}
+											bind:group={userId}
+											style="background-color: #{color} !important;"
+										/>
+										{color}
+									</label>
+								</div>
+							{/each}
+						</div>
 						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
 							>Créer un Spectrum</button
 						>

@@ -374,6 +374,19 @@
 		};
 	}
 
+	function deletePellet(otherUserId) {
+		if (others[otherUserId].cancel) {
+			others[otherUserId].cancel();
+		}
+
+		if (others[otherUserId].pellet) {
+			myCanvas.remove(others[otherUserId].pellet);
+			myCanvas.renderAll();
+		}
+
+		delete others[otherUserId];
+	}
+
 	function updateClaim(event) {
 		if (websocket) {
 			const data = new FormData(event.currentTarget);
@@ -476,7 +489,7 @@
 	 */
 	function parseCommand(line) {
 		const re = new RegExp(
-			/^(ack|update|claim|spectrum|newposition)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
+			/^(ack|update|claim|spectrum|newposition|userleft)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
 		);
 		const matches = [...line.matchAll(re)][0];
 
@@ -495,6 +508,8 @@
 				else initPellet();
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
+			} else if (command == 'userleft') {
+				if (otherUserId != userId) deletePellet(otherUserId);
 			} else if (command == 'newposition') {
 				if (myPellet) {
 					myPellet.left = coords.x;

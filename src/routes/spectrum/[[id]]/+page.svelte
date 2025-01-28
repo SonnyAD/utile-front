@@ -489,7 +489,7 @@
 	 */
 	function parseCommand(line) {
 		const re = new RegExp(
-			/^(ack|update|claim|spectrum|newposition|userleft)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
+			/^(ack|nack|update|claim|spectrum|newposition|userleft)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
 		);
 		const matches = [...line.matchAll(re)][0];
 
@@ -506,6 +506,10 @@
 			if (command == 'ack') {
 				if (!initialized) initialized = true;
 				else initPellet();
+			} else if (command == 'nack') {
+				if (showJoinModal) {
+					notifier.danger("Désolé, couleur déjà prise par quelqu'un d'autre, veuillez en choisir une autre.")
+				}
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
@@ -522,6 +526,7 @@
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			} else if (command == 'spectrum') {
+				showJoinModal = false;
 				const s = matches[7].toString().split(' ');
 				console.log(s[1]);
 				if (s[1] == 'true') {
@@ -549,7 +554,6 @@
 
 	function joinSpectrum() {
 		websocket.send(`joinspectrum ${spectrumId} ${nickname} ${userId}`);
-		toggleJoinModal();
 	}
 
 	let adminModeOn = false;

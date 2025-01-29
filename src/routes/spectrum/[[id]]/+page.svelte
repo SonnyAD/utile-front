@@ -508,7 +508,9 @@
 				else initPellet();
 			} else if (command == 'nack') {
 				if (showJoinModal) {
-					notifier.danger("Désolé, couleur déjà prise par quelqu'un d'autre, veuillez en choisir une autre.")
+					notifier.danger(
+						"Désolé, couleur déjà prise par quelqu'un d'autre, veuillez en choisir une autre."
+					);
 				}
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);

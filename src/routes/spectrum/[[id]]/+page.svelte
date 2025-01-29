@@ -529,9 +529,10 @@
 				if (otherUserId != userId) receivedClaim(matches[7]);
 			} else if (command == 'spectrum') {
 				showJoinModal = false;
+				userId = matches[3];
 				const s = matches[7].toString().split(' ');
-				console.log(s[1]);
-				if (s[1] == 'true') {
+				nickname = s[1];
+				if (s[2] == 'true') {
 					adminModeOn = true;
 				}
 				joinedSpectrum(s[0]);
@@ -549,7 +550,7 @@
 	function createSpectrum() {
 		claim = initialClaim;
 		initialClaim = '';
-		websocket.send('startspectrum ' + userId);
+		websocket.send(`startspectrum ${nickname} ${userId}`);
 		document.getElementById('create-modal').style.display = 'none';
 		adminModeOn = true;
 	}

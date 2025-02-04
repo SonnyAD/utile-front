@@ -13,18 +13,19 @@
 	import { page } from '$app/stores';
 	import { PUBLIC_URL } from '$lib/Env';
 
-	const palette = [
-		'aeaeae', // Neutral gray
-		'ff5555', // Bright red
-		'cd5334', // Burnt oran*-ge
-		'ff9955', // Vibrant orange
-		'ffe680', // Soft yellow
-		'aade87', // Light green
-		'9fd8cb', // Pale teal
-		'aaeeff', // Light cyan
-		'c6afe9', // Soft lavender
-		'985f6f' // Muted mauve
-	];
+
+	const palette = {
+		'aeaeae': 'Gris  ', // Neutral gray 
+		'cd5334': 'Brun  ', // Burnt orange
+		'ff5555': 'Rouge ', // Bright red
+		'ff9955': 'Orange', // Vibrant orange		
+		'ffe680': 'Jaune ', // Soft yellow
+		'aade87': 'Vert  ', // Light green
+		'aaeeff': 'Bleu  ', // Light cyan
+		'4b0082': 'Indigo', // Indigo
+		'c6afe9': 'Violet', // Soft lavender
+		'd473d4': 'Mauve ' // Muted mauve
+	};
 
 	export let spectrumId;
 
@@ -152,7 +153,7 @@
 		options.radius = 10;
 
 		// only if not assigned, then random
-		if (!userId) userId = palette[fabric.util.getRandomInt(0, palette.length - 1)];
+		if (!userId) userId = Object.keys(palette)[fabric.util.getRandomInt(0, Object.keys(palette).length - 1)];
 
 		let circle = new fabric.Circle({
 			...options,
@@ -553,6 +554,7 @@
 		websocket.send(`startspectrum ${nickname} ${userId}`);
 		document.getElementById('create-modal').style.display = 'none';
 		adminModeOn = true;
+		websocket.send(`claim ${claim}`);
 	}
 
 	function joinSpectrum() {
@@ -586,6 +588,7 @@
 	function leaveSpectrum() {
 		websocket.send(`leavespectrum ${spectrumId}`);
 		spectrumId = undefined;
+		adminModeOn = false;
 	}
 
 	const copied = () => {
@@ -685,18 +688,18 @@
 						<hr />
 						<p><b>Choisissez une couleur</b></p>
 						<div class="w3-container" style="display: flex; flex-wrap: wrap;">
-							{#each palette as color}
+							{#each Object.entries(palette) as [colorHex, colorName]}
 								<div style="margin: 6px">
 									<label class="form-control w3-monospace">
 										<input
 											class="w3-radio"
 											type="radio"
 											name="color"
-											value={color}
+											value={colorHex}
 											bind:group={userId}
-											style="background-color: #{color} !important;"
+											style="background-color: #{colorHex} !important;"
 										/>
-										{color}
+										{@html colorName.replace(/ /g, '&nbsp;')}
 									</label>
 								</div>
 							{/each}
@@ -739,32 +742,31 @@
 							required
 						/>
 						<hr />
-						<!--<label for="claim"><b>Initial claim</b></label>
+						<label for="claim"><b>Claim initial</b></label>
 						<input
 							class="w3-input w3-border w3-margin-bottom"
 							type="text"
-							placeholder="Please enter the initial claim"
+							placeholder="Veuillez entrer le claim"
 							id="claim"
 							style="width: 100%;"
 							bind:value={initialClaim}
 							required
 						/>
-						-->
 						<hr />
 						<p><b>Choisissez une couleur</b></p>
 						<div class="w3-container" style="display: flex; flex-wrap: wrap;">
-							{#each palette as color}
+							{#each Object.entries(palette) as [colorHex, colorName]}
 								<div style="margin: 6px">
 									<label class="form-control w3-monospace">
 										<input
 											class="w3-radio"
 											type="radio"
 											name="color"
-											value={color}
+											value={colorHex}
 											bind:group={userId}
-											style="background-color: #{color} !important;"
+											style="background-color: #{colorHex} !important;"
 										/>
-										{color}
+										{@html colorName.replace(/ /g, '&nbsp;')}
 									</label>
 								</div>
 							{/each}
@@ -793,34 +795,29 @@
 			>
 			<input
 				name="claim"
-				class="w3-col w3-input"
-				style="width: {adminModeOn ? '80' : '90'}%"
+				class="w3-col w3-input w3-border-0"
+				style="width: {adminModeOn ? '80' : '90'}%; z-index: 100;"
 				type="text"
 				readonly={!adminModeOn}
 				bind:value={claim}
 			/>
 			{#if adminModeOn}
-				<button class="w3-col w3-btn" style="width: 10%; padding-left: 0; padding-right: 0;"
+				<button class="w3-col w3-button" style="width: 10%; padding-left: 0; padding-right: 0;"
 					>Update</button
 				>
 			{/if}
 		</form>
 	</header>
 
-	<div class="w3-container w3-border" style="display: flex; flex-direction: column; padding: 0;">
+	<div class="w3-container w3-border-top" style="display: flex; flex-direction: column; padding: 0;">
 		<canvas style="margin: auto;" id="spectrum"></canvas>
 	</div>
 
-	<footer class="w3-bar">
+	<footer class="w3-bar" class:w3-padding={adminModeOn}>
 		{#if adminModeOn}
 			<button
-				class="w3-bar-item w3-mobile w3-button w3-amber w3-round-large w3-monospace"
+				class="w3-bar-item w3-mobile w3-button w3-amber w3-round-large w3-monospace w3-margin-right"
 				on:click={resetPositions}>Reset les Positions</button
-			>
-
-			<button
-				class="w3-bar-item w3-mobile w3-button w3-deep-orange w3-round-large w3-monospace w3-disabled"
-				>Kick utilisateur</button
 			>
 
 			<button class="w3-bar-item w3-mobile w3-button w3-red w3-round-large w3-monospace w3-disabled"

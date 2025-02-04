@@ -767,7 +767,6 @@
 											bind:group={userId}
 											style="background-color: #{colorHex} !important;"
 										/>
-										// eslint-disable-next-line svelte/no-at-html-tags
 										{@html colorName.replace(/ /g, '&nbsp;')}
 									</label>
 								</div>

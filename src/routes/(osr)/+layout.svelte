@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 
-	import '../app.css';
+	import '../../app.css';
 
 	import { NotificationDisplay } from '$lib/notifications';
 	import tippy from 'sveltejs-tippy';
@@ -151,45 +151,12 @@
 </script>
 
 <svelte:head>
-	<title>utile.space — {title}</title>
+	<title>Spectrum</title>
 	<meta name="description" content={description} />
 </svelte:head>
 
 <section class="w3-main w3-row-padding w3-content w3-margin-top w3-margin-bottom">
-	<aside class="w3-collapse w3-padding w3-quarter">
-		<header class="w3-center">
-			<img alt="Logo" src="logo.svg" />
-			<div class="w3-large w3-monospace"><strong>utile.space</strong></div>
-		</header>
-
-		<nav class="w3-padding-large">
-			<div><a href="/" title="Home">/</a></div>
-
-			{#each links as link}
-				<div use:tippy={{ content: link.description, placement: 'left', theme: 'light-border' }}>
-					{#if !link.newTarget}
-						└─<a
-							class="listitem"
-							href={link.link}
-							title={link.title}
-							on:click={() => updateMeta(link)}>{link.label}</a
-						>
-					{:else}
-						└─<a
-							class="listitem"
-							href={link.link}
-							title={link.title}
-							target="_blank"
-							rel="external noopener"
-							>{link.label}<sup>&nbsp;<Fa icon={faArrowUpRightFromSquare} /></sup></a
-						>
-					{/if}
-				</div>
-			{/each}
-		</nav>
-	</aside>
-
-	<article class="w3-threequarter">
+	<article class="">
 		<slot />
 	</article>
 

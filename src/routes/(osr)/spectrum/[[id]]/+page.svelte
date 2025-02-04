@@ -606,11 +606,11 @@
 
 <Header
 	bind:clientWidth={canvasWidth}
-	title="Spectrum"
+	title="OSR Spectrum"
 	subtitle="Outil pour vous aider à faire un spectrum en ligne avec 2 à 6 participants"
 />
 
-<hr />
+<br/>
 
 <div class="w3-container w3-margin" style="font-family: monospace;">
 	{#if !spectrumId}

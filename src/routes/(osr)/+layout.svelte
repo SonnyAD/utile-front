@@ -167,28 +167,4 @@
 	section.w3-main {
 		width: 100%;
 	}
-
-	nav {
-		text-align: left;
-		font-family: var(--mono) !important;
-	}
-
-	nav > div {
-		display: list-item;
-		list-style-type: none;
-		font-size: medium;
-		margin-bottom: 0px;
-	}
-
-	nav > div > a {
-		text-decoration: none;
-	}
-
-	nav > div > a:hover {
-		text-decoration: underline;
-	}
-
-	a:active {
-		color: var(--madder-lake);
-	}
 </style>

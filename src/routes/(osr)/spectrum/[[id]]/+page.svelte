@@ -13,18 +13,17 @@
 	import { page } from '$app/stores';
 	import { PUBLIC_URL } from '$lib/Env';
 
-
 	const palette = {
-		'aeaeae': 'Gris  ', // Neutral gray 
-		'cd5334': 'Brun  ', // Burnt orange
-		'ff5555': 'Rouge ', // Bright red
-		'ff9955': 'Orange', // Vibrant orange		
-		'ffe680': 'Jaune ', // Soft yellow
-		'aade87': 'Vert  ', // Light green
-		'aaeeff': 'Bleu  ', // Light cyan
+		aeaeae: 'Gris  ', // Neutral gray
+		cd5334: 'Brun  ', // Burnt orange
+		ff5555: 'Rouge ', // Bright red
+		ff9955: 'Orange', // Vibrant orange
+		ffe680: 'Jaune ', // Soft yellow
+		aade87: 'Vert  ', // Light green
+		aaeeff: 'Bleu  ', // Light cyan
 		'4b0082': 'Indigo', // Indigo
-		'c6afe9': 'Violet', // Soft lavender
-		'd473d4': 'Mauve ' // Muted mauve
+		c6afe9: 'Violet', // Soft lavender
+		d473d4: 'Mauve ' // Muted mauve
 	};
 
 	export let spectrumId;
@@ -153,7 +152,8 @@
 		options.radius = 10;
 
 		// only if not assigned, then random
-		if (!userId) userId = Object.keys(palette)[fabric.util.getRandomInt(0, Object.keys(palette).length - 1)];
+		if (!userId)
+			userId = Object.keys(palette)[fabric.util.getRandomInt(0, Object.keys(palette).length - 1)];
 
 		let circle = new fabric.Circle({
 			...options,
@@ -610,7 +610,7 @@
 	subtitle="Outil pour vous aider à faire un spectrum en ligne avec 2 à 6 participants"
 />
 
-<br/>
+<br />
 
 <div class="w3-container w3-margin" style="font-family: monospace;">
 	{#if !spectrumId}
@@ -809,7 +809,10 @@
 		</form>
 	</header>
 
-	<div class="w3-container w3-border-top" style="display: flex; flex-direction: column; padding: 0;">
+	<div
+		class="w3-container w3-border-top"
+		style="display: flex; flex-direction: column; padding: 0;"
+	>
 		<canvas style="margin: auto;" id="spectrum"></canvas>
 	</div>
 

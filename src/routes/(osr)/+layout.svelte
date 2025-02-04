@@ -4,129 +4,6 @@
 	import '../../app.css';
 
 	import { NotificationDisplay } from '$lib/notifications';
-	import tippy from 'sveltejs-tippy';
-	import Fa from 'svelte-fa';
-	import { faArrowUpRightFromSquare } from '@fortawesome/free-solid-svg-icons';
-
-	var links = [
-		{
-			link: '/about',
-			label: '/about',
-			description: 'About this website',
-			title: 'About this website'
-		},
-		{
-			link: '/api',
-			label: '/api',
-			description: 'utile.space API',
-			title: 'utile.space API'
-		},
-		{
-			link: '/base64',
-			label: '/base64',
-			description: 'Encode/decode data in base64',
-			title: 'Encrypt or decrypt base64'
-		},
-		{
-			link: '/battleships',
-			label: '/battleships',
-			description: 'Battleships game using zero knowledge proof',
-			title: 'Battleships'
-		},
-		{
-			link: '/color',
-			label: '/color',
-			description: 'Color picker',
-			title: 'Color picker'
-		},
-		{
-			link: '/dice',
-			label: '/d[2-100]',
-			description: 'Roll dice between 2 and 100',
-			title: 'Roll a dice'
-		},
-		{
-			link: '/dns',
-			label: '/dns',
-			description: 'Resolve a domain name',
-			title: 'Roll a dice'
-		},
-		{
-			link: '/api/docs/',
-			label: '/docs',
-			description: 'API Documentation',
-			title: 'API Documentation',
-			newTarget: true
-		},
-		{
-			link: '/int2english',
-			label: '/int2english',
-			description: 'Convert integers to English string',
-			title: 'Convert integers to English string'
-		},
-		{
-			link: '/ip/',
-			label: '/ip',
-			description: 'Get your IP',
-			title: 'Get your IP',
-			newTarget: true
-		},
-		{
-			link: '/json',
-			label: '/json',
-			description: 'Get a Tree View of your JSON',
-			title: 'Get a Tree View of your JSON'
-		},
-		{
-			link: '/json2csv',
-			label: '/json2csv',
-			description: 'Convert JSON to CSV',
-			title: 'Convert JSON to CSV'
-		},
-		{
-			link: '/links/',
-			label: '/links',
-			description: 'Retrieve my useful links',
-			title: 'Retrieve my useful links'
-		},
-		{
-			link: '/lorem/',
-			label: '/lorem',
-			description: 'Generate a lorem ipsum paragraph',
-			title: 'Generate lorem ipsum'
-		},
-		{
-			link: '/math',
-			label: '/math',
-			description: 'Some mathematics stuff, I liked to play with like Pi, Tau, ...',
-			title: 'Some mathematics stuff'
-		},
-		{
-			link: '/password',
-			label: '/password',
-			description: 'Generate random password',
-			title: 'Generate password'
-		},
-		{
-			link: '/pdf/',
-			label: '/pdf',
-			description: 'Free PDF files I am resharing',
-			title: 'Free PDF',
-			newTarget: true
-		},
-		{
-			link: '/timestamp/',
-			label: '/timestamp',
-			description: 'Convert timestamp to date and vice-vers',
-			title: 'Convert timestamp'
-		},
-		{
-			link: '/uuid',
-			label: '/uuid',
-			description: 'Generate UUIDs',
-			title: 'Generate UUIDs'
-		}
-	];
 
 	let themes = {
 		// These are the defaults
@@ -137,17 +14,8 @@
 		default: '#dddddd' // relates to simply '.show()'
 	};
 
-	let title = 'Home';
 	let description =
 		'Welcome to utile.space the Swiss Army Knife webtool. Click on the links in the menu to discover the tools offered.';
-
-	/**
-	 * @param {any} link
-	 */
-	function updateMeta(link) {
-		title = link.title;
-		description = link.description;
-	}
 </script>
 
 <svelte:head>

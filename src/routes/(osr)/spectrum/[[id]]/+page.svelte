@@ -1,5 +1,6 @@
 <script>
 	// @ts-nocheck
+	/* eslint svelte/no-at-html-tags: "off" */
 
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
@@ -766,6 +767,7 @@
 											bind:group={userId}
 											style="background-color: #{colorHex} !important;"
 										/>
+										// eslint-disable-next-line svelte/no-at-html-tags
 										{@html colorName.replace(/ /g, '&nbsp;')}
 									</label>
 								</div>

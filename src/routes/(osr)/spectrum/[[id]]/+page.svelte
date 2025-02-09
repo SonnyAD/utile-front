@@ -150,7 +150,7 @@
 		};
 
 		// @ts-ignore
-		options.radius = 10;
+		options.radius = 12;
 
 		// only if not assigned, then random
 		if (!userId)
@@ -168,8 +168,8 @@
 
 		let text = new fabric.Text(nickname, {
 			fontFamily: 'monospace',
-			left: circle.left + circle.radius + 18,
-			top: circle.top - circle.radius - 13,
+			left: circle.left + circle.radius + 20,
+			top: circle.top - circle.radius - 11,
 			fontSize: 14,
 			color: '#f9f9f9',
 			hasBorders: false,
@@ -295,7 +295,7 @@
 			left: 0
 		};
 		// @ts-ignore
-		options.radius = 10;
+		options.radius = 12;
 
 		let circle = new fabric.Circle({
 			...options,
@@ -311,8 +311,8 @@
 
 		let text = new fabric.Text(nickname, {
 			fontFamily: 'monospace',
-			left: circle.left + circle.radius + 18,
-			top: circle.top - circle.radius - 13,
+			left: circle.left + circle.radius + 20,
+			top: circle.top - circle.radius - 11,
 			fontSize: 14,
 			color: '#f9f9f9',
 			evented: false,
@@ -350,10 +350,14 @@
 	 * @param {string} otherUserId
 	 * @param {{ x: number; y: number; } | null} coords
 	 */
-	function updatePellet(otherUserId, coords, nickname) {
+	function updatePellet(otherUserId, coords, otherNickname) {
 		// New user
 		if (!others[otherUserId]) {
-			others[otherUserId] = { pellet: initOtherPellet(otherUserId, nickname), targets: [coords] };
+			others[otherUserId] = {
+				pellet: initOtherPellet(otherUserId, otherNickname),
+				targets: [coords],
+				nickname: otherNickname
+			};
 		} else {
 			// known user
 			others[otherUserId].targets.push(coords);
@@ -570,6 +574,12 @@
 		if (!adminModeOn) {
 			initPellet();
 		}
+	}
+
+	function makeAdmin(id) {
+		if (!adminModeOn) return;
+
+		websocket.send(`makeadmin ${id}`);
 	}
 
 	let showJoinModal = false;
@@ -830,6 +840,36 @@
 		{/if}
 	</footer>
 </div>
+
+{#if adminModeOn}
+	<div class="w3-container w3-margin">
+		<h5>Liste des participants</h5>
+		<ul class="w3-padding">
+			{#each Object.entries(others) as [colorHex, other]}
+				<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
+					<button class="w3-bar-item w3-button w3-large w3-right w3-disabled"
+						>Retirer du spectrum &times;</button
+					>
+					<button
+						class="w3-bar-item w3-button w3-large w3-right"
+						on:click={() => {
+							makeAdmin(colorHex);
+						}}>Rendre admin</button
+					>
+					<span
+						class="w3-bar-item w3-circle"
+						style="width:35px; height: 35px; background: #{colorHex}"
+					></span>
+					<div class="w3-bar-item">
+						<span class="w3-large">{other.nickname}</span>
+					</div>
+				</li>
+			{/each}
+		</ul>
+	</div>
+{/if}
+
+<p>&nbsp;</p>
 
 <style>
 	header {

@@ -619,7 +619,7 @@
 		notifier.success('Lien du Spectrum copié!');
 	};
 
-	let showParticipants = false;
+	let showParticipants = true;
 </script>
 
 <!-- EN/US
@@ -861,6 +861,7 @@
 	</footer>
 </div>
 
+{#if spectrumId}
 <div class="w3-container w3-margin w3-monospace">
 	<button
 		class="w3-monospace w3-button w3-block w3-left-align"
@@ -901,6 +902,7 @@
 		{/each}
 	</ul>
 </div>
+{/if}
 
 <p>&nbsp;</p>
 

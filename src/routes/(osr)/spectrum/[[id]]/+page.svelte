@@ -354,11 +354,12 @@
 		// New user
 		if (!others[otherUserId]) {
 			others[otherUserId] = {
-				pellet: initOtherPellet(otherUserId, otherNickname),
+				pellet:
+					!isNaN(coords.x) && !isNaN(coords.y) ? initOtherPellet(otherUserId, otherNickname) : null,
 				targets: [coords],
 				nickname: otherNickname
 			};
-		} else {
+		} else if (!isNaN(coords.x) && !isNaN(coords.y)) {
 			// known user
 			others[otherUserId].targets.push(coords);
 
@@ -373,14 +374,16 @@
 
 		//others[otherUserId].target = coords;
 
-		const cancel = animatePellet(otherUserId, coords);
-		others[otherUserId].cancel = () => {
-			cancel.cancelX();
-			cancel.cancelY();
-		};
+		if (!isNaN(coords.x) && !isNaN(coords.y)) {
+			const cancel = animatePellet(otherUserId, coords);
+			others[otherUserId].cancel = () => {
+				cancel.cancelX();
+				cancel.cancelY();
+			};
+		}
 	}
 
-	function deletePellet(otherUserId) {
+	function deletePellet(otherUserId, keepUser = false) {
 		if (others[otherUserId].cancel) {
 			others[otherUserId].cancel();
 		}
@@ -390,7 +393,9 @@
 			myCanvas.renderAll();
 		}
 
-		delete others[otherUserId];
+		if (!keepUser) {
+			delete others[otherUserId];
+		}
 	}
 
 	function updateClaim(event) {
@@ -495,7 +500,7 @@
 	 */
 	function parseCommand(line) {
 		const re = new RegExp(
-			/^(ack|nack|update|claim|spectrum|newposition|userleft)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
+			/^(ack|nack|update|claim|spectrum|newposition|userleft|madeadmin)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
 		);
 		const matches = [...line.matchAll(re)][0];
 
@@ -522,6 +527,14 @@
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
 				if (otherUserId != userId) deletePellet(otherUserId);
+			} else if (command == 'madeadmin') {
+				if (otherUserId != userId) deletePellet(otherUserId, true);
+				else {
+					adminModeOn = true;
+					myCanvas.remove(myPellet);
+					myCanvas.renderAll();
+					myPellet = null;
+				}
 			} else if (command == 'newposition') {
 				if (myPellet) {
 					myPellet.left = coords.x;
@@ -605,6 +618,8 @@
 	const copied = () => {
 		notifier.success('Lien du Spectrum copié!');
 	};
+
+	let showParticipants = false;
 </script>
 
 <!-- EN/US
@@ -834,6 +849,11 @@
 				on:click={resetPositions}>Reset les Positions</button
 			>
 
+			<button
+				class="w3-bar-item w3-mobile w3-button w3-green w3-round-large w3-monospace w3-margin-right"
+				on:click={initPellet}>Créer mon Palet</button
+			>
+
 			<button class="w3-bar-item w3-mobile w3-button w3-red w3-round-large w3-monospace w3-disabled"
 				>Clôturer le Spectrum</button
 			>
@@ -841,33 +861,46 @@
 	</footer>
 </div>
 
-{#if adminModeOn}
-	<div class="w3-container w3-margin">
-		<h5>Liste des participants</h5>
-		<ul class="w3-padding">
-			{#each Object.entries(others) as [colorHex, other]}
-				<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
-					<button class="w3-bar-item w3-button w3-large w3-right w3-disabled"
+<div class="w3-container w3-margin w3-monospace">
+	<button
+		class="w3-monospace w3-button w3-block w3-left-align"
+		on:click={() => {
+			showParticipants = !showParticipants;
+		}}
+		>{#if showParticipants}&#9660;{:else}&#9654;{/if} Liste des participants :
+	</button>
+	<ul class="w3-padding" style="margin-top: 0;" class:w3-hide={!showParticipants}>
+		<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
+			<span class="w3-bar-item w3-circle" style="width:30px; height: 30px; background: #{userId}"
+			></span>
+			<div class="w3-bar-item">
+				<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
+			</div>
+		</li>
+		{#each Object.entries(others) as [colorHex, other]}
+			<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
+				{#if adminModeOn}
+					<button class="w3-bar-item w3-button w3-small w3-right w3-disabled"
 						>Retirer du spectrum &times;</button
 					>
 					<button
-						class="w3-bar-item w3-button w3-large w3-right"
+						class="w3-bar-item w3-button w3-small w3-right"
 						on:click={() => {
 							makeAdmin(colorHex);
 						}}>Rendre admin</button
 					>
-					<span
-						class="w3-bar-item w3-circle"
-						style="width:35px; height: 35px; background: #{colorHex}"
-					></span>
-					<div class="w3-bar-item">
-						<span class="w3-large">{other.nickname}</span>
-					</div>
-				</li>
-			{/each}
-		</ul>
-	</div>
-{/if}
+				{/if}
+				<span
+					class="w3-bar-item w3-circle"
+					style="width: 30px; height: 30px; background: #{colorHex}"
+				></span>
+				<div class="w3-bar-item">
+					<span class="w3-small"><b>{other.nickname}</b></span>
+				</div>
+			</li>
+		{/each}
+	</ul>
+</div>
 
 <p>&nbsp;</p>
 

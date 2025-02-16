@@ -540,9 +540,9 @@
 					myPellet.left = coords.x;
 					myPellet.top = coords.y;
 					myPellet.setCoords();
+					myCanvas.renderAll();
+					updateMyPellet(true);
 				}
-				myCanvas.renderAll();
-				updateMyPellet(true);
 				moving = false;
 			} else if (command == 'claim') {
 				if (otherUserId != userId) receivedClaim(matches[7]);
@@ -659,8 +659,7 @@
 					on:click={toggleShowSpectrumId}>👁️</button
 				>
 			</span>
-		</div>
-		<div class="w3-bar">
+
 			<button
 				class="w3-button w3-bar-item w3-round w3-green"
 				use:copy={PUBLIC_URL + '/spectrum/' + spectrumId}
@@ -862,46 +861,46 @@
 </div>
 
 {#if spectrumId}
-<div class="w3-container w3-margin w3-monospace">
-	<button
-		class="w3-monospace w3-button w3-block w3-left-align"
-		on:click={() => {
-			showParticipants = !showParticipants;
-		}}
-		>{#if showParticipants}&#9660;{:else}&#9654;{/if} Liste des participants :
-	</button>
-	<ul class="w3-padding" style="margin-top: 0;" class:w3-hide={!showParticipants}>
-		<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
-			<span class="w3-bar-item w3-circle" style="width:30px; height: 30px; background: #{userId}"
-			></span>
-			<div class="w3-bar-item">
-				<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
-			</div>
-		</li>
-		{#each Object.entries(others) as [colorHex, other]}
+	<div class="w3-container w3-margin w3-monospace">
+		<button
+			class="w3-monospace w3-button w3-block w3-left-align"
+			on:click={() => {
+				showParticipants = !showParticipants;
+			}}
+			>{#if showParticipants}&#9660;{:else}&#9654;{/if} Liste des participants :
+		</button>
+		<ul class="w3-padding" style="margin-top: 0;" class:w3-hide={!showParticipants}>
 			<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
-				{#if adminModeOn}
-					<button class="w3-bar-item w3-button w3-small w3-right w3-disabled"
-						>Retirer du spectrum &times;</button
-					>
-					<button
-						class="w3-bar-item w3-button w3-small w3-right"
-						on:click={() => {
-							makeAdmin(colorHex);
-						}}>Rendre admin</button
-					>
-				{/if}
-				<span
-					class="w3-bar-item w3-circle"
-					style="width: 30px; height: 30px; background: #{colorHex}"
+				<span class="w3-bar-item w3-circle" style="width:30px; height: 30px; background: #{userId}"
 				></span>
 				<div class="w3-bar-item">
-					<span class="w3-small"><b>{other.nickname}</b></span>
+					<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
 				</div>
 			</li>
-		{/each}
-	</ul>
-</div>
+			{#each Object.entries(others) as [colorHex, other]}
+				<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
+					{#if adminModeOn}
+						<button class="w3-bar-item w3-button w3-small w3-right w3-disabled"
+							>Retirer du spectrum &times;</button
+						>
+						<button
+							class="w3-bar-item w3-button w3-small w3-right"
+							on:click={() => {
+								makeAdmin(colorHex);
+							}}>Rendre admin</button
+						>
+					{/if}
+					<span
+						class="w3-bar-item w3-circle"
+						style="width: 30px; height: 30px; background: #{colorHex}"
+					></span>
+					<div class="w3-bar-item">
+						<span class="w3-small"><b>{other.nickname}</b></span>
+					</div>
+				</li>
+			{/each}
+		</ul>
+	</div>
 {/if}
 
 <p>&nbsp;</p>

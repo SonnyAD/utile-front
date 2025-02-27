@@ -63,6 +63,7 @@
 	 */
 	let nickname;
 	let initialized = false;
+	let listenning = true;
 
 	/**
 	 * @type {{ left: any; top: any; }}
@@ -499,6 +500,8 @@
 	 * @param {string} line
 	 */
 	function parseCommand(line) {
+		if (!listenning) return;
+
 		const re = new RegExp(
 			/^(ack|nack|update|claim|spectrum|newposition|userleft|madeadmin)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
 		);
@@ -567,6 +570,7 @@
 
 	let initialClaim;
 	function createSpectrum() {
+		listenning = true;
 		claim = initialClaim;
 		initialClaim = '';
 		websocket.send(`startspectrum ${nickname} ${userId}`);
@@ -576,6 +580,7 @@
 	}
 
 	function joinSpectrum() {
+		listenning = true;
 		websocket.send(`joinspectrum ${spectrumId} ${nickname} ${userId}`);
 	}
 
@@ -610,9 +615,16 @@
 	}
 
 	function leaveSpectrum() {
+		listenning = false;
 		websocket.send(`leavespectrum ${spectrumId}`);
 		spectrumId = undefined;
 		adminModeOn = false;
+		myCanvas.remove(myPellet);
+		for (const key in others) {
+			if (others[key].pellet) myCanvas.remove(others[key].pellet);
+			delete others[key];
+		}
+		myCanvas.renderAll();
 	}
 
 	const copied = () => {

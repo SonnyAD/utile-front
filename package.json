@@ -34,7 +34,7 @@
 		"svelte": "^4.2.19",
 		"svelte-awesome-color-picker": "^3.1.4",
 		"svelte-check": "^4.1.4",
-		"svelte-copy": "^1.4.2",
+		"svelte-copy": "^2.0.0",
 		"svelte-fa": "^4.0.3",
 		"svelte-json-tree": "^2.2.0",
 		"svelte-loading-spinners": "^0.3.6",

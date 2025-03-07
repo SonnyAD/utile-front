@@ -4,6 +4,18 @@
 
 	import Header from '$lib/components/Header.svelte';
 	import { notifier } from '$lib/notifications';
+	import Fa from 'svelte-fa';
+	import {
+		faRotateLeft,
+		faCirclePlus,
+		faStop,
+		faCopy,
+		faPersonWalkingArrowRight,
+		faPerson,
+		faExclamation,
+		faPalette,
+		faPaperPlane
+	} from '@fortawesome/free-solid-svg-icons';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
 	import { getPlayerId } from '$lib/battleships/playerId';
@@ -238,13 +250,13 @@
 					}*/
 
 					if (pointInPolygon(points, [myPellet.left, myPellet.top])) {
-						cell.set({ fill: 'blue' });
+						cell.set({ fill: '#10b1b1' });
 						//console.log(cell);
 					} else {
 						if (cell.id == 'notReplied' || cell.id == 'indifferent') {
-							cell.set({ fill: '#cccccc' });
+							cell.set({ fill: '#ccc' });
 						} else {
-							cell.set({ fill: 'black' });
+							cell.set({ fill: '#000002' });
 						}
 					}
 				}
@@ -635,6 +647,7 @@
 		jaune #ffc517
 		blanc #fffdfc
 		black #000002
+		olive #25291C
 	*/
 </script>
 
@@ -647,7 +660,6 @@
 -->
 
 <Header
-	bind:clientWidth={canvasWidth}
 	title="Spectrum"
 	subtitle="Plate-forme de spectrum en ligne de 2 à 6 participants"
 	logo="/logo-osr.png"
@@ -658,12 +670,13 @@
 <div class="w3-container w3-margin" style="font-family: monospace;">
 	{#if !spectrumId}
 		<div class="w3-bar">
-			<button on:click={toggleJoinModal} class="w3-bar-item w3-button w3-green w3-round w3-left"
-				>Rejoindre un Spectrum</button
-			>
-
-			<button on:click={toggleCreateModal} class="w3-bar-item w3-button w3-red w3-round w3-right"
+			<button on:click={toggleCreateModal} class="w3-bar-item w3-button osr-yellow w3-round w3-left"
 				>Créer un Spectrum</button
+			>
+			<button
+				on:click={toggleJoinModal}
+				class="w3-margin-left w3-bar-item w3-button osr-green w3-round w3-left"
+				>Rejoindre un Spectrum</button
 			>
 		</div>
 	{:else}
@@ -678,15 +691,15 @@
 			</span>
 
 			<button
-				class="w3-button w3-bar-item w3-round w3-green"
+				class="w3-button w3-bar-item w3-round osr-green"
 				use:copy={PUBLIC_URL + '/spectrum/' + spectrumId}
 				on:svelte-copy={() => copied()}
 			>
-				Copier Lien
+				<Fa icon={faCopy} /> Copier Lien
 			</button>
 
-			<button on:click={leaveSpectrum} class="w3-bar-item w3-round w3-button w3-red w3-right"
-				>Quitter le Spectrum</button
+			<button on:click={leaveSpectrum} class="w3-bar-item w3-round w3-button osr-yellow w3-right"
+				><Fa icon={faPersonWalkingArrowRight} /> Quitter le Spectrum</button
 			>
 		</div>
 	{/if}
@@ -746,14 +759,16 @@
 								</div>
 							{/each}
 						</div>
-						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
+						<button class="w3-button w3-block osr-green w3-section w3-padding" type="submit"
 							>Rejoindre le Spectrum</button
 						>
 					</div>
 				</form>
 
 				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-					<button on:click={toggleJoinModal} type="button" class="w3-button w3-red">Annuler</button>
+					<button on:click={toggleJoinModal} type="button" class="w3-button osr-yellow"
+						>Annuler</button
+					>
 				</div>
 			</div>
 		</div>
@@ -813,14 +828,14 @@
 								</div>
 							{/each}
 						</div>
-						<button class="w3-button w3-block w3-green w3-section w3-padding" type="submit"
+						<button class="w3-button w3-block osr-green w3-section w3-padding" type="submit"
 							>Créer un Spectrum</button
 						>
 					</div>
 				</form>
 
 				<div class="w3-container w3-border-top w3-padding-16 w3-light-grey">
-					<button on:click={toggleCreateModal} type="button" class="w3-button w3-red"
+					<button on:click={toggleCreateModal} type="button" class="w3-button osr-yellow"
 						>Annuler</button
 					>
 				</div>
@@ -829,97 +844,113 @@
 	{/if}
 </div>
 
-<div class="w3-card">
-	<header class="w3-container" style="padding: 0; font-family: monospace;">
-		<form method="POST" on:submit|preventDefault={updateClaim}>
-			<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
-				>Claim:</label
-			>
-			<input
-				name="claim"
-				class="w3-col w3-input w3-border-0"
-				style="width: {adminModeOn ? '80' : '90'}%; z-index: 100;"
-				type="text"
-				readonly={!adminModeOn}
-				bind:value={claim}
-			/>
-			{#if adminModeOn}
-				<button class="w3-col w3-button" style="width: 10%; padding-left: 0; padding-right: 0;"
-					>Update</button
-				>
-			{/if}
-		</form>
-	</header>
-
-	<div
-		class="w3-container w3-border-top"
-		style="display: flex; flex-direction: column; padding: 0;"
-	>
-		<canvas style="margin: auto;" id="spectrum"></canvas>
-	</div>
-
-	<footer class="w3-bar" class:w3-padding={adminModeOn}>
-		{#if adminModeOn}
-			<button
-				class="w3-bar-item w3-mobile w3-button w3-amber w3-round-large w3-monospace w3-margin-right"
-				on:click={resetPositions}>Reset les Positions</button
-			>
-
-			<button
-				class="w3-bar-item w3-mobile w3-button w3-green w3-round-large w3-monospace w3-margin-right"
-				on:click={initPellet}>Créer mon Palet</button
-			>
-
-			<button class="w3-bar-item w3-mobile w3-button w3-red w3-round-large w3-monospace w3-disabled"
-				>Clôturer le Spectrum</button
-			>
-		{/if}
-	</footer>
-</div>
-
-{#if spectrumId}
-	<div class="w3-container w3-margin w3-monospace">
-		<button
-			class="w3-monospace w3-button w3-block w3-left-align"
-			on:click={() => {
-				showParticipants = !showParticipants;
-			}}
-			>{#if showParticipants}&#9660;{:else}&#9654;{/if} Liste des participants :
-		</button>
-		<ul class="w3-padding" style="margin-top: 0;" class:w3-hide={!showParticipants}>
-			<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
-				<span class="w3-bar-item w3-circle" style="width:30px; height: 30px; background: #{userId}"
-				></span>
-				<div class="w3-bar-item">
-					<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
-				</div>
-			</li>
-			{#each Object.entries(others) as [colorHex, other]}
-				<li class="w3-bar w3-margin-top w3-border-bottom w3-hover-border-black">
+<div class="w3-row">
+	<div class="w3-twothird">
+		<div class="w3-card w3-content" bind:clientWidth={canvasWidth}>
+			<header class="w3-container" style="padding: 0; font-family: monospace;">
+				<form method="POST" on:submit|preventDefault={updateClaim}>
+					<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
+						>Claim:</label
+					>
+					<input
+						name="claim"
+						class="w3-col w3-input w3-border-0"
+						style="width: {adminModeOn ? '80' : '90'}%; z-index: 100;"
+						type="text"
+						readonly={!adminModeOn}
+						bind:value={claim}
+					/>
 					{#if adminModeOn}
-						<button class="w3-bar-item w3-button w3-small w3-right w3-disabled"
-							>Retirer du spectrum &times;</button
-						>
-						<button
-							class="w3-bar-item w3-button w3-small w3-right"
-							on:click={() => {
-								makeAdmin(colorHex);
-							}}>Rendre admin</button
+						<button class="w3-col w3-button" style="width: 10%; padding-left: 0; padding-right: 0;"
+							><Fa icon={faPaperPlane} /> Update</button
 						>
 					{/if}
-					<span
-						class="w3-bar-item w3-circle"
-						style="width: 30px; height: 30px; background: #{colorHex}"
-					></span>
-					<div class="w3-bar-item">
-						<span class="w3-small"><b>{other.nickname}</b></span>
-					</div>
-				</li>
-			{/each}
-		</ul>
-	</div>
-{/if}
+				</form>
+			</header>
 
+			<div
+				class="w3-container w3-border-top"
+				style="display: flex; flex-direction: column; padding: 0;"
+			>
+				<canvas style="margin: auto;" id="spectrum"></canvas>
+			</div>
+
+			<footer class="w3-bar" class:w3-padding={adminModeOn}>
+				{#if adminModeOn}
+					<button
+						class="w3-bar-item w3-mobile w3-button w3-black w3-text-white w3-round-large w3-monospace w3-margin-right"
+						on:click={resetPositions}
+					>
+						<Fa icon={faRotateLeft} /> Reset les Positions</button
+					>
+
+					<button
+						class="w3-bar-item w3-mobile w3-button w3-black w3-text-white w3-round-large w3-monospace w3-margin-right"
+						on:click={initPellet}><Fa icon={faCirclePlus} /> Créer mon Palet</button
+					>
+
+					<button
+						class="w3-bar-item w3-mobile w3-button w3-black w3-text-white w3-round-large w3-monospace w3-disabled"
+						><Fa icon={faStop} /> Clôturer le Spectrum</button
+					>
+				{/if}
+			</footer>
+		</div>
+	</div>
+
+	{#if spectrumId}
+		<div class="w3-container w3-third w3-responsive w3-monospace">
+			<table class="w3-table-all w3-striped w3-bordered">
+				<tbody>
+					<tr>
+						<th class="w3-center"><Fa icon={faPalette} /> </th>
+						<th><Fa icon={faPerson} /> Participant</th>
+						{#if adminModeOn}
+							<th><Fa icon={faExclamation} /> Actions</th>
+						{/if}
+					</tr>
+					<tr>
+						<td>
+							<div style="background: #{userId}; clip-path: circle(10px);">&nbsp;</div>
+						</td>
+						<td>
+							<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
+						</td>
+						{#if adminModeOn}
+							<td> &nbsp; </td>
+						{/if}
+					</tr>
+					{#each Object.entries(others) as [colorHex, other]}
+						<tr>
+							<td>
+								<div style="background: #{colorHex}; clip-path: circle(10px);">&nbsp;</div>
+							</td>
+							<td>
+								<span class="w3-small"><b>{other.nickname}</b></span>
+							</td>
+							{#if adminModeOn}
+								<td>
+									<button class="w3-button w3-small w3-right w3-disabled"
+										>Retirer du spectrum &times;</button
+									>
+									<button
+										class="w3-button w3-small w3-right"
+										on:click={() => {
+											makeAdmin(colorHex);
+										}}>Rendre admin</button
+									>
+								</td>
+							{/if}
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		</div>
+	{/if}
+</div>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 
 <style>
@@ -929,6 +960,25 @@
 
 	input {
 		width: max-content;
+	}
+
+	table {
+		table-layout: fixed;
+		box-shadow:
+			0 2px 5px 0 rgba(0, 0, 0, 0.16),
+			0 2px 10px 0 rgba(0, 0, 0, 0.12);
+	}
+
+	.osr-green {
+		background-color: #10b1b1;
+	}
+
+	.osr-yellow {
+		background-color: #ffc517;
+	}
+
+	.osr-olive {
+		background-color: #25291c;
 	}
 
 	.form-control {

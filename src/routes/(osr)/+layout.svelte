@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-	<title>Spectrum</title>
+	<title>Opinions sur Rue — Spectrum</title>
 	<meta name="description" content={description} />
 </svelte:head>
 

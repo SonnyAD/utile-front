@@ -521,11 +521,9 @@
 				if (!initialized) initialized = true;
 				else initPellet();
 			} else if (command == 'nack') {
-				if (showJoinModal) {
-					notifier.danger(
-						"Désolé, couleur déjà prise par quelqu'un d'autre, veuillez en choisir une autre."
-					);
-				}
+				notifier.danger(
+					"Désolé, erreur reçue: " + matches[7]
+				);
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
@@ -632,6 +630,14 @@
 	};
 
 	let showParticipants = true;
+
+	/*
+		OSR Color: 
+		indigo #10b1b1 
+		jaune #ffc517
+		blanc #fffdfc
+		black #000002
+	*/
 </script>
 
 <!-- EN/US
@@ -644,8 +650,9 @@
 
 <Header
 	bind:clientWidth={canvasWidth}
-	title="OSR Spectrum"
-	subtitle="Outil pour vous aider à faire un spectrum en ligne avec 2 à 6 participants"
+	title="Spectrum"
+	subtitle="Plate-forme de spectrum en ligne de 2 à 6 participants"
+	logo="/logo-osr.png"
 />
 
 <br />

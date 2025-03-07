@@ -521,9 +521,7 @@
 				if (!initialized) initialized = true;
 				else initPellet();
 			} else if (command == 'nack') {
-				notifier.danger(
-					"Désolé, erreur reçue: " + matches[7]
-				);
+				notifier.danger('Désolé, erreur reçue: ' + matches[7]);
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {

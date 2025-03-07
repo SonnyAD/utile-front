@@ -5,7 +5,9 @@
 	export let clientWidth = 0;
 </script>
 
-<h1 class="w3-xxlarge">{#if logo}<img src={logo} alt="Logo" width="64px" />{/if}{title}</h1>
+<h1 class="w3-xxlarge">
+	{#if logo}<img src={logo} alt="Logo" width="64px" />{/if}{title}
+</h1>
 
 <p bind:clientWidth>{subtitle}</p>
 

@@ -411,17 +411,9 @@
 		}
 	}
 
-	function updateClaim(event) {
-		if (websocket) {
-			const data = new FormData(event.currentTarget);
-			console.log(data);
-			websocket.send('claim ' + data.get('claim'));
-		}
-	}
-
 	function receivedClaim(c) {
-		console.log(c);
-		claim = c;
+		console.log(c.replace(/^(\|\|)+|(\|\|)+$/g, ''));
+		claim = c.replace(/^(\|\|)+|(\|\|)+$/g, '');
 	}
 
 	function animatePellet(userId, target) {
@@ -848,24 +840,22 @@
 	<div class="w3-twothird">
 		<div class="w3-card w3-content" bind:clientWidth={canvasWidth}>
 			<header class="w3-container" style="padding: 0; font-family: monospace;">
-				<form method="POST" on:submit|preventDefault={updateClaim}>
-					<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
-						>Claim:</label
-					>
-					<input
-						name="claim"
-						class="w3-col w3-input w3-border-0"
-						style="width: {adminModeOn ? '80' : '90'}%; z-index: 100;"
-						type="text"
-						readonly={!adminModeOn}
-						bind:value={claim}
-					/>
-					{#if adminModeOn}
-						<button class="w3-col w3-button" style="width: 10%; padding-left: 0; padding-right: 0;"
-							><Fa icon={faPaperPlane} /> Update</button
-						>
-					{/if}
-				</form>
+				<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
+					>Claim:</label
+				>
+				<input
+					name="claim"
+					class="w3-col w3-input w3-border-0"
+					style="width: 90%; z-index: 100;"
+					type="text"
+					readonly={!adminModeOn}
+					bind:value={claim}
+					on:input={() => {
+						if (adminModeOn) {
+							websocket.send('claim ||' + claim + '||');
+						}
+					}}
+				/>
 			</header>
 
 			<div

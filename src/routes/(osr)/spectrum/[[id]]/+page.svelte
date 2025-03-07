@@ -13,8 +13,7 @@
 		faPersonWalkingArrowRight,
 		faPerson,
 		faExclamation,
-		faPalette,
-		faPaperPlane
+		faPalette
 	} from '@fortawesome/free-solid-svg-icons';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
@@ -631,8 +630,6 @@
 		notifier.success('Lien du Spectrum copié!');
 	};
 
-	let showParticipants = true;
-
 	/*
 		OSR Color: 
 		indigo #10b1b1 
@@ -967,9 +964,9 @@
 		background-color: #ffc517;
 	}
 
-	.osr-olive {
+	/*.osr-olive {
 		background-color: #25291c;
-	}
+	}*/
 
 	.form-control {
 		font-family: system-ui, sans-serif;

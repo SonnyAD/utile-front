@@ -1,7 +1,7 @@
 <script>
 	export let title;
 	export let subtitle;
-	export let logo;
+	export let logo = undefined;
 	export let clientWidth = 0;
 </script>
 

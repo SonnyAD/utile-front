@@ -365,6 +365,7 @@
 	function updatePellet(otherUserId, coords, otherNickname) {
 		// New user
 		if (!others[otherUserId]) {
+			console.log(`HELLo ${otherUserId}; ${coords}; ${otherNickname}`);
 			others[otherUserId] = {
 				pellet:
 					!isNaN(coords.x) && !isNaN(coords.y) ? initOtherPellet(otherUserId, otherNickname) : null,
@@ -413,6 +414,14 @@
 	function receivedClaim(c) {
 		console.log(c.replace(/^(\|\|)+|(\|\|)+$/g, ''));
 		claim = c.replace(/^(\|\|)+|(\|\|)+$/g, '');
+	}
+
+	/**
+	 * @param {number} emojiIndex
+	 */
+	function sendEmoji(emojiIndex) {
+		const emojis = ['😜', '🤚', '😵', '🤯', '🫣', '🛟'];
+		websocket.send('emoji ' + emojis[emojiIndex]);
 	}
 
 	function animatePellet(userId, target) {
@@ -506,7 +515,7 @@
 		if (!listenning) return;
 
 		const re = new RegExp(
-			/^(ack|nack|update|claim|spectrum|newposition|userleft|madeadmin)(\s+([0-9a-f]*))?(\s+([0-9]+,[0-9]+))?(\s+(.+))?$/gu
+			/^(ack|nack|update|claim|spectrum|newposition|userleft|madeadmin|receive)(\s+([0-9a-f]*))?(\s+([0-9N]+,[0-9A]+))?(\s+(.+))?$/gu
 		);
 		const matches = [...line.matchAll(re)][0];
 
@@ -529,6 +538,12 @@
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
 				if (otherUserId != userId) deletePellet(otherUserId);
+			} else if (command == 'receive') {
+				if (otherUserId != userId)
+					notifier.info(
+						others[otherUserId].nickname + ' a envoyé : ' + matches[7].toString(),
+						5000
+					);
 			} else if (command == 'madeadmin') {
 				if (otherUserId != userId) deletePellet(otherUserId, true);
 				else {
@@ -862,7 +877,7 @@
 				<canvas style="margin: auto;" id="spectrum"></canvas>
 			</div>
 
-			<footer class="w3-bar" class:w3-padding={adminModeOn}>
+			<footer class="w3-bar w3-padding">
 				{#if adminModeOn}
 					<button
 						class="w3-bar-item w3-mobile w3-button w3-black w3-text-white w3-round-large w3-monospace w3-margin-right"
@@ -881,6 +896,36 @@
 						><Fa icon={faStop} /> Clôturer le Spectrum</button
 					>
 				{/if}
+
+				<div class="w3-dropdown-hover w3-mobile w3-right w3-monospace" style="font-style: normal">
+					<button class="w3-button w3-round-large w3-mobile w3-yellow">😀 Emoji</button>
+					<div class="w3-dropdown-content">
+						<button
+							on:click={() => sendEmoji(0)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">😜</button
+						>
+						<button
+							on:click={() => sendEmoji(1)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🤚</button
+						>
+						<button
+							on:click={() => sendEmoji(2)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">😵</button
+						>
+						<button
+							on:click={() => sendEmoji(3)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🤯</button
+						>
+						<button
+							on:click={() => sendEmoji(4)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🫣</button
+						>
+						<button
+							on:click={() => sendEmoji(5)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🛟</button
+						>
+					</div>
+				</div>
 			</footer>
 		</div>
 	</div>
@@ -954,6 +999,14 @@
 		box-shadow:
 			0 2px 5px 0 rgba(0, 0, 0, 0.16),
 			0 2px 10px 0 rgba(0, 0, 0, 0.12);
+	}
+
+	.w3-dropdown-hover:first-child {
+		background-color: transparent;
+	}
+
+	.w3-dropdown-content button:hover {
+		background-color: #ccc;
 	}
 
 	.osr-green {

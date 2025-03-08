@@ -898,39 +898,42 @@
 				{/if}
 
 				{#if spectrumId}
-				<div class="w3-dropdown-hover w3-mobile w3-right w3-monospace" style="font-style: normal;">
-					<button class="w3-button w3-round-large w3-mobile w3-yellow">😀 Emoji</button>
-					<div class="w3-dropdown-content">
-						<button
-							on:click={() => sendEmoji(0)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">😜</button
-						>
-						<button
-							on:click={() => sendEmoji(1)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🤚</button
-						>
-						<button
-							on:click={() => sendEmoji(2)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">😵</button
-						>
-						<button
-							on:click={() => sendEmoji(3)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🤯</button
-						>
-						<button
-							on:click={() => sendEmoji(4)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🫣</button
-						>
-						<button
-							on:click={() => sendEmoji(5)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🛟</button
-						>
-						<button
-							on:click={() => sendEmoji(6)}
-							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🦝</button
-						>
+					<div
+						class="w3-dropdown-hover w3-mobile w3-right w3-monospace"
+						style="font-style: normal;"
+					>
+						<button class="w3-button w3-round-large w3-mobile w3-yellow">😀 Emoji</button>
+						<div class="w3-dropdown-content">
+							<button
+								on:click={() => sendEmoji(0)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">😜</button
+							>
+							<button
+								on:click={() => sendEmoji(1)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">🤚</button
+							>
+							<button
+								on:click={() => sendEmoji(2)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">😵</button
+							>
+							<button
+								on:click={() => sendEmoji(3)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">🤯</button
+							>
+							<button
+								on:click={() => sendEmoji(4)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">🫣</button
+							>
+							<button
+								on:click={() => sendEmoji(5)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">🛟</button
+							>
+							<button
+								on:click={() => sendEmoji(6)}
+								class="w3-bar-item w3-button w3-large w3-mobile w3-center">🦝</button
+							>
+						</div>
 					</div>
-				</div>
 				{/if}
 			</footer>
 		</div>

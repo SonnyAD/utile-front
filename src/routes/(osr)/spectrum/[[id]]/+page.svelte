@@ -420,7 +420,7 @@
 	 * @param {number} emojiIndex
 	 */
 	function sendEmoji(emojiIndex) {
-		const emojis = ['😜', '🤚', '😵', '🤯', '🫣', '🛟'];
+		const emojis = ['😜', '🤚', '😵', '🤯', '🫣', '🛟', '🦝'];
 		websocket.send('emoji ' + emojis[emojiIndex]);
 	}
 
@@ -923,6 +923,10 @@
 						<button
 							on:click={() => sendEmoji(5)}
 							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🛟</button
+						>
+						<button
+							on:click={() => sendEmoji(6)}
+							class="w3-bar-item w3-button w3-large w3-mobile w3-center">🦝</button
 						>
 					</div>
 				</div>

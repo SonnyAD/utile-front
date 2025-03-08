@@ -877,7 +877,7 @@
 				<canvas style="margin: auto;" id="spectrum"></canvas>
 			</div>
 
-			<footer class="w3-bar w3-padding">
+			<footer class="w3-bar" class:w3-padding={spectrumId}>
 				{#if adminModeOn}
 					<button
 						class="w3-bar-item w3-mobile w3-button w3-black w3-text-white w3-round-large w3-monospace w3-margin-right"
@@ -897,7 +897,8 @@
 					>
 				{/if}
 
-				<div class="w3-dropdown-hover w3-mobile w3-right w3-monospace" style="font-style: normal">
+				{#if spectrumId}
+				<div class="w3-dropdown-hover w3-mobile w3-right w3-monospace" style="font-style: normal;">
 					<button class="w3-button w3-round-large w3-mobile w3-yellow">😀 Emoji</button>
 					<div class="w3-dropdown-content">
 						<button
@@ -930,6 +931,7 @@
 						>
 					</div>
 				</div>
+				{/if}
 			</footer>
 		</div>
 	</div>

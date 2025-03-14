@@ -52,7 +52,6 @@
 		notReplied: 'Pas répondu encore'
 	};
 	let currentOpinion = 'notReplied';
-	let opinionValidated;
 
 	export let spectrumId;
 
@@ -1079,7 +1078,7 @@
 						on:mouseleave={() => (isHoveringHistory = false)}
 					>
 						{#each logs as log}
-							<tr>
+							<tr style="display: table; width: 100%;">
 								<td>
 									{#if log.startsWith('Claim: ')}
 										<span class="w3-small"><b>&bullet; {log}</b></span>

@@ -14,12 +14,13 @@
 		faPerson,
 		faExclamation,
 		faPalette,
-		faNewspaper
+		faNewspaper,
+		faUserSlash
 	} from '@fortawesome/free-solid-svg-icons';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
 	import { getPlayerId } from '$lib/battleships/playerId';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { fabric } from 'fabric';
 	import { copy } from 'svelte-copy';
 
@@ -38,6 +39,20 @@
 		c6afe9: 'Violet', // Soft lavender
 		d473d4: 'Mauve ' // Muted mauve
 	};
+
+	const opinions = {
+		stonglyAgree: "Complètement d'accord",
+		agree: "D'accord",
+		slightlyAgree: "Un peu d'accord",
+		neutral: 'Neutre',
+		slightlyDisagree: 'Un peu en désaccord',
+		disagree: 'En désaccord',
+		stronglyDisagree: 'Complètement en désaccord',
+		indifferent: 'Indifférent ou sans avis',
+		notReplied: 'Pas répondu encore'
+	};
+	let currentOpinion = 'notReplied';
+	let opinionValidated;
 
 	export let spectrumId;
 
@@ -88,13 +103,37 @@
 	let myPellet;
 	let moving = false;
 	const cells = [];
+	const cellsPoints = [];
 	const others = {};
 
 	let claim = '';
 	let scale;
 
+	let tbodyRef; // Reference to tbody
+
+	function validateOpinion(otherUserId) {
+		const target = others[otherUserId].pellet;
+
+		for (let i = 0; i < cells.length; i++) {
+			const cell = cells[i];
+
+			if (pointInPolygon(cellsPoints[i], [target.left, target.top])) {
+				if (cell.id != 'notReplied') {
+					log(`${others[otherUserId].nickname} est "${opinions[cell.id]}"`);
+				}
+			}
+		}
+	}
+
 	$: {
 		scale = canvasWidth / 800;
+	}
+
+	async function scrollToBottom() {
+		await tick(); // Wait for UI to update
+		if (tbodyRef && !isHoveringHistory) {
+			tbodyRef.scrollTop = tbodyRef.scrollHeight;
+		}
 	}
 
 	onMount(() => {
@@ -102,6 +141,8 @@
 			websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
 			adminModeOn = true;
 		};
+
+		currentOpinion = 'notReplied';
 
 		spectrumId = $page.params.id;
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
@@ -118,6 +159,9 @@
 			'object:modified': function () {
 				// /** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
 				moving = false;
+
+				if (currentOpinion && currentOpinion != 'notReplied')
+					log(`Vous êtes "${opinions[currentOpinion]}"`);
 			}
 		});
 
@@ -147,6 +191,18 @@
 
 				for (let i = 0; i <= 8; i++) {
 					cells.push(svgObjects[i]);
+					const cell = cells[cells.length - 1];
+					cellsPoints[cells.length - 1] = [];
+
+					for (let index = 0; index < cell.path.length - 2; index++) {
+						let pathPoint = cell.path[index];
+
+						let p = [
+							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 40,
+							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 80
+						];
+						cellsPoints[cells.length - 1].push(p);
+					}
 				}
 
 				myCanvas.add(g);
@@ -238,25 +294,13 @@
 
 				for (let i = 0; i < cells.length; i++) {
 					const cell = cells[i];
-					const points = [];
 
-					for (let index = 0; index < cell.path.length - 2; index++) {
-						let pathPoint = cell.path[index];
-
-						let p = [
-							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 40,
-							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 80
-						];
-						points.push(p);
-					}
-
-					/*if (cell.id == 'neutral') {
-						console.log(points);
-					}*/
-
-					if (pointInPolygon(points, [myPellet.left, myPellet.top])) {
+					if (pointInPolygon(cellsPoints[i], [myPellet.left, myPellet.top])) {
 						cell.set({ fill: '#10b1b1' });
-						//console.log(cell);
+						console.log(cell.id);
+						if (cell.id != currentOpinion) {
+							currentOpinion = cell.id;
+						}
 					} else {
 						if (cell.id == 'notReplied' || cell.id == 'indifferent') {
 							cell.set({ fill: '#ccc' });
@@ -269,7 +313,6 @@
 		});
 
 		setInterval(updateMyPellet, updateTick);
-		//animate();
 	}
 
 	/**
@@ -395,6 +438,13 @@
 
 		if (!isNaN(coords.x) && !isNaN(coords.y)) {
 			const cancel = animatePellet(otherUserId, coords);
+
+			if (others[otherUserId].validateOpinion) clearTimeout(others[otherUserId].validateOpinion);
+
+			others[otherUserId].validateOpinion = setTimeout(() => {
+				validateOpinion(otherUserId);
+			}, 500);
+
 			others[otherUserId].cancel = () => {
 				cancel.cancelX();
 				cancel.cancelY();
@@ -460,35 +510,11 @@
 		};
 	}
 
-	/*function animate() {
-		for (let key in others) {
-			let obj = others[key].pellet;
-			let center = obj.getCenterPoint();
-			let target = new fabric.Point(others[key].target.x, others[key].target.y)
-			let l = center.lerp(target, 0.5);
-			obj.left = l.x;
-			obj.top = l.y; 
-		}
-		myCanvas.renderAll();
-		fabric.util.requestAnimFrame(animate);
-  	}*/
-
 	function updateMyPellet(force = false) {
 		if (moving || force)
 			websocket.send(
 				`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)} ${nickname}`
 			);
-	}
-
-	/**
-	 * @type {string | number | NodeJS.Timeout | undefined}
-	 */
-	//let clear;
-	$: {
-		/*clearInterval(clear);
-		clear = setInterval(() => {
-			//stats = getStats();
-		}, 5000);*/
 	}
 
 	/**
@@ -514,9 +540,12 @@
 		//connected = true;
 	}
 
+	let isHoveringHistory = false;
+
 	function log(message) {
 		logs.push(message);
 		logs = logs;
+		scrollToBottom();
 	}
 
 	let claimFocus = false;
@@ -551,8 +580,8 @@
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
 				if (otherUserId != userId) {
-					deletePellet(otherUserId);
 					log(`${others[otherUserId].nickname} a quitté le spectrum`);
+					deletePellet(otherUserId);
 				}
 			} else if (command == 'receive') {
 				if (otherUserId != userId)
@@ -583,7 +612,11 @@
 			} else if (command == 'claim') {
 				if (!adminModeOn || (adminModeOn && !claimFocus)) {
 					receivedClaim(matches[7]);
-					log(`Claim: ${claim}`);
+
+					clearTimeout(updateClaimLog);
+					updateClaimLog = setTimeout(() => {
+						log(`Claim: ${claim}`);
+					}, 3000);
 				}
 			} else if (command == 'spectrum') {
 				showJoinModal = false;
@@ -598,6 +631,9 @@
 			}
 		}
 	}
+
+	let updateClaimLog;
+	let previousClaim;
 
 	function connectionLost() {}
 
@@ -887,9 +923,11 @@
 					bind:value={claim}
 					on:focusin={() => {
 						claimFocus = true;
+						previousClaim = claim;
 					}}
 					on:focusout={() => {
 						claimFocus = false;
+						if (claim != previousClaim) log(`Claim: ${claim}`);
 					}}
 					on:input={() => {
 						if (adminModeOn) {
@@ -972,6 +1010,15 @@
 		<div class="w3-col w3-third">
 			<div class="w3-container w3-responsive w3-monospace w3-margin-bottom">
 				<table class="w3-table-all w3-striped w3-bordered">
+					<colgroup>
+						<col style="width: 10%;" />
+						{#if adminModeOn}
+							<col style="width: 40%;" />
+							<col style="width: 50%;" />
+						{:else}
+							<col style="width: 90%;" />
+						{/if}
+					</colgroup>
 					<tbody>
 						<tr>
 							<th class="w3-center"><Fa icon={faPalette} /> </th>
@@ -1001,14 +1048,16 @@
 								</td>
 								{#if adminModeOn}
 									<td>
-										<button class="w3-button w3-small w3-right w3-disabled"
-											>Retirer du spectrum &times;</button
+										<button class="w3-button w3-right w3-disabled"
+											><Fa icon={faUserSlash} />
+											<span class="w3-small">Retirer du spectrum</span></button
 										>
 										<button
-											class="w3-button w3-small w3-right"
+											class="w3-button w3-right"
 											on:click={() => {
 												makeAdmin(colorHex);
-											}}>Rendre admin</button
+											}}
+											><Fa icon={faCirclePlus} /> <span class="w3-small">Rendre admin</span></button
 										>
 									</td>
 								{/if}
@@ -1017,16 +1066,26 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="w3-container w3-responsive w3-monospace">
+			<div id="history" class="w3-container w3-responsive w3-monospace">
 				<table class="w3-table-all w3-striped w3-bordered">
-					<tbody>
+					<thead>
 						<tr>
 							<th><Fa icon={faNewspaper} /> Historique</th>
 						</tr>
+					</thead>
+					<tbody
+						bind:this={tbodyRef}
+						on:mouseenter={() => (isHoveringHistory = true)}
+						on:mouseleave={() => (isHoveringHistory = false)}
+					>
 						{#each logs as log}
 							<tr>
 								<td>
-									<span class="w3-small">&bullet; {log}</span>
+									{#if log.startsWith('Claim: ')}
+										<span class="w3-small"><b>&bullet; {log}</b></span>
+									{:else}
+										<span class="w3-small">&bullet; {log}</span>
+									{/if}
 								</td>
 							</tr>
 						{/each}
@@ -1071,6 +1130,12 @@
 
 	.osr-yellow {
 		background-color: #ffc517;
+	}
+
+	#history tbody {
+		overflow-y: auto;
+		max-height: 300px;
+		display: block;
 	}
 
 	/*.osr-olive {

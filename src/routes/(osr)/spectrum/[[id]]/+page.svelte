@@ -13,7 +13,8 @@
 		faPersonWalkingArrowRight,
 		faPerson,
 		faExclamation,
-		faPalette
+		faPalette,
+		faNewspaper
 	} from '@fortawesome/free-solid-svg-icons';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
@@ -75,6 +76,11 @@
 	let nickname;
 	let initialized = false;
 	let listenning = true;
+
+	/**
+	 * @type {string[]}
+	 */
+	let logs = [];
 
 	/**
 	 * @type {{ left: any; top: any; }}
@@ -365,7 +371,7 @@
 	function updatePellet(otherUserId, coords, otherNickname) {
 		// New user
 		if (!others[otherUserId]) {
-			console.log(`HELLo ${otherUserId}; ${coords}; ${otherNickname}`);
+			log(`${otherNickname} a rejoint le spectrum`);
 			others[otherUserId] = {
 				pellet:
 					!isNaN(coords.x) && !isNaN(coords.y) ? initOtherPellet(otherUserId, otherNickname) : null,
@@ -508,6 +514,13 @@
 		//connected = true;
 	}
 
+	function log(message) {
+		logs.push(message);
+		logs = logs;
+	}
+
+	let claimFocus = false;
+
 	/**
 	 * @param {string} line
 	 */
@@ -537,7 +550,10 @@
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
-				if (otherUserId != userId) deletePellet(otherUserId);
+				if (otherUserId != userId) {
+					deletePellet(otherUserId);
+					log(`${others[otherUserId].nickname} a quitté le spectrum`);
+				}
 			} else if (command == 'receive') {
 				if (otherUserId != userId)
 					notifier.info(
@@ -545,12 +561,15 @@
 						5000
 					);
 			} else if (command == 'madeadmin') {
-				if (otherUserId != userId) deletePellet(otherUserId, true);
-				else {
+				if (otherUserId != userId) {
+					deletePellet(otherUserId, true);
+					log(`${others[otherUserId].nickname} a été élu admin`);
+				} else {
 					adminModeOn = true;
 					myCanvas.remove(myPellet);
 					myCanvas.renderAll();
 					myPellet = null;
+					log('Vous avez été élu admin');
 				}
 			} else if (command == 'newposition') {
 				if (myPellet) {
@@ -562,7 +581,10 @@
 				}
 				moving = false;
 			} else if (command == 'claim') {
-				if (otherUserId != userId) receivedClaim(matches[7]);
+				if (!adminModeOn || (adminModeOn && !claimFocus)) {
+					receivedClaim(matches[7]);
+					log(`Claim: ${claim}`);
+				}
 			} else if (command == 'spectrum') {
 				showJoinModal = false;
 				userId = matches[3];
@@ -572,6 +594,7 @@
 					adminModeOn = true;
 				}
 				joinedSpectrum(s[0]);
+				log('Vous venez de rejoindre le spectrum.');
 			}
 		}
 	}
@@ -849,7 +872,7 @@
 </div>
 
 <div class="w3-row">
-	<div class="w3-twothird">
+	<div class="w3-twothird w3-col">
 		<div class="w3-card w3-content" bind:clientWidth={canvasWidth}>
 			<header class="w3-container" style="padding: 0; font-family: monospace;">
 				<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
@@ -862,6 +885,12 @@
 					type="text"
 					readonly={!adminModeOn}
 					bind:value={claim}
+					on:focusin={() => {
+						claimFocus = true;
+					}}
+					on:focusout={() => {
+						claimFocus = false;
+					}}
 					on:input={() => {
 						if (adminModeOn) {
 							websocket.send('claim ||' + claim + '||');
@@ -940,52 +969,70 @@
 	</div>
 
 	{#if spectrumId}
-		<div class="w3-container w3-third w3-responsive w3-monospace">
-			<table class="w3-table-all w3-striped w3-bordered">
-				<tbody>
-					<tr>
-						<th class="w3-center"><Fa icon={faPalette} /> </th>
-						<th><Fa icon={faPerson} /> Participant</th>
-						{#if adminModeOn}
-							<th><Fa icon={faExclamation} /> Actions</th>
-						{/if}
-					</tr>
-					<tr>
-						<td>
-							<div style="background: #{userId}; clip-path: circle(10px);">&nbsp;</div>
-						</td>
-						<td>
-							<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
-						</td>
-						{#if adminModeOn}
-							<td> &nbsp; </td>
-						{/if}
-					</tr>
-					{#each Object.entries(others) as [colorHex, other]}
+		<div class="w3-col w3-third">
+			<div class="w3-container w3-responsive w3-monospace w3-margin-bottom">
+				<table class="w3-table-all w3-striped w3-bordered">
+					<tbody>
 						<tr>
-							<td>
-								<div style="background: #{colorHex}; clip-path: circle(10px);">&nbsp;</div>
-							</td>
-							<td>
-								<span class="w3-small"><b>{other.nickname}</b></span>
-							</td>
+							<th class="w3-center"><Fa icon={faPalette} /> </th>
+							<th><Fa icon={faPerson} /> Participant</th>
 							{#if adminModeOn}
-								<td>
-									<button class="w3-button w3-small w3-right w3-disabled"
-										>Retirer du spectrum &times;</button
-									>
-									<button
-										class="w3-button w3-small w3-right"
-										on:click={() => {
-											makeAdmin(colorHex);
-										}}>Rendre admin</button
-									>
-								</td>
+								<th><Fa icon={faExclamation} /> Actions</th>
 							{/if}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+						<tr>
+							<td>
+								<div style="background: #{userId}; clip-path: circle(10px);">&nbsp;</div>
+							</td>
+							<td>
+								<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
+							</td>
+							{#if adminModeOn}
+								<td> &nbsp; </td>
+							{/if}
+						</tr>
+						{#each Object.entries(others) as [colorHex, other]}
+							<tr>
+								<td>
+									<div style="background: #{colorHex}; clip-path: circle(10px);">&nbsp;</div>
+								</td>
+								<td>
+									<span class="w3-small"><b>{other.nickname}</b></span>
+								</td>
+								{#if adminModeOn}
+									<td>
+										<button class="w3-button w3-small w3-right w3-disabled"
+											>Retirer du spectrum &times;</button
+										>
+										<button
+											class="w3-button w3-small w3-right"
+											on:click={() => {
+												makeAdmin(colorHex);
+											}}>Rendre admin</button
+										>
+									</td>
+								{/if}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+			<div class="w3-container w3-responsive w3-monospace">
+				<table class="w3-table-all w3-striped w3-bordered">
+					<tbody>
+						<tr>
+							<th><Fa icon={faNewspaper} /> Historique</th>
+						</tr>
+						{#each logs as log}
+							<tr>
+								<td>
+									<span class="w3-small">&bullet; {log}</span>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	{/if}
 </div>

@@ -13,12 +13,14 @@
 		faPersonWalkingArrowRight,
 		faPerson,
 		faExclamation,
-		faPalette
+		faPalette,
+		faNewspaper,
+		faUserSlash
 	} from '@fortawesome/free-solid-svg-icons';
 
 	import { startWebsocket } from '$lib/spectrum/websocket';
 	import { getPlayerId } from '$lib/battleships/playerId';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { fabric } from 'fabric';
 	import { copy } from 'svelte-copy';
 
@@ -37,6 +39,19 @@
 		c6afe9: 'Violet', // Soft lavender
 		d473d4: 'Mauve ' // Muted mauve
 	};
+
+	const opinions = {
+		stonglyAgree: "Complètement d'accord",
+		agree: "D'accord",
+		slightlyAgree: "Un peu d'accord",
+		neutral: 'Neutre',
+		slightlyDisagree: 'Un peu en désaccord',
+		disagree: 'En désaccord',
+		stronglyDisagree: 'Complètement en désaccord',
+		indifferent: 'Indifférent ou sans avis',
+		notReplied: 'Pas répondu encore'
+	};
+	let currentOpinion = 'notReplied';
 
 	export let spectrumId;
 
@@ -77,18 +92,47 @@
 	let listenning = true;
 
 	/**
+	 * @type {string[]}
+	 */
+	let logs = [];
+
+	/**
 	 * @type {{ left: any; top: any; }}
 	 */
 	let myPellet;
 	let moving = false;
 	const cells = [];
+	const cellsPoints = [];
 	const others = {};
 
 	let claim = '';
 	let scale;
 
+	let tbodyRef; // Reference to tbody
+
+	function validateOpinion(otherUserId) {
+		const target = others[otherUserId].pellet;
+
+		for (let i = 0; i < cells.length; i++) {
+			const cell = cells[i];
+
+			if (pointInPolygon(cellsPoints[i], [target.left, target.top])) {
+				if (cell.id != 'notReplied') {
+					log(`${others[otherUserId].nickname} est "${opinions[cell.id]}"`);
+				}
+			}
+		}
+	}
+
 	$: {
 		scale = canvasWidth / 800;
+	}
+
+	async function scrollToBottom() {
+		await tick(); // Wait for UI to update
+		if (tbodyRef && !isHoveringHistory) {
+			tbodyRef.scrollTop = tbodyRef.scrollHeight;
+		}
 	}
 
 	onMount(() => {
@@ -96,6 +140,8 @@
 			websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
 			adminModeOn = true;
 		};
+
+		currentOpinion = 'notReplied';
 
 		spectrumId = $page.params.id;
 		websocket = startWebsocket(signIn, parseCommand, connectionLost);
@@ -112,6 +158,9 @@
 			'object:modified': function () {
 				// /** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
 				moving = false;
+
+				if (currentOpinion && currentOpinion != 'notReplied')
+					log(`Vous êtes "${opinions[currentOpinion]}"`);
 			}
 		});
 
@@ -141,6 +190,18 @@
 
 				for (let i = 0; i <= 8; i++) {
 					cells.push(svgObjects[i]);
+					const cell = cells[cells.length - 1];
+					cellsPoints[cells.length - 1] = [];
+
+					for (let index = 0; index < cell.path.length - 2; index++) {
+						let pathPoint = cell.path[index];
+
+						let p = [
+							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 40,
+							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 80
+						];
+						cellsPoints[cells.length - 1].push(p);
+					}
 				}
 
 				myCanvas.add(g);
@@ -232,25 +293,13 @@
 
 				for (let i = 0; i < cells.length; i++) {
 					const cell = cells[i];
-					const points = [];
 
-					for (let index = 0; index < cell.path.length - 2; index++) {
-						let pathPoint = cell.path[index];
-
-						let p = [
-							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 40,
-							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 80
-						];
-						points.push(p);
-					}
-
-					/*if (cell.id == 'neutral') {
-						console.log(points);
-					}*/
-
-					if (pointInPolygon(points, [myPellet.left, myPellet.top])) {
+					if (pointInPolygon(cellsPoints[i], [myPellet.left, myPellet.top])) {
 						cell.set({ fill: '#10b1b1' });
-						//console.log(cell);
+						console.log(cell.id);
+						if (cell.id != currentOpinion) {
+							currentOpinion = cell.id;
+						}
 					} else {
 						if (cell.id == 'notReplied' || cell.id == 'indifferent') {
 							cell.set({ fill: '#ccc' });
@@ -263,7 +312,6 @@
 		});
 
 		setInterval(updateMyPellet, updateTick);
-		//animate();
 	}
 
 	/**
@@ -365,7 +413,7 @@
 	function updatePellet(otherUserId, coords, otherNickname) {
 		// New user
 		if (!others[otherUserId]) {
-			console.log(`HELLo ${otherUserId}; ${coords}; ${otherNickname}`);
+			log(`${otherNickname} a rejoint le spectrum`);
 			others[otherUserId] = {
 				pellet:
 					!isNaN(coords.x) && !isNaN(coords.y) ? initOtherPellet(otherUserId, otherNickname) : null,
@@ -389,6 +437,13 @@
 
 		if (!isNaN(coords.x) && !isNaN(coords.y)) {
 			const cancel = animatePellet(otherUserId, coords);
+
+			if (others[otherUserId].validateOpinion) clearTimeout(others[otherUserId].validateOpinion);
+
+			others[otherUserId].validateOpinion = setTimeout(() => {
+				validateOpinion(otherUserId);
+			}, 500);
+
 			others[otherUserId].cancel = () => {
 				cancel.cancelX();
 				cancel.cancelY();
@@ -454,35 +509,11 @@
 		};
 	}
 
-	/*function animate() {
-		for (let key in others) {
-			let obj = others[key].pellet;
-			let center = obj.getCenterPoint();
-			let target = new fabric.Point(others[key].target.x, others[key].target.y)
-			let l = center.lerp(target, 0.5);
-			obj.left = l.x;
-			obj.top = l.y; 
-		}
-		myCanvas.renderAll();
-		fabric.util.requestAnimFrame(animate);
-  	}*/
-
 	function updateMyPellet(force = false) {
 		if (moving || force)
 			websocket.send(
 				`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)} ${nickname}`
 			);
-	}
-
-	/**
-	 * @type {string | number | NodeJS.Timeout | undefined}
-	 */
-	//let clear;
-	$: {
-		/*clearInterval(clear);
-		clear = setInterval(() => {
-			//stats = getStats();
-		}, 5000);*/
 	}
 
 	/**
@@ -507,6 +538,16 @@
 		websocket.send('signin ' + getPlayerId());
 		//connected = true;
 	}
+
+	let isHoveringHistory = false;
+
+	function log(message) {
+		logs.push(message);
+		logs = logs;
+		scrollToBottom();
+	}
+
+	let claimFocus = false;
 
 	/**
 	 * @param {string} line
@@ -537,7 +578,10 @@
 			} else if (command == 'update') {
 				if (otherUserId != userId) updatePellet(otherUserId, coords, matches[7]);
 			} else if (command == 'userleft') {
-				if (otherUserId != userId) deletePellet(otherUserId);
+				if (otherUserId != userId) {
+					log(`${others[otherUserId].nickname} a quitté le spectrum`);
+					deletePellet(otherUserId);
+				}
 			} else if (command == 'receive') {
 				if (otherUserId != userId)
 					notifier.info(
@@ -545,12 +589,15 @@
 						5000
 					);
 			} else if (command == 'madeadmin') {
-				if (otherUserId != userId) deletePellet(otherUserId, true);
-				else {
+				if (otherUserId != userId) {
+					deletePellet(otherUserId, true);
+					log(`${others[otherUserId].nickname} a été élu admin`);
+				} else {
 					adminModeOn = true;
 					myCanvas.remove(myPellet);
 					myCanvas.renderAll();
 					myPellet = null;
+					log('Vous avez été élu admin');
 				}
 			} else if (command == 'newposition') {
 				if (myPellet) {
@@ -562,7 +609,14 @@
 				}
 				moving = false;
 			} else if (command == 'claim') {
-				if (otherUserId != userId) receivedClaim(matches[7]);
+				if (!adminModeOn || (adminModeOn && !claimFocus)) {
+					receivedClaim(matches[7]);
+
+					clearTimeout(updateClaimLog);
+					updateClaimLog = setTimeout(() => {
+						log(`Claim: ${claim}`);
+					}, 3000);
+				}
 			} else if (command == 'spectrum') {
 				showJoinModal = false;
 				userId = matches[3];
@@ -572,9 +626,13 @@
 					adminModeOn = true;
 				}
 				joinedSpectrum(s[0]);
+				log('Vous venez de rejoindre le spectrum.');
 			}
 		}
 	}
+
+	let updateClaimLog;
+	let previousClaim;
 
 	function connectionLost() {}
 
@@ -849,7 +907,7 @@
 </div>
 
 <div class="w3-row">
-	<div class="w3-twothird">
+	<div class="w3-twothird w3-col">
 		<div class="w3-card w3-content" bind:clientWidth={canvasWidth}>
 			<header class="w3-container" style="padding: 0; font-family: monospace;">
 				<label for="claim" class="w3-col w3-padding" style="width: 10%; font-weight: bold"
@@ -862,6 +920,14 @@
 					type="text"
 					readonly={!adminModeOn}
 					bind:value={claim}
+					on:focusin={() => {
+						claimFocus = true;
+						previousClaim = claim;
+					}}
+					on:focusout={() => {
+						claimFocus = false;
+						if (claim != previousClaim) log(`Claim: ${claim}`);
+					}}
 					on:input={() => {
 						if (adminModeOn) {
 							websocket.send('claim ||' + claim + '||');
@@ -940,52 +1006,91 @@
 	</div>
 
 	{#if spectrumId}
-		<div class="w3-container w3-third w3-responsive w3-monospace">
-			<table class="w3-table-all w3-striped w3-bordered">
-				<tbody>
-					<tr>
-						<th class="w3-center"><Fa icon={faPalette} /> </th>
-						<th><Fa icon={faPerson} /> Participant</th>
+		<div class="w3-col w3-third">
+			<div class="w3-container w3-responsive w3-monospace w3-margin-bottom">
+				<table class="w3-table-all w3-striped w3-bordered">
+					<colgroup>
+						<col style="width: 10%;" />
 						{#if adminModeOn}
-							<th><Fa icon={faExclamation} /> Actions</th>
+							<col style="width: 40%;" />
+							<col style="width: 50%;" />
+						{:else}
+							<col style="width: 90%;" />
 						{/if}
-					</tr>
-					<tr>
-						<td>
-							<div style="background: #{userId}; clip-path: circle(10px);">&nbsp;</div>
-						</td>
-						<td>
-							<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
-						</td>
-						{#if adminModeOn}
-							<td> &nbsp; </td>
-						{/if}
-					</tr>
-					{#each Object.entries(others) as [colorHex, other]}
+					</colgroup>
+					<tbody>
 						<tr>
-							<td>
-								<div style="background: #{colorHex}; clip-path: circle(10px);">&nbsp;</div>
-							</td>
-							<td>
-								<span class="w3-small"><b>{other.nickname}</b></span>
-							</td>
+							<th class="w3-center"><Fa icon={faPalette} /> </th>
+							<th><Fa icon={faPerson} /> Participant</th>
 							{#if adminModeOn}
-								<td>
-									<button class="w3-button w3-small w3-right w3-disabled"
-										>Retirer du spectrum &times;</button
-									>
-									<button
-										class="w3-button w3-small w3-right"
-										on:click={() => {
-											makeAdmin(colorHex);
-										}}>Rendre admin</button
-									>
-								</td>
+								<th><Fa icon={faExclamation} /> Actions</th>
 							{/if}
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+						<tr>
+							<td>
+								<div style="background: #{userId}; clip-path: circle(10px);">&nbsp;</div>
+							</td>
+							<td>
+								<span class="w3-small"><b>{nickname}{adminModeOn ? '*' : ''}</b> (Vous-même)</span>
+							</td>
+							{#if adminModeOn}
+								<td> &nbsp; </td>
+							{/if}
+						</tr>
+						{#each Object.entries(others) as [colorHex, other]}
+							<tr>
+								<td>
+									<div style="background: #{colorHex}; clip-path: circle(10px);">&nbsp;</div>
+								</td>
+								<td>
+									<span class="w3-small"><b>{other.nickname}</b></span>
+								</td>
+								{#if adminModeOn}
+									<td>
+										<button class="w3-button w3-right w3-disabled"
+											><Fa icon={faUserSlash} />
+											<span class="w3-small">Retirer du spectrum</span></button
+										>
+										<button
+											class="w3-button w3-right"
+											on:click={() => {
+												makeAdmin(colorHex);
+											}}
+											><Fa icon={faCirclePlus} /> <span class="w3-small">Rendre admin</span></button
+										>
+									</td>
+								{/if}
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+			<div id="history" class="w3-container w3-responsive w3-monospace">
+				<table class="w3-table-all w3-striped w3-bordered">
+					<thead>
+						<tr>
+							<th><Fa icon={faNewspaper} /> Historique</th>
+						</tr>
+					</thead>
+					<tbody
+						bind:this={tbodyRef}
+						on:mouseenter={() => (isHoveringHistory = true)}
+						on:mouseleave={() => (isHoveringHistory = false)}
+					>
+						{#each logs as log}
+							<tr style="display: table; width: 100%;">
+								<td>
+									{#if log.startsWith('Claim: ')}
+										<span class="w3-small"><b>&bullet; {log}</b></span>
+									{:else}
+										<span class="w3-small">&bullet; {log}</span>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	{/if}
 </div>
@@ -1024,6 +1129,12 @@
 
 	.osr-yellow {
 		background-color: #ffc517;
+	}
+
+	#history tbody {
+		overflow-y: auto;
+		max-height: 300px;
+		display: block;
 	}
 
 	/*.osr-olive {

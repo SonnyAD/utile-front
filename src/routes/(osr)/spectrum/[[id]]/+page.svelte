@@ -52,6 +52,7 @@
 		notReplied: 'Pas répondu encore'
 	};
 	let currentOpinion = 'notReplied';
+	let previousOpinion = 'notReplied';
 
 	export let spectrumId;
 
@@ -159,8 +160,10 @@
 				// /** @type {{ target: { left?: any; width?: any; top?: any; setCoords?: any; angle?: number; }; }} */ e
 				moving = false;
 
-				if (currentOpinion && currentOpinion != 'notReplied')
+				if (currentOpinion != 'notReplied' && currentOpinion != previousOpinion) {
 					log(`Vous êtes "${opinions[currentOpinion]}"`);
+					previousOpinion = currentOpinion;
+				}
 			}
 		});
 
@@ -417,10 +420,10 @@
 			others[otherUserId] = {
 				pellet:
 					!isNaN(coords.x) && !isNaN(coords.y) ? initOtherPellet(otherUserId, otherNickname) : null,
-				targets: [coords],
+				targets: !isNaN(coords.x) && !isNaN(coords.y) ? [coords] : [],
 				nickname: otherNickname
 			};
-		} else if (!isNaN(coords.x) && !isNaN(coords.y)) {
+		} else if (coords && !isNaN(coords.x) && !isNaN(coords.y)) {
 			// known user
 			others[otherUserId].targets.push(coords);
 
@@ -429,11 +432,9 @@
 				others[otherUserId].targets = others[otherUserId].targets.slice(1, 6);
 		}
 
-		if (others[otherUserId].cancel) {
+		if (others[otherUserId].cancel && coords != others[otherUserId].targets[0]) {
 			others[otherUserId].cancel();
 		}
-
-		//others[otherUserId].target = coords;
 
 		if (!isNaN(coords.x) && !isNaN(coords.y)) {
 			const cancel = animatePellet(otherUserId, coords);
@@ -486,25 +487,24 @@
 				endValue: target.x,
 				duration: updateTick,
 				onChange: function (value) {
-					others[userId].pellet.left = value;
+					others[userId].pellet.set({ left: value });
 					myCanvas.renderAll();
 				},
 				onComplete: function () {
 					others[userId].pellet.setCoords();
 				}
-				//easing: fabric.util.ease.easeOutExpo,
 			}),
 			cancelY: fabric.util.animate({
 				startValue: others[userId].pellet.top,
 				endValue: target.y,
 				duration: updateTick,
 				onChange: function (value) {
-					others[userId].pellet.top = value;
+					others[userId].pellet.set({ top: value });
+					myCanvas.renderAll();
 				},
 				onComplete: function () {
 					others[userId].pellet.setCoords();
 				}
-				//easing: fabric.util.ease.easeOutExpo,
 			})
 		};
 	}

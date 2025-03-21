@@ -41,7 +41,7 @@
 	};
 
 	const opinions = {
-		stonglyAgree: "Complètement d'accord",
+		stronglyAgree: "Complètement d'accord",
 		agree: "D'accord",
 		slightlyAgree: "Un peu d'accord",
 		neutral: 'Neutre',
@@ -126,7 +126,7 @@
 	}
 
 	$: {
-		scale = canvasWidth / 800;
+		scale = canvasWidth / 980;
 	}
 
 	async function scrollToBottom() {
@@ -137,9 +137,11 @@
 	}
 
 	onMount(() => {
-		window.setAdminModeOn = () => {
-			websocket.send(`joinspectrum ${spectrumId} ${nickname}`);
-			adminModeOn = true;
+		window.setPosition = (x, y) => {
+			myPellet.left = x * scale;
+			myPellet.top = y * scale;
+			myPellet.setCoords();
+			myCanvas.renderAll();
 		};
 
 		currentOpinion = 'notReplied';
@@ -174,7 +176,7 @@
 				// @ts-ignore
 				const svg = fabric.util.groupSVGElements(objects, options);
 
-				let canvasHeight = (canvasWidth * 600) / 800;
+				let canvasHeight = (canvasWidth * 735) / 980;
 				let g = new fabric.Group([], {
 					width: canvasWidth,
 					height: canvasHeight
@@ -200,9 +202,17 @@
 						let pathPoint = cell.path[index];
 
 						let p = [
-							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 40,
-							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 80
+							pathPoint[pathPoint.length - 2] * cell.scaleX * scale - 15,
+							pathPoint[pathPoint.length - 1] * cell.scaleY * scale - 10
 						];
+
+						/*const circle = new fabric.Circle({
+							radius: 20,           // Radius of the circle (small size)
+							fill: 'blue',         // Fill color of the circle
+							left: p[0],            // X position of the circle (left)
+							top: p[1],             // Y position of the circle (top)
+						});
+						myCanvas.add(circle)*/
 						cellsPoints[cells.length - 1].push(p);
 					}
 				}
@@ -268,8 +278,8 @@
 		});
 
 		let g = new fabric.Group([circle, rect, text], {
-			top: 230,
-			left: 330,
+			top: (canvasWidth * 735) / 980 / 2,
+			left: canvasWidth / 2,
 			hasBorders: false,
 			hasControls: false
 		});
@@ -398,8 +408,8 @@
 		});
 
 		let g = new fabric.Group([circle, rect, text], {
-			top: 230,
-			left: 330,
+			top: (canvasWidth * 735) / 980 / 2,
+			left: canvasWidth / 2,
 			evented: false,
 			hasBorders: false,
 			hasControls: false
@@ -484,7 +494,7 @@
 		return {
 			cancelX: fabric.util.animate({
 				startValue: others[userId].pellet.left,
-				endValue: target.x,
+				endValue: target.x * scale,
 				duration: updateTick,
 				onChange: function (value) {
 					others[userId].pellet.set({ left: value });
@@ -496,7 +506,7 @@
 			}),
 			cancelY: fabric.util.animate({
 				startValue: others[userId].pellet.top,
-				endValue: target.y,
+				endValue: target.y * scale,
 				duration: updateTick,
 				onChange: function (value) {
 					others[userId].pellet.set({ top: value });
@@ -512,7 +522,7 @@
 	function updateMyPellet(force = false) {
 		if (moving || force)
 			websocket.send(
-				`update ${userId} ${Math.round(myPellet.left)},${Math.round(myPellet.top)} ${nickname}`
+				`update ${userId} ${Math.round(myPellet.left / scale)},${Math.round(myPellet.top / scale)} ${nickname}`
 			);
 	}
 
@@ -607,8 +617,8 @@
 				}
 			} else if (command == 'newposition') {
 				if (myPellet) {
-					myPellet.left = coords.x;
-					myPellet.top = coords.y;
+					myPellet.left = coords.x * scale;
+					myPellet.top = coords.y * scale;
 					myPellet.setCoords();
 					myCanvas.renderAll();
 					updateMyPellet(true);

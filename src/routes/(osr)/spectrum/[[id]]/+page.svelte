@@ -542,7 +542,9 @@
 	let isHoveringHistory = false;
 
 	function log(message) {
-		logs.push(message);
+		const now = new Date();
+		const formattedDate = now.toLocaleString('fr-FR');
+		logs.push(`[${formattedDate}] ${message}`);
 		logs = logs;
 		scrollToBottom();
 	}
@@ -583,11 +585,15 @@
 					deletePellet(otherUserId);
 				}
 			} else if (command == 'receive') {
-				if (otherUserId != userId)
+				if (otherUserId != userId) {
 					notifier.info(
 						others[otherUserId].nickname + ' a envoyé : ' + matches[7].toString(),
 						5000
 					);
+					log(`${others[otherUserId].nickname} a envoyé : ${matches[7]}`);
+				} else {
+					log(`Vous avez envoyé : ${matches[7]}`);
+				}
 			} else if (command == 'madeadmin') {
 				if (otherUserId != userId) {
 					deletePellet(otherUserId, true);
@@ -965,10 +971,12 @@
 
 				{#if spectrumId}
 					<div
-						class="w3-dropdown-hover w3-mobile w3-right w3-monospace"
-						style="font-style: normal;"
+						class="w3-dropdown-hover w3-mobile w3-right"
+						style="font-style: normal; font-family: 'Segoe UI', 'Noto Color Emoji', 'Apple Color Emoji', 'Emoji', sans-serif;"
 					>
-						<button class="w3-button w3-round-large w3-mobile w3-yellow">😀 Emoji</button>
+						<button class="w3-button w3-round-large w3-mobile w3-yellow w3-monospace"
+							>😀 Emoji</button
+						>
 						<div class="w3-dropdown-content">
 							<button
 								on:click={() => sendEmoji(0)}
@@ -1080,10 +1088,10 @@
 						{#each logs as log}
 							<tr style="display: table; width: 100%;">
 								<td>
-									{#if log.startsWith('Claim: ')}
-										<span class="w3-small"><b>&bullet; {log}</b></span>
+									{#if log.includes('Claim: ')}
+										<span class="w3-small"><b>{log}</b></span>
 									{:else}
-										<span class="w3-small">&bullet; {log}</span>
+										<span class="w3-small">{log}</span>
 									{/if}
 								</td>
 							</tr>
